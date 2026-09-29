@@ -21,7 +21,7 @@ export class TableScene3D {
     // Three.js Core
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x0A0D12);
-    this.scene.fog = new THREE.FogExp2(0x0A0D12, 0.28);
+    this.scene.fog = new THREE.FogExp2(0x0A0D12, 0.22);
 
     this.camera = new THREE.PerspectiveCamera(54, this.width / this.height, 0.1, 50);
     // Eye level sitting at the table
@@ -32,10 +32,11 @@ export class TableScene3D {
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
     this.renderer.setSize(this.width, this.height);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.15;
+    this.renderer.toneMappingExposure = 1.05;
     this.container.appendChild(this.renderer.domElement);
 
     // Mouse Parallax for natural FPP Head Look
@@ -56,10 +57,10 @@ export class TableScene3D {
     this.scene.add(this.camera);
 
     // 3D Card Meshes & Stacks
-    this.cardGeometry = new THREE.BoxGeometry(0.2, 0.002, 0.28);
+    this.cardGeometry = new THREE.BoxGeometry(0.22, 0.003, 0.31);
     this.cardBackMaterial = new THREE.MeshStandardMaterial({
       map: getCardBackTexture(),
-      roughness: 0.4,
+      roughness: 0.35,
       metalness: 0.1
     });
 
@@ -89,20 +90,30 @@ export class TableScene3D {
   }
 
   setupLighting() {
-    // Dim atmospheric room fill
-    const ambientLight = new THREE.AmbientLight(0x1B212B, 0.9);
+    // 1. Ambient Light (Warm moody room base)
+    const ambientLight = new THREE.AmbientLight(0x242B36, 1.2);
     this.scene.add(ambientLight);
 
-    // Overhead Suspended Industrial Lamp
+    // 2. Front Fill Light (Ensures player hands, cards, and opponents aren't pitch black)
+    const frontFill = new THREE.DirectionalLight(0xFFE8C7, 1.1);
+    frontFill.position.set(0, 2.5, 2.2);
+    this.scene.add(frontFill);
+
+    // 3. Back Rim Light (Silhouettes character shoulders and hair cleanly)
+    const backRim = new THREE.DirectionalLight(0x68809E, 0.85);
+    backRim.position.set(0, 2.2, -2.5);
+    this.scene.add(backRim);
+
+    // 4. Overhead Suspended Industrial Lamp
     this.lampRig = new THREE.Group();
     this.lampRig.position.set(0, 2.15, -0.15);
 
     // Lamp Shade Mesh
     const shadeGeo = new THREE.ConeGeometry(0.24, 0.25, 16, 1, true);
     const shadeMat = new THREE.MeshStandardMaterial({
-      color: 0x22262E,
-      roughness: 0.5,
-      metalness: 0.8,
+      color: 0x1A1F27,
+      roughness: 0.45,
+      metalness: 0.85,
       side: THREE.DoubleSide
     });
     const shade = new THREE.Mesh(shadeGeo, shadeMat);
@@ -122,19 +133,19 @@ export class TableScene3D {
     wire.position.y = 0.9;
     this.lampRig.add(wire);
 
-    // Warm Incandescent Spotlight casting shadows on the green felt
-    this.spotLight = new THREE.SpotLight(0xFCE6A2, 4.2);
+    // Warm Incandescent Spotlight (balanced intensity so white cards don't blow out)
+    this.spotLight = new THREE.SpotLight(0xFDF1C9, 2.4);
     this.spotLight.position.set(0, 0, 0);
-    this.spotLight.angle = 0.65;
+    this.spotLight.angle = 0.72;
     this.spotLight.penumbra = 0.65;
-    this.spotLight.decay = 1.4;
+    this.spotLight.decay = 1.2;
     this.spotLight.distance = 5;
     this.spotLight.castShadow = true;
     this.spotLight.shadow.mapSize.width = 1024;
     this.spotLight.shadow.mapSize.height = 1024;
     this.spotLight.shadow.camera.near = 0.5;
     this.spotLight.shadow.camera.far = 4;
-    this.spotLight.shadow.bias = -0.0008;
+    this.spotLight.shadow.bias = -0.0004;
 
     this.spotTarget = new THREE.Object3D();
     this.spotTarget.position.set(0, 0.72, -0.15);
@@ -145,7 +156,7 @@ export class TableScene3D {
     this.scene.add(this.lampRig);
 
     // Soft warm point glow inside shade
-    const bulbGlow = new THREE.PointLight(0xF8D77B, 1.2, 1.5);
+    const bulbGlow = new THREE.PointLight(0xF8D77B, 1.1, 1.8);
     bulbGlow.position.set(0, -0.05, 0);
     this.lampRig.add(bulbGlow);
   }
@@ -161,7 +172,7 @@ export class TableScene3D {
 
     // Back Basement Brick/Wood Wall
     const wallGeo = new THREE.PlaneGeometry(12, 6);
-    const wallMat = new THREE.MeshStandardMaterial({ color: 0x11161D, roughness: 0.85 });
+    const wallMat = new THREE.MeshStandardMaterial({ color: 0x131822, roughness: 0.85 });
     const wall = new THREE.Mesh(wallGeo, wallMat);
     wall.position.set(0, 2.5, -3.2);
     this.scene.add(wall);
@@ -171,10 +182,10 @@ export class TableScene3D {
     this.tableGroup.position.set(0, 0, -0.15);
 
     // Outer Wooden Rim
-    const rimGeo = new THREE.CylinderGeometry(1.22, 1.18, 0.08, 36);
+    const rimGeo = new THREE.CylinderGeometry(1.22, 1.18, 0.08, 48);
     const rimMat = new THREE.MeshStandardMaterial({
-      color: 0x342214,
-      roughness: 0.45,
+      color: 0x382417,
+      roughness: 0.4,
       metalness: 0.15
     });
     const rim = new THREE.Mesh(rimGeo, rimMat);
@@ -183,7 +194,7 @@ export class TableScene3D {
     this.tableGroup.add(rim);
 
     // Table Baize / Green Felt Surface
-    const feltGeo = new THREE.CylinderGeometry(1.14, 1.14, 0.085, 36);
+    const feltGeo = new THREE.CylinderGeometry(1.14, 1.14, 0.085, 48);
     const feltMat = new THREE.MeshStandardMaterial({
       map: getFeltTexture(),
       roughness: 0.85,
@@ -195,16 +206,16 @@ export class TableScene3D {
     this.tableGroup.add(felt);
 
     // Brass Inner Ring
-    const brassTrimGeo = new THREE.TorusGeometry(1.14, 0.008, 8, 36);
-    const brassTrimMat = new THREE.MeshStandardMaterial({ color: 0xC9A24B, metalness: 0.8, roughness: 0.3 });
+    const brassTrimGeo = new THREE.TorusGeometry(1.14, 0.008, 8, 48);
+    const brassTrimMat = new THREE.MeshStandardMaterial({ color: 0xC9A24B, metalness: 0.85, roughness: 0.25 });
     const brassTrim = new THREE.Mesh(brassTrimGeo, brassTrimMat);
     brassTrim.position.y = 0.74;
     brassTrim.rotation.x = Math.PI / 2;
     this.tableGroup.add(brassTrim);
 
     // Sturdy Wooden Table Base / Pillar
-    const baseGeo = new THREE.CylinderGeometry(0.28, 0.42, 0.68, 16);
-    const baseMat = new THREE.MeshStandardMaterial({ color: 0x22150D, roughness: 0.8 });
+    const baseGeo = new THREE.CylinderGeometry(0.28, 0.42, 0.68, 20);
+    const baseMat = new THREE.MeshStandardMaterial({ color: 0x241710, roughness: 0.8 });
     const base = new THREE.Mesh(baseGeo, baseMat);
     base.position.y = 0.34;
     this.tableGroup.add(base);
@@ -213,7 +224,7 @@ export class TableScene3D {
   }
 
   setupCharacters() {
-    // 1. Across table: Babanrao (The Veteran)
+    // 1. Across table: Babanrao (The Veteran Uncle)
     const babanrao = createBabanrao();
     babanrao.position.set(0, 0, -1.35);
     babanrao.rotation.y = 0;
@@ -244,7 +255,7 @@ export class TableScene3D {
   }
 
   initDeckStacks() {
-    // 4 Player Decks on table
+    // 4 Player Decks on table with the luxury Art Deco card back
     const stackDefs = {
       bottom: { pos: new THREE.Vector3(0.24, 0.74, 0.52), rot: 0.05 },
       top: { pos: new THREE.Vector3(0.22, 0.74, -0.85), rot: -0.05 },
@@ -259,7 +270,7 @@ export class TableScene3D {
 
       // 3D physical deck mesh
       const deckMesh = new THREE.Mesh(
-        new THREE.BoxGeometry(0.2, 0.04, 0.28),
+        new THREE.BoxGeometry(0.22, 0.04, 0.31),
         this.cardBackMaterial
       );
       deckMesh.position.y = 0.02;
@@ -282,7 +293,7 @@ export class TableScene3D {
         stack.group.visible = false;
       } else {
         stack.group.visible = true;
-        const height = Math.max(0.004, (count / 52) * 0.07);
+        const height = Math.max(0.005, (count / 52) * 0.08);
         stack.mesh.scale.set(1, height / 0.04, 1);
         stack.mesh.position.y = height / 2;
       }
@@ -297,16 +308,28 @@ export class TableScene3D {
     if (this.deckStacks['right']) this.deckStacks['right'].group.visible = count >= 4;
   }
 
+  // Clear pot of all meshes to guarantee no overlap or stranded cards
+  clearPot() {
+    for (const cardMesh of this.potCards) {
+      this.scene.remove(cardMesh);
+      if (cardMesh.geometry) cardMesh.geometry.dispose();
+    }
+    this.potCards = [];
+  }
+
   // Animate a player or opponent tossing card onto central pot
   playCardThrow(seat, card, onLanded) {
+    // Height increments cleanly with each card in pot (6mm step) to completely prevent z-fighting
+    const stackHeight = 0.744 + (this.potCards.length * 0.006);
+    
+    // Natural organic card scatter on felt
     const potTargetPos = new THREE.Vector3(
-      (Math.random() - 0.5) * 0.12,
-      0.74 + this.potCards.length * 0.003,
-      -0.15 + (Math.random() - 0.5) * 0.12
+      (Math.random() - 0.5) * 0.28,
+      stackHeight,
+      -0.15 + (Math.random() - 0.5) * 0.22
     );
 
     const onDrop = () => {
-      // Spawn real 3D card flying into the pot
       this.spawnFlyingCard(seat, card, potTargetPos, onLanded);
     };
 
@@ -324,32 +347,48 @@ export class TableScene3D {
     const startPos = this.deckStacks[seat]?.basePos.clone() || new THREE.Vector3(0, 0.74, 0.5);
     startPos.y += 0.06;
 
+    // Crisp materials with polygonOffset to prevent depth-buffer tearing
+    const faceMaterial = new THREE.MeshStandardMaterial({
+      map: getCardFaceTexture(card),
+      roughness: 0.5,
+      metalness: 0.02,
+      polygonOffset: true,
+      polygonOffsetFactor: -1 * (this.potCards.length + 1),
+      polygonOffsetUnits: -1
+    });
+
+    const edgeMaterial = new THREE.MeshStandardMaterial({ color: 0xFAF8F5, roughness: 0.6 });
+
     const materials = [
-      new THREE.MeshStandardMaterial({ color: 0xF5F0E6 }), // edge
-      new THREE.MeshStandardMaterial({ color: 0xF5F0E6 }), // edge
-      new THREE.MeshStandardMaterial({ map: getCardFaceTexture(card), roughness: 0.4 }), // top (face)
-      this.cardBackMaterial, // bottom (back)
-      new THREE.MeshStandardMaterial({ color: 0xF5F0E6 }), // edge
-      new THREE.MeshStandardMaterial({ color: 0xF5F0E6 })  // edge
+      edgeMaterial,          // +X
+      edgeMaterial,          // -X
+      faceMaterial,          // +Y (Card Face)
+      this.cardBackMaterial, // -Y (Card Back)
+      edgeMaterial,          // +Z
+      edgeMaterial           // -Z
     ];
 
     const cardMesh = new THREE.Mesh(this.cardGeometry, materials);
     cardMesh.position.copy(startPos);
     cardMesh.castShadow = true;
+    cardMesh.receiveShadow = true;
     this.scene.add(cardMesh);
 
     const startTime = performance.now();
-    const duration = 260; // snappy, tactile speed
-    const rotTarget = (Math.random() - 0.5) * 0.45;
+    const duration = 260; // Snappy, tactile throw
+    // Generous, organic rotation angle (-30 to +30 deg)
+    const rotTarget = (Math.random() - 0.5) * 1.1;
 
     const animObj = {
+      cardMesh,
       update: (now) => {
         const p = Math.min(1, (now - startTime) / duration);
-        // Parabolic arc
+        
+        // Parabolic trajectory
         cardMesh.position.lerpVectors(startPos, targetPos, p);
-        cardMesh.position.y += Math.sin(p * Math.PI) * 0.18; // lift height
+        cardMesh.position.y += Math.sin(p * Math.PI) * 0.18;
 
-        // Flip card face-up
+        // Flip card face-up onto table
         cardMesh.rotation.x = Math.PI * (1 - p);
         cardMesh.rotation.y = rotTarget * p;
 
@@ -359,7 +398,7 @@ export class TableScene3D {
           this.potCards.push(cardMesh);
           this.triggerCameraShake(0.012);
           if (onLanded) onLanded();
-          return false; // remove from flying list
+          return false;
         }
         return true;
       }
@@ -373,29 +412,31 @@ export class TableScene3D {
     const targetStack = this.deckStacks[seat]?.basePos.clone() || new THREE.Vector3(0, 0.74, 0.5);
     targetStack.y += 0.08;
 
+    // Grab all cards currently in the pot and any currently in mid-air
     const cardsToSweep = [...this.potCards];
     this.potCards = [];
 
     const startTime = performance.now();
-    const duration = 400;
+    const duration = 380;
 
     cardsToSweep.forEach((mesh, idx) => {
       const startPos = mesh.position.clone();
-      const delay = idx * 18;
+      const delay = idx * 16;
 
       const animObj = {
+        cardMesh: mesh,
         update: (now) => {
           if (now < startTime + delay) return true;
           const p = Math.min(1, (now - (startTime + delay)) / duration);
 
           mesh.position.lerpVectors(startPos, targetStack, p);
           mesh.position.y += Math.sin(p * Math.PI) * 0.22;
-          mesh.rotation.y += 0.1;
+          mesh.rotation.y += 0.12;
           mesh.scale.setScalar(1 - p * 0.25);
 
           if (p >= 1) {
             this.scene.remove(mesh);
-            mesh.geometry?.dispose();
+            if (mesh.geometry) mesh.geometry.dispose();
             return false;
           }
           return true;
@@ -406,7 +447,7 @@ export class TableScene3D {
 
     setTimeout(() => {
       if (onComplete) onComplete();
-    }, duration + cardsToSweep.length * 18 + 50);
+    }, duration + cardsToSweep.length * 16 + 40);
   }
 
   triggerCameraShake(intensity = 0.02) {

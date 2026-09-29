@@ -168,36 +168,38 @@ export class BhikarSawkarEngine {
       const capturedCount = this.centralPile.length;
       currentPlayer.cardsWon += capturedCount;
 
-      // Add captured cards to bottom of personal deck (shuffled in per tradition)
-      const wonCards = [...this.centralPile];
-      this.centralPile = [];
-      currentPlayer.deck.push(...shuffle(wonCards));
-
-      this.emit('onMatch', {
-        player: currentPlayer,
-        matchedCard: playedCard,
-        underneathCard: previousTopCard,
-        capturedCount: capturedCount,
-        newDeckCount: currentPlayer.deck.length
-      });
-
-      if (!currentPlayer.isHuman && currentPlayer.botId) {
-        this.emit('onBanter', {
-          player: currentPlayer,
-          text: getRandomQuote(currentPlayer.botId, 'onMatch')
-        });
-      }
-
-      // Check if this capture crowns the Sawkar (holds all 52 cards or eliminated everyone else)
+      // Wait 300ms for card throw animation to land on table before triggering match sweep
       setTimeout(() => {
-        this.isPaused = false;
-        this.verifyEliminations();
-        if (this.checkVictory()) return;
+        const wonCards = [...this.centralPile];
+        this.centralPile = [];
+        currentPlayer.deck.push(...shuffle(wonCards));
 
-        // Capturing player leads the next round
-        this.emit('onStateChange', this.getState());
-        this.checkNextTurn();
-      }, this.getSpeedDelay() * 1.4);
+        this.emit('onMatch', {
+          player: currentPlayer,
+          matchedCard: playedCard,
+          underneathCard: previousTopCard,
+          capturedCount: capturedCount,
+          newDeckCount: currentPlayer.deck.length
+        });
+
+        if (!currentPlayer.isHuman && currentPlayer.botId) {
+          this.emit('onBanter', {
+            player: currentPlayer,
+            text: getRandomQuote(currentPlayer.botId, 'onMatch')
+          });
+        }
+
+        // Wait for sweep animation to finish before proceeding to next lead turn
+        setTimeout(() => {
+          this.isPaused = false;
+          this.verifyEliminations();
+          if (this.checkVictory()) return;
+
+          // Capturing player leads the next round
+          this.emit('onStateChange', this.getState());
+          this.checkNextTurn();
+        }, Math.max(800, this.getSpeedDelay() * 1.5));
+      }, 300);
 
     } else {
       // Normal non-match card played

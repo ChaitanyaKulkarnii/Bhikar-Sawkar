@@ -116,16 +116,11 @@ export function renderCardFace(card) {
   `;
 }
 
-// Generate ornate card back HTML
+// Generate ornate card back HTML using the luxury Art Deco design
 export function renderCardBack() {
   return `
-    <div class="card card-back">
-      <div class="card-back-pattern">
-        <div class="back-frame">
-          <div class="back-rosette"></div>
-          <div class="back-text">भिकार सावकार</div>
-        </div>
-      </div>
+    <div class="card card-back card-back-luxury">
+      <img src="/card_back.png" alt="Card Back" class="card-back-img-element" draggable="false" />
     </div>
   `;
 }

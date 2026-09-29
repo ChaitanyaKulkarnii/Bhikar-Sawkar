@@ -139,13 +139,15 @@ function updateHud(state) {
   });
 
   // Last card HUD preview
-  if (state.topCard) {
-    const suitSymbol = state.topCard.suitSymbol || '♠';
-    const color = (state.topCard.suit === 'hearts' || state.topCard.suit === 'diamonds') ? '#D4463B' : '#FFFFFF';
+  const activeCard = state.topCard || lastPlayedCard;
+  if (activeCard && state.centralPileCount > 0) {
+    const suitSymbol = activeCard.suitSymbol || '♠';
+    const isRed = (activeCard.suit === 'hearts' || activeCard.suit === 'diamonds');
+    const color = isRed ? '#D42C20' : '#FFFFFF';
     hudCardDisplay.innerHTML = `
       <div class="hud-card-mini" style="color: ${color};">
-        <span>${state.topCard.rank}</span>
-        <span>${suitSymbol}</span>
+        <span style="font-size: 1.6rem; font-weight: 800;">${activeCard.rank}</span>
+        <span style="font-size: 1.4rem;">${suitSymbol}</span>
       </div>
     `;
   } else {
@@ -199,17 +201,21 @@ function fireSawkarVictoryConfetti() {
   } catch (e) {}
 }
 
+let lastPlayedCard = null;
+
 // Wire Engine Events to 3D Scene
 engine.on('onStateChange', (state) => {
   updateHud(state);
 });
 
 engine.on('onCardPlayed', ({ player, card, potSize }) => {
+  lastPlayedCard = card;
   const seatKeys = getSeatMap(engine.playerCount);
   const pIdx = engine.players.findIndex(p => p.id === player.id);
   const seatKey = seatKeys[pIdx] || 'bottom';
 
   sounds.playCardFlip();
+  updateHud(engine.getState());
 
   // Play 3D card throw motion from the character's hands
   scene3d.playCardThrow(seatKey, card, () => {
@@ -225,19 +231,17 @@ engine.on('onMatch', ({ player, matchedCard, underneathCard, capturedCount, newD
 
   sounds.playSawkarMatch();
   sounds.playTableSlam();
-  scene3d.triggerCameraShake(0.035);
+  scene3d.triggerCameraShake(0.045);
   fireMatchConfetti();
 
   // Banner
   matchAnnouncement.classList.add('show');
   matchSubtext.textContent = `${player.name} ने जिंकला ${capturedCount} पानांचा ढीग!`;
 
-  setTimeout(() => {
-    sounds.playCardSweep();
-    scene3d.sweepPotToWinner(seatKey, () => {
-      updateHud(engine.getState());
-    });
-  }, 350);
+  sounds.playCardSweep();
+  scene3d.sweepPotToWinner(seatKey, () => {
+    updateHud(engine.getState());
+  });
 
   setTimeout(() => {
     matchAnnouncement.classList.remove('show');
@@ -352,12 +356,16 @@ btnSettings.addEventListener('click', () => {
 
 btnNewMatch.addEventListener('click', () => {
   sounds.playCardSweep();
+  lastPlayedCard = null;
+  scene3d.clearPot();
   engine.initMatch();
 });
 
 btnPlayAgain.addEventListener('click', () => {
   modalVictory.classList.remove('open');
   sounds.playCardSweep();
+  lastPlayedCard = null;
+  scene3d.clearPot();
   engine.initMatch();
 });
 
