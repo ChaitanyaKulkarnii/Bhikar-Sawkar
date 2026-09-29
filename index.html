@@ -12,6 +12,180 @@
 </head>
 <body>
   <div id="app">
+    <!-- Home / Start Screen Overlay (Matching Reference Image) -->
+    <section id="home-screen" class="home-screen" aria-label="Game Main Menu">
+      <div class="home-backdrop"></div>
+      
+      <div class="home-container">
+        <!-- Top Action Bar -->
+        <header class="home-top-bar">
+          <div class="home-top-left">
+            <button id="btn-home-settings" class="btn-home-icon" title="Game Settings" aria-label="Game Settings">
+              ⚙️
+            </button>
+            <button id="btn-home-sound" class="btn-home-icon" title="Toggle Sound" aria-label="Toggle Sound">
+              🔊
+            </button>
+          </div>
+          <div class="home-top-right">
+            <div class="online-indicator">
+              <span class="online-icon">👥</span>
+              <span class="online-text">Players Online</span>
+              <span class="online-dot"></span>
+            </div>
+          </div>
+        </header>
+
+        <!-- Center Hero Section -->
+        <div class="home-content">
+          <!-- Title & Royal Crown -->
+          <div class="home-branding">
+            <div class="crown-icon" aria-hidden="true">
+              <svg viewBox="0 0 48 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4 25H44V28H4V25Z" fill="url(#crownGold)" />
+                <path d="M6 23L11 9L20 17L24 4L28 17L37 9L42 23H6Z" fill="url(#crownGold)" stroke="#FFF2B2" stroke-width="0.8"/>
+                <circle cx="24" cy="3.5" r="2.2" fill="#FFEAA0" />
+                <circle cx="11" cy="8.5" r="1.8" fill="#FFEAA0" />
+                <circle cx="37" cy="8.5" r="1.8" fill="#FFEAA0" />
+                <defs>
+                  <linearGradient id="crownGold" x1="4" y1="4" x2="44" y2="28" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#FFE082"/>
+                    <stop offset="0.5" stop-color="#C9A24B"/>
+                    <stop offset="1" stop-color="#8C651A"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+            <h1 class="home-title">
+              <span class="title-flourish left">✦</span>
+              BHIKAR SAWKAR
+              <span class="title-flourish right">✦</span>
+            </h1>
+            <div class="home-subtitle">
+              <span>STRATEGY</span>
+              <span class="sub-diamond">✦</span>
+              <span>SKILL</span>
+              <span class="sub-diamond">✦</span>
+              <span>VICTORY</span>
+            </div>
+          </div>
+
+          <!-- Step 1: Your Name -->
+          <div class="home-section name-section">
+            <label for="player-name-input" class="section-label">YOUR NAME</label>
+            <div class="name-input-wrapper">
+              <span class="input-icon" aria-hidden="true">👤</span>
+              <input type="text" id="player-name-input" class="player-name-input" placeholder="Enter your name..." value="Bhau" maxlength="16" autocomplete="off" spellcheck="false">
+              <div class="corner-ornament top-left" aria-hidden="true"></div>
+              <div class="corner-ornament top-right" aria-hidden="true"></div>
+              <div class="corner-ornament bottom-left" aria-hidden="true"></div>
+              <div class="corner-ornament bottom-right" aria-hidden="true"></div>
+            </div>
+          </div>
+
+          <!-- Step 2: Choose Your Character -->
+          <div class="home-section character-section">
+            <div class="section-header-rule">
+              <span class="rule-line"></span>
+              <h2 class="section-label">CHOOSE YOUR CHARACTER</h2>
+              <span class="rule-line"></span>
+            </div>
+            <div class="character-carousel-wrapper">
+              <button id="btn-char-prev" class="carousel-arrow prev" title="Previous Character" aria-label="Previous Character">‹</button>
+              
+              <div class="character-cards-track" id="character-track" role="radiogroup" aria-label="Choose Character">
+                <!-- 6 Character Avatars -->
+                <div class="char-card active" data-char-id="sawkar" data-char-name="The Sawkar" role="radio" aria-checked="true" tabindex="0">
+                  <div class="char-avatar-ring">
+                    <img src="/avatars/sawkar.png" alt="The Sawkar" class="char-avatar-img">
+                  </div>
+                  <span class="char-title">The Sawkar</span>
+                </div>
+
+                <div class="char-card" data-char-id="patil" data-char-name="The Patil" role="radio" aria-checked="false" tabindex="0">
+                  <div class="char-avatar-ring">
+                    <img src="/avatars/patil.png" alt="The Patil" class="char-avatar-img">
+                  </div>
+                  <span class="char-title">The Patil</span>
+                </div>
+
+                <div class="char-card" data-char-id="bhau" data-char-name="The Bhau" role="radio" aria-checked="false" tabindex="0">
+                  <div class="char-avatar-ring">
+                    <img src="/avatars/bhau.png" alt="The Bhau" class="char-avatar-img">
+                  </div>
+                  <span class="char-title">The Bhau</span>
+                </div>
+
+                <div class="char-card" data-char-id="rani" data-char-name="The Rani" role="radio" aria-checked="false" tabindex="0">
+                  <div class="char-avatar-ring">
+                    <img src="/avatars/rani.png" alt="The Rani" class="char-avatar-img">
+                  </div>
+                  <span class="char-title">The Rani</span>
+                </div>
+
+                <div class="char-card" data-char-id="dada" data-char-name="The Dada" role="radio" aria-checked="false" tabindex="0">
+                  <div class="char-avatar-ring">
+                    <img src="/avatars/dada.png" alt="The Dada" class="char-avatar-img">
+                  </div>
+                  <span class="char-title">The Dada</span>
+                </div>
+
+                <div class="char-card" data-char-id="bhikar" data-char-name="The Bhikar" role="radio" aria-checked="false" tabindex="0">
+                  <div class="char-avatar-ring">
+                    <img src="/avatars/bhikar.png" alt="The Bhikar" class="char-avatar-img">
+                  </div>
+                  <span class="char-title">The Bhikar</span>
+                </div>
+              </div>
+
+              <button id="btn-char-next" class="carousel-arrow next" title="Next Character" aria-label="Next Character">›</button>
+            </div>
+          </div>
+
+          <!-- Step 3: Select Players -->
+          <div class="home-section players-section">
+            <div class="section-header-rule">
+              <span class="rule-line"></span>
+              <h2 class="section-label">SELECT PLAYERS</h2>
+              <span class="rule-line"></span>
+            </div>
+            <div class="player-select-buttons" role="radiogroup" aria-label="Number of Players">
+              <button class="player-option-btn" data-players="2" role="radio" aria-checked="false">
+                <span class="option-icon">👥</span>
+                <span class="option-label">2 PLAYERS</span>
+              </button>
+              <button class="player-option-btn" data-players="3" role="radio" aria-checked="false">
+                <span class="option-icon">👥👥</span>
+                <span class="option-label">3 PLAYERS</span>
+              </button>
+              <button class="player-option-btn active" data-players="4" role="radio" aria-checked="true">
+                <span class="option-icon">👥👥👥</span>
+                <span class="option-label">4 PLAYERS</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Primary CTA Button: PLAY -->
+          <div class="home-action">
+            <button id="btn-start-game" class="btn-play-gold" aria-label="Start Game">
+              <span class="btn-play-inner">
+                <span class="play-diamond left">✦</span>
+                PLAY
+                <span class="play-diamond right">✦</span>
+              </span>
+            </button>
+          </div>
+
+          <!-- Footer -->
+          <footer class="home-footer">
+            <span>GOOD LUCK</span>
+            <span class="footer-diamond">✦</span>
+            <span>HAVE FUN</span>
+          </footer>
+        </div>
+      </div>
+    </section>
+
     <!-- Heartbeat Tension Vignette (Pulses when pot gets large) -->
     <div id="tension-vignette" class="tension-vignette" aria-hidden="true"></div>
 
@@ -29,8 +203,11 @@
         </div>
       </div>
 
-      <!-- Left Vertical Action Controls (Sound, Settings, New Match) -->
+      <!-- Left Vertical Action Controls (Home, Sound, Settings, New Match) -->
       <aside class="action-buttons-vertical" id="action-buttons-vertical" aria-label="Game Controls">
+        <button id="btn-home" class="btn-icon" title="Return to Main Menu / Home" aria-label="Main Menu">
+          🏠
+        </button>
         <button id="btn-audio" class="btn-icon" title="Toggle Sound (Mute/Unmute)" aria-label="Toggle Sound">
           🔊
         </button>

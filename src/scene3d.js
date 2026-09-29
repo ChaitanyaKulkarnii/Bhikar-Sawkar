@@ -47,13 +47,16 @@ export class TableScene3D {
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
     this.renderer.setSize(this.width, this.height);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.05;
     this.container.appendChild(this.renderer.domElement);
+
+    this._hudWorldPos = new THREE.Vector3();
+    this.hudSeatEls = null;
 
     // ==========================================================
     // 230° TO 240° FIRST-PERSON FREE-LOOK CONTROLLER
@@ -266,10 +269,6 @@ export class TableScene3D {
     skylightTarget.position.set(0, 1.8, -3.4);
     this.scene.add(skylightTarget);
     skylightWash.target = skylightTarget;
-    skylightWash.castShadow = true;
-    skylightWash.shadow.mapSize.width = 2048;
-    skylightWash.shadow.mapSize.height = 2048;
-    skylightWash.shadow.bias = -0.0001;
     this.scene.add(skylightWash);
 
     // 3. Front Architectural Fill Light
@@ -466,7 +465,6 @@ export class TableScene3D {
     const leftBeamGeo = new THREE.BoxGeometry(3.3, 1.7, 8.0);
     const leftBeam = new THREE.Mesh(leftBeamGeo, beamMat);
     leftBeam.position.set(-3.35, 3.25, -0.5);
-    leftBeam.castShadow = true;
     leftBeam.receiveShadow = true;
     this.scene.add(leftBeam);
 
@@ -474,7 +472,6 @@ export class TableScene3D {
     const rightBeamGeo = new THREE.BoxGeometry(3.3, 1.7, 8.0);
     const rightBeam = new THREE.Mesh(rightBeamGeo, beamMat);
     rightBeam.position.set(3.35, 3.25, -0.5);
-    rightBeam.castShadow = true;
     rightBeam.receiveShadow = true;
     this.scene.add(rightBeam);
 
@@ -1056,42 +1053,52 @@ export class TableScene3D {
     this.renderer.render(this.scene, this.camera);
   }
 
-  // Project 3D character head coordinates to screen space for HUD badges
+  // Project 3D character head coordinates to screen space for HUD badges (GPU transform)
   update3DHudPositions() {
+    if (!this.hudSeatEls) {
+      this.hudSeatEls = {
+        top: document.getElementById('seat-top'),
+        left: document.getElementById('seat-left'),
+        right: document.getElementById('seat-right')
+      };
+    }
     const seatKeys = ['top', 'left', 'right'];
     for (const seat of seatKeys) {
       const char = this.characters[seat];
-      const hudEl = document.getElementById(`seat-${seat}`);
+      const hudEl = this.hudSeatEls[seat];
       if (!hudEl) continue;
 
       if (!char || !char.visible) {
-        hudEl.style.opacity = '0';
-        hudEl.style.pointerEvents = 'none';
+        if (hudEl.style.opacity !== '0') {
+          hudEl.style.opacity = '0';
+          hudEl.style.pointerEvents = 'none';
+        }
         continue;
       }
 
       const head = char.userData?.head;
       if (!head) continue;
 
-      const worldPos = new THREE.Vector3();
-      head.getWorldPosition(worldPos);
-      worldPos.y += 0.28; // slightly above head
+      head.getWorldPosition(this._hudWorldPos);
+      this._hudWorldPos.y += 0.28; // slightly above head
 
-      worldPos.project(this.camera);
+      this._hudWorldPos.project(this.camera);
 
       // In front of camera?
-      const inFront = worldPos.z < 1.0;
-      if (inFront && worldPos.x >= -1.15 && worldPos.x <= 1.15 && worldPos.y >= -1.15 && worldPos.y <= 1.15) {
-        const screenX = (worldPos.x * 0.5 + 0.5) * this.width;
-        const screenY = (-(worldPos.y * 0.5) + 0.5) * this.height;
-        hudEl.style.left = `${screenX}px`;
-        hudEl.style.top = `${screenY}px`;
-        hudEl.style.transform = 'translate(-50%, -100%)';
-        hudEl.style.opacity = '1';
-        hudEl.style.pointerEvents = 'auto';
+      const inFront = this._hudWorldPos.z < 1.0;
+      if (inFront && this._hudWorldPos.x >= -1.15 && this._hudWorldPos.x <= 1.15 && this._hudWorldPos.y >= -1.15 && this._hudWorldPos.y <= 1.15) {
+        const screenX = Math.round((this._hudWorldPos.x * 0.5 + 0.5) * this.width);
+        const screenY = Math.round((-(this._hudWorldPos.y * 0.5) + 0.5) * this.height);
+        hudEl.style.transform = `translate3d(${screenX}px, ${screenY}px, 0) translate(-50%, -100%)`;
+        if (hudEl.style.opacity !== '1') {
+          hudEl.style.opacity = '1';
+          hudEl.style.pointerEvents = 'auto';
+        }
       } else {
-        hudEl.style.opacity = '0';
-        hudEl.style.pointerEvents = 'none';
+        if (hudEl.style.opacity !== '0') {
+          hudEl.style.opacity = '0';
+          hudEl.style.pointerEvents = 'none';
+        }
       }
     }
   }

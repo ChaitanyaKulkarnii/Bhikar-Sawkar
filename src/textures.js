@@ -12,7 +12,7 @@ export function getCardBackTexture() {
 
   cachedCardBack = textureLoader.load('/card_back.png?v=3');
   cachedCardBack.colorSpace = THREE.SRGBColorSpace;
-  cachedCardBack.anisotropy = 16;
+  cachedCardBack.anisotropy = 4;
   cachedCardBack.generateMipmaps = true;
   cachedCardBack.minFilter = THREE.LinearMipmapLinearFilter;
   cachedCardBack.magFilter = THREE.LinearFilter;
@@ -77,7 +77,7 @@ export function getDeckRimTexture() {
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.ClampToEdgeWrapping;
   texture.repeat.set(1, 1);
-  texture.anisotropy = 16;
+  texture.anisotropy = 4;
   texture.generateMipmaps = true;
   texture.minFilter = THREE.LinearMipmapLinearFilter;
   texture.magFilter = THREE.LinearFilter;
@@ -126,7 +126,7 @@ export function getDeckRimBumpMap() {
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.ClampToEdgeWrapping;
   texture.repeat.set(1, 1);
-  texture.anisotropy = 16;
+  texture.anisotropy = 4;
   texture.generateMipmaps = true;
   texture.minFilter = THREE.LinearMipmapLinearFilter;
   texture.magFilter = THREE.LinearFilter;
@@ -237,7 +237,7 @@ export function getCardFaceTexture(card) {
   // Create High-Quality Three.js Texture with Mipmapping
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = 16;
+  texture.anisotropy = 4;
   texture.generateMipmaps = true;
   texture.minFilter = THREE.LinearMipmapLinearFilter;
   texture.magFilter = THREE.LinearFilter;
@@ -423,7 +423,7 @@ export function getFeltTexture() {
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = 16;
+  texture.anisotropy = 4;
   texture.generateMipmaps = true;
   texture.minFilter = THREE.LinearMipmapLinearFilter;
   texture.magFilter = THREE.LinearFilter;
@@ -438,7 +438,7 @@ export function getConcreteWallTexture() {
   if (cachedConcreteWall) return cachedConcreteWall;
   cachedConcreteWall = textureLoader.load('/concrete_back_wall.png');
   cachedConcreteWall.colorSpace = THREE.SRGBColorSpace;
-  cachedConcreteWall.anisotropy = 16;
+  cachedConcreteWall.anisotropy = 4;
   cachedConcreteWall.generateMipmaps = true;
   return cachedConcreteWall;
 }
@@ -447,7 +447,7 @@ let cachedConcreteWallBump = null;
 export function getConcreteWallBumpMap() {
   if (cachedConcreteWallBump) return cachedConcreteWallBump;
   cachedConcreteWallBump = textureLoader.load('/concrete_back_wall_bump.png');
-  cachedConcreteWallBump.anisotropy = 8;
+  cachedConcreteWallBump.anisotropy = 4;
   cachedConcreteWallBump.generateMipmaps = true;
   return cachedConcreteWallBump;
 }
@@ -460,7 +460,7 @@ export function getConcreteFloorTexture() {
   cachedConcreteFloor.wrapS = THREE.RepeatWrapping;
   cachedConcreteFloor.wrapT = THREE.RepeatWrapping;
   cachedConcreteFloor.repeat.set(3, 3);
-  cachedConcreteFloor.anisotropy = 16;
+  cachedConcreteFloor.anisotropy = 4;
   cachedConcreteFloor.generateMipmaps = true;
   return cachedConcreteFloor;
 }
@@ -473,7 +473,7 @@ export function getConcreteTileTexture() {
   cachedConcreteTile.wrapS = THREE.RepeatWrapping;
   cachedConcreteTile.wrapT = THREE.RepeatWrapping;
   cachedConcreteTile.repeat.set(3, 2);
-  cachedConcreteTile.anisotropy = 16;
+  cachedConcreteTile.anisotropy = 4;
   cachedConcreteTile.generateMipmaps = true;
   return cachedConcreteTile;
 }

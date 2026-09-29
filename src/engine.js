@@ -10,6 +10,8 @@ export class BhikarSawkarEngine {
     this.gameSpeed = options.gameSpeed || 'normal'; // 'normal' (900ms), 'fast' (450ms), 'turbo' (180ms)
     this.playMode = options.playMode || 'ai'; // 'ai' or 'pass_and_play'
     this.humanName = options.humanName || 'Bhau';
+    this.humanAvatar = options.humanAvatar || '/avatars/sawkar.png';
+    this.humanRole = options.humanRole || 'The Sawkar';
 
     this.players = [];
     this.centralPile = [];
@@ -69,8 +71,8 @@ export class BhikarSawkarEngine {
       id: 'p0',
       name: this.humanName,
       isHuman: true,
-      avatar: '1',
-      role: 'The Contender',
+      avatar: this.humanAvatar || '/avatars/sawkar.png',
+      role: this.humanRole || 'The Sawkar',
       deck: hands[0],
       eliminated: false,
       cardsWon: 0,
@@ -228,6 +230,19 @@ export class BhikarSawkarEngine {
     }
 
     this.turnIndex = nextIndex;
+    this.emit('onStateChange', this.getState());
+    this.checkNextTurn();
+  }
+
+  pause() {
+    this.isPaused = true;
+    clearTimeout(this.turnTimeout);
+    this.emit('onStateChange', this.getState());
+  }
+
+  resume() {
+    if (!this.isPlaying) return;
+    this.isPaused = false;
     this.emit('onStateChange', this.getState());
     this.checkNextTurn();
   }

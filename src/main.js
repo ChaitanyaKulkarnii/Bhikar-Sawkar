@@ -16,11 +16,23 @@ const btnSpeed = document.getElementById('btn-speed');
 const btnRules = document.getElementById('btn-rules');
 const btnSettings = document.getElementById('btn-settings');
 const btnNewMatch = document.getElementById('btn-new-match');
+const btnHome = document.getElementById('btn-home');
 const matchAnnouncement = document.getElementById('match-announcement');
 const matchSubtext = document.getElementById('match-subtext');
 const hudCardDisplay = document.getElementById('hud-card-display');
 const stakesIndicator = document.getElementById('stakes-indicator');
 const stakesText = document.getElementById('stakes-text');
+
+// Home / Start Screen DOM References
+const homeScreen = document.getElementById('home-screen');
+const btnStartGame = document.getElementById('btn-start-game');
+const playerNameInput = document.getElementById('player-name-input');
+const btnCharPrev = document.getElementById('btn-char-prev');
+const btnCharNext = document.getElementById('btn-char-next');
+const characterCards = document.querySelectorAll('.char-card');
+const playerOptionBtns = document.querySelectorAll('.player-option-btn');
+const btnHomeSettings = document.getElementById('btn-home-settings');
+const btnHomeSound = document.getElementById('btn-home-sound');
 
 const modalRules = document.getElementById('modal-rules');
 const modalSettings = document.getElementById('modal-settings');
@@ -163,7 +175,11 @@ function updateHud(state) {
     if (!els) return;
 
     els.name.textContent = player.name;
-    els.avatar.textContent = player.avatar;
+    if (typeof player.avatar === 'string' && player.avatar.startsWith('/')) {
+      els.avatar.innerHTML = `<img src="${player.avatar}" alt="${player.name}" style="width:100%;height:100%;border-radius:4px;object-fit:cover;">`;
+    } else {
+      els.avatar.textContent = player.avatar;
+    }
     els.role.textContent = player.role;
     const numEl = els.count.querySelector('.count-num');
     if (numEl) {
@@ -429,12 +445,28 @@ window.addEventListener('keydown', (e) => {
   }
 });
 
-// Audio Toggle
-btnAudio.addEventListener('click', () => {
-  sounds.ensureContext();
-  isMuted = sounds.toggleMute();
-  btnAudio.textContent = isMuted ? '🔇' : '🔊';
-});
+// Audio Toggle & Sync
+function updateAudioButtonIcons(muted) {
+  const icon = muted ? '🔇' : '🔊';
+  if (btnAudio) btnAudio.textContent = icon;
+  if (btnHomeSound) btnHomeSound.textContent = icon;
+}
+
+if (btnAudio) {
+  btnAudio.addEventListener('click', () => {
+    sounds.ensureContext();
+    isMuted = sounds.toggleMute();
+    updateAudioButtonIcons(isMuted);
+  });
+}
+
+if (btnHomeSound) {
+  btnHomeSound.addEventListener('click', () => {
+    sounds.ensureContext();
+    isMuted = sounds.toggleMute();
+    updateAudioButtonIcons(isMuted);
+  });
+}
 
 // Speed Toggle Cycle (if present)
 const speeds = ['normal', 'fast', 'turbo'];
@@ -563,10 +595,111 @@ document.querySelectorAll('.btn-pov').forEach((btn) => {
   });
 });
 
+// ============================================================================
+// HOME SCREEN / START MENU INTERACTIONS
+// ============================================================================
+let selectedCharId = 'sawkar';
+let selectedCharName = 'The Sawkar';
+let selectedPlayerCount = 4;
+let isGameStarted = false;
+
+function selectCharacterCard(card) {
+  if (!card) return;
+  characterCards.forEach(c => {
+    c.classList.remove('active');
+    c.setAttribute('aria-checked', 'false');
+  });
+  card.classList.add('active');
+  card.setAttribute('aria-checked', 'true');
+  selectedCharId = card.dataset.charId || 'sawkar';
+  selectedCharName = card.dataset.charName || 'The Sawkar';
+  sounds.playCoin();
+}
+
+characterCards.forEach(card => {
+  card.addEventListener('click', () => selectCharacterCard(card));
+});
+
+// Carousel arrows for characters
+if (btnCharPrev && btnCharNext) {
+  const cardsArr = Array.from(characterCards);
+  btnCharPrev.addEventListener('click', () => {
+    const curIdx = cardsArr.findIndex(c => c.classList.contains('active'));
+    const prevIdx = (curIdx - 1 + cardsArr.length) % cardsArr.length;
+    selectCharacterCard(cardsArr[prevIdx]);
+    cardsArr[prevIdx].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  });
+  btnCharNext.addEventListener('click', () => {
+    const curIdx = cardsArr.findIndex(c => c.classList.contains('active'));
+    const nextIdx = (curIdx + 1) % cardsArr.length;
+    selectCharacterCard(cardsArr[nextIdx]);
+    cardsArr[nextIdx].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  });
+}
+
+// Player Count Selection Buttons
+playerOptionBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    playerOptionBtns.forEach(b => {
+      b.classList.remove('active');
+      b.setAttribute('aria-checked', 'false');
+    });
+    btn.classList.add('active');
+    btn.setAttribute('aria-checked', 'true');
+    selectedPlayerCount = parseInt(btn.dataset.players, 10);
+    sounds.playCoin();
+  });
+});
+
+// Home Settings Button
+if (btnHomeSettings) {
+  btnHomeSettings.addEventListener('click', () => {
+    sounds.playCoin();
+    modalSettings.classList.add('open');
+  });
+}
+
+// In-Game Return to Home Button
+if (btnHome) {
+  btnHome.addEventListener('click', () => {
+    sounds.playCoin();
+    if (homeScreen) {
+      homeScreen.classList.remove('hidden');
+    }
+    engine.pause();
+  });
+}
+
+// Start Game Primary Action CTA
+if (btnStartGame) {
+  btnStartGame.addEventListener('click', () => {
+    sounds.ensureContext();
+    sounds.playSawkarMatch();
+
+    const inputName = playerNameInput ? playerNameInput.value.trim() : '';
+    const playerName = inputName || 'Bhau';
+
+    // Apply configuration to engine and scene
+    engine.humanName = playerName;
+    engine.humanRole = selectedCharName;
+    engine.humanAvatar = `/avatars/${selectedCharId}.png`;
+    engine.playerCount = selectedPlayerCount;
+    scene3d.setPlayerCount(selectedPlayerCount);
+
+    // Hide Home Screen
+    if (homeScreen) {
+      homeScreen.classList.add('hidden');
+    }
+
+    // Initialize and start match
+    isGameStarted = true;
+    lastPlayedCard = null;
+    scene3d.clearPot();
+    engine.initMatch();
+  });
+}
+
 // First Interaction Audio Unlock
 window.addEventListener('click', () => {
   sounds.ensureContext();
 }, { once: true });
-
-// Start First Match
-engine.initMatch();
