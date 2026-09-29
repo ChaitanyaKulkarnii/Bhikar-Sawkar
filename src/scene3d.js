@@ -181,13 +181,13 @@ export class TableScene3D {
       this.targetPitch = -0.06;
     } else if (seat === 'top') {
       this.targetYaw = 0;      // Look across at Babanrao
-      this.targetPitch = -0.12;
+      this.targetPitch = -0.08;
     } else if (seat === 'bottom') {
       this.targetYaw = 0;      // Look down at cards and pot
       this.targetPitch = -0.60;
     } else if (seat === 'reset') {
       this.targetYaw = 0;
-      this.targetPitch = -0.22;
+      this.targetPitch = -0.18;
     }
   }
 
@@ -267,11 +267,11 @@ export class TableScene3D {
     // ========================================================
     // Babanrao Key Light (Directly illuminates face, mustache, glasses, and kurta across table)
     const babanraoTarget = new THREE.Object3D();
-    babanraoTarget.position.set(0, 1.25, -1.35);
+    babanraoTarget.position.set(0, 1.25, -1.60);
     this.scene.add(babanraoTarget);
 
     const babanraoLight = new THREE.SpotLight(0xFFE5C4, 3.4);
-    babanraoLight.position.set(0, 1.85, -0.65);
+    babanraoLight.position.set(0, 2.1, -0.95);
     babanraoLight.target = babanraoTarget;
     babanraoLight.angle = 0.65;
     babanraoLight.penumbra = 0.55;
@@ -281,11 +281,11 @@ export class TableScene3D {
 
     // Dinkar Key Light (Directly illuminates face, sunglasses, varsity jacket, and arms on left)
     const dinkarTarget = new THREE.Object3D();
-    dinkarTarget.position.set(-1.18, 1.22, -0.42);
+    dinkarTarget.position.set(-1.42, 1.22, -0.46);
     this.scene.add(dinkarTarget);
 
     const dinkarLight = new THREE.SpotLight(0xFFDEB0, 3.4);
-    dinkarLight.position.set(-0.45, 1.82, 0.05);
+    dinkarLight.position.set(-0.65, 2.1, 0.0);
     dinkarLight.target = dinkarTarget;
     dinkarLight.angle = 0.68;
     dinkarLight.penumbra = 0.55;
@@ -295,11 +295,11 @@ export class TableScene3D {
 
     // Anandi Key Light (Directly illuminates face, bindi, earrings, and emerald silk on right)
     const anandiTarget = new THREE.Object3D();
-    anandiTarget.position.set(1.18, 1.22, -0.42);
+    anandiTarget.position.set(1.42, 1.22, -0.46);
     this.scene.add(anandiTarget);
 
     const anandiLight = new THREE.SpotLight(0xFFE8D6, 3.4);
-    anandiLight.position.set(0.45, 1.82, 0.05);
+    anandiLight.position.set(0.65, 2.1, 0.0);
     anandiLight.target = anandiTarget;
     anandiLight.angle = 0.68;
     anandiLight.penumbra = 0.55;
@@ -532,31 +532,32 @@ export class TableScene3D {
 
   setupCharacters() {
     // 1. Across table: Babanrao (The Veteran Uncle)
+    // Seated comfortably behind the leather rail with hands resting on felt
     const babanrao = createBabanrao();
-    babanrao.position.set(0, 0, -1.35);
+    babanrao.position.set(0, 0, -1.60);
     babanrao.rotation.y = 0;
     const chairTop = createChair();
-    chairTop.position.set(0, 0, -1.35);
+    chairTop.position.set(0, 0, -1.62);
     this.scene.add(chairTop, babanrao);
     this.characters['top'] = babanrao;
 
     // 2. Left seat: Dinkar (The Hype Guy)
     const dinkar = createDinkar();
-    dinkar.position.set(-1.18, 0, -0.42);
-    dinkar.rotation.y = Math.PI / 3.2;
+    dinkar.position.set(-1.42, 0, -0.46);
+    dinkar.rotation.y = Math.PI / 3.0;
     const chairLeft = createChair();
-    chairLeft.position.set(-1.18, 0, -0.42);
-    chairLeft.rotation.y = Math.PI / 3.2;
+    chairLeft.position.set(-1.44, 0, -0.48);
+    chairLeft.rotation.y = Math.PI / 3.0;
     this.scene.add(chairLeft, dinkar);
     this.characters['left'] = dinkar;
 
     // 3. Right seat: Anandi (The Mastermind)
     const anandi = createAnandi();
-    anandi.position.set(1.18, 0, -0.42);
-    anandi.rotation.y = -Math.PI / 3.2;
+    anandi.position.set(1.42, 0, -0.46);
+    anandi.rotation.y = -Math.PI / 3.0;
     const chairRight = createChair();
-    chairRight.position.set(1.18, 0, -0.42);
-    chairRight.rotation.y = -Math.PI / 3.2;
+    chairRight.position.set(1.44, 0, -0.48);
+    chairRight.rotation.y = -Math.PI / 3.0;
     this.scene.add(chairRight, anandi);
     this.characters['right'] = anandi;
   }
@@ -564,10 +565,10 @@ export class TableScene3D {
   initDeckStacks() {
     // 4 Player Decks on table with the luxury Art Deco card back
     const stackDefs = {
-      bottom: { pos: new THREE.Vector3(0.24, 0.74, 0.52), rot: 0.05 },
-      top: { pos: new THREE.Vector3(0.22, 0.74, -0.85), rot: -0.05 },
-      left: { pos: new THREE.Vector3(-0.72, 0.74, -0.32), rot: 0.75 },
-      right: { pos: new THREE.Vector3(0.72, 0.74, -0.32), rot: -0.75 }
+      bottom: { pos: new THREE.Vector3(0.24, 0.74, 0.50), rot: 0.05 },
+      top: { pos: new THREE.Vector3(0.22, 0.74, -0.88), rot: -0.05 },
+      left: { pos: new THREE.Vector3(-0.74, 0.74, -0.34), rot: 0.75 },
+      right: { pos: new THREE.Vector3(0.74, 0.74, -0.34), rot: -0.75 }
     };
 
     for (const [seat, def] of Object.entries(stackDefs)) {

@@ -251,14 +251,12 @@ export function createBabanrao() {
 
   // Left Arm (Resting on table)
   const leftArm = createArm(babanraoShirtMaterial, babanraoSkinMaterial, false);
-  leftArm.position.set(-0.25, 1.05, 0);
-  leftArm.rotation.set(0.7, 0.3, -0.4);
+  leftArm.position.set(-0.25, 1.06, 0);
   group.add(leftArm);
 
-  // Right Arm (Animated for card play & table slap)
+  // Right Arm (Resting on table / animated for card play)
   const rightArm = createArm(babanraoShirtMaterial, babanraoSkinMaterial, true);
-  rightArm.position.set(0.25, 1.05, 0);
-  rightArm.rotation.set(0.7, -0.3, 0.4);
+  rightArm.position.set(0.25, 1.06, 0);
   group.add(rightArm);
 
   group.userData = {
@@ -369,15 +367,13 @@ export function createDinkar() {
   smile.rotation.z = Math.PI * 0.9;
   group.add(smile);
 
-  // Cream Sleeves on Arms
+  // Cream Sleeves on Arms resting on table
   const leftArm = createArm(dinkarSleeveMaterial, dinkarSkinMaterial, false);
-  leftArm.position.set(-0.26, 1.05, 0);
-  leftArm.rotation.set(0.7, 0.2, -0.3);
+  leftArm.position.set(-0.25, 1.06, 0);
   group.add(leftArm);
 
   const rightArm = createArm(dinkarSleeveMaterial, dinkarSkinMaterial, true);
-  rightArm.position.set(0.26, 1.05, 0);
-  rightArm.rotation.set(0.7, -0.2, 0.3);
+  rightArm.position.set(0.25, 1.06, 0);
   group.add(rightArm);
 
   group.userData = { head, torso, rightArm, leftArm, animTime: 0 };
@@ -475,15 +471,13 @@ export function createAnandi() {
   gajra.position.set(0, 1.31, -0.125);
   group.add(gajra);
 
-  // Arms with Gold Bangles on both wrists
+  // Arms with Gold Bangles on both wrists resting on table
   const leftArm = createArm(anandiDressMaterial, anandiSkinMaterial, false, true);
-  leftArm.position.set(-0.23, 1.05, 0);
-  leftArm.rotation.set(0.7, 0.3, -0.3);
+  leftArm.position.set(-0.23, 1.06, 0);
   group.add(leftArm);
 
   const rightArm = createArm(anandiDressMaterial, anandiSkinMaterial, true, true);
-  rightArm.position.set(0.23, 1.05, 0);
-  rightArm.rotation.set(0.7, -0.3, 0.3);
+  rightArm.position.set(0.23, 1.06, 0);
   group.add(rightArm);
 
   group.userData = { head, torso, rightArm, leftArm, animTime: 0 };
@@ -560,42 +554,60 @@ export function createPlayerArms() {
   return group;
 }
 
-// Helper: Articulated Arm
+// Helper: Articulated Arm resting naturally on the table baize
 function createArm(sleeveMat, handSkinMat, isRight = false, addBangle = false) {
   const arm = new THREE.Group();
+  const sideSign = isRight ? 1 : -1;
 
-  // Upper arm
-  const upperGeo = new THREE.CylinderGeometry(0.06, 0.05, 0.35, 10);
+  // Upper arm: reaches down & forward from shoulder toward table edge
+  const upperArmGroup = new THREE.Group();
+
+  const upperGeo = new THREE.CylinderGeometry(0.052, 0.046, 0.28, 12);
   const upper = new THREE.Mesh(upperGeo, sleeveMat);
-  upper.position.y = -0.16;
-  arm.add(upper);
+  upper.position.set(sideSign * -0.015, -0.13, 0.10);
+  upper.rotation.x = 0.65;
+  upper.rotation.z = sideSign * -0.10;
+  upper.castShadow = true;
+  upperArmGroup.add(upper);
 
-  // Forearm
-  const foreGeo = new THREE.CylinderGeometry(0.05, 0.04, 0.34, 10);
+  // Forearm: extends horizontally forward resting directly on the table
+  const forearmGroup = new THREE.Group();
+  forearmGroup.position.set(sideSign * -0.03, -0.25, 0.20);
+
+  const foreGeo = new THREE.CylinderGeometry(0.044, 0.038, 0.26, 12);
   const fore = new THREE.Mesh(foreGeo, handSkinMat);
-  fore.position.set(0, -0.42, 0.12);
-  fore.rotation.x = 0.8;
-  arm.add(fore);
+  fore.position.set(sideSign * -0.02, -0.02, 0.13);
+  fore.rotation.x = 1.48; // flat forward on felt
+  fore.rotation.y = sideSign * -0.16;
+  fore.castShadow = true;
+  forearmGroup.add(fore);
 
-  // Hand
-  const handGeo = new THREE.BoxGeometry(0.08, 0.035, 0.11);
+  // Hand: rests flat on table felt
+  const handGeo = new THREE.BoxGeometry(0.082, 0.024, 0.11);
   const hand = new THREE.Mesh(handGeo, handSkinMat);
-  hand.position.set(0, -0.52, 0.24);
-  hand.rotation.x = 0.2;
-  arm.add(hand);
+  hand.position.set(sideSign * -0.04, -0.032, 0.28);
+  hand.rotation.x = -0.04;
+  hand.rotation.y = sideSign * -0.22;
+  hand.castShadow = true;
+  hand.receiveShadow = true;
+  forearmGroup.add(hand);
 
   // Gold Bangles for Anandi
   if (addBangle) {
-    [-0.46, -0.48, -0.50].forEach((yPos) => {
-      const bangleGeo = new THREE.TorusGeometry(0.046, 0.006, 8, 16);
+    [0.17, 0.19, 0.21].forEach((zOff) => {
+      const bangleGeo = new THREE.TorusGeometry(0.044, 0.006, 8, 16);
       const bangle = new THREE.Mesh(bangleGeo, goldTrimMaterial);
-      bangle.position.set(0, yPos, 0.18 + (yPos + 0.48) * 0.4);
-      bangle.rotation.x = Math.PI / 2.2;
-      arm.add(bangle);
+      bangle.position.set(sideSign * -0.025, -0.02, zOff);
+      bangle.rotation.y = sideSign * -0.16;
+      bangle.rotation.x = 1.48;
+      forearmGroup.add(bangle);
     });
   }
 
-  arm.userData = { upper, fore, hand, isRight };
+  upperArmGroup.add(forearmGroup);
+  arm.add(upperArmGroup);
+
+  arm.userData = { upperArmGroup, forearmGroup, upper, fore, hand, isRight };
   return arm;
 }
 
@@ -633,7 +645,7 @@ export function animateCardThrow(character, targetPos, onDrop, onComplete) {
 
   const origRot = arm.rotation.clone();
   const startTime = performance.now();
-  const duration = 450; // ms
+  const duration = 440; // ms
 
   let dropped = false;
 
@@ -641,27 +653,27 @@ export function animateCardThrow(character, targetPos, onDrop, onComplete) {
     const now = performance.now();
     const progress = Math.min(1, (now - startTime) / duration);
 
-    if (progress < 0.45) {
-      // 1. Reach down toward deck & lift
-      const p = progress / 0.45;
-      arm.rotation.x = origRot.x - p * 0.6;
-      arm.rotation.z = origRot.z + p * 0.3;
-    } else if (progress < 0.75) {
+    if (progress < 0.38) {
+      // 1. Lift arm up from table
+      const p = progress / 0.38;
+      arm.rotation.x = -p * 0.45;
+      arm.rotation.z = p * 0.15;
+    } else if (progress < 0.72) {
       // 2. Thrust forward into the center pot!
-      const p = (progress - 0.45) / 0.3;
-      arm.rotation.x = origRot.x - 0.6 + p * 0.9;
-      arm.rotation.y = origRot.y + (character.position.x < 0 ? -0.4 : 0.4) * p;
+      const p = (progress - 0.38) / 0.34;
+      arm.rotation.x = -0.45 + p * 0.75;
+      arm.rotation.y = (character.position.x < 0 ? -0.35 : 0.35) * p;
 
-      if (!dropped && progress > 0.6) {
+      if (!dropped && progress > 0.55) {
         dropped = true;
         if (onDrop) onDrop();
       }
     } else {
-      // 3. Return to rest
-      const p = (progress - 0.75) / 0.25;
-      arm.rotation.x = origRot.x + 0.3 * (1 - p);
-      arm.rotation.y = origRot.y * (1 - p);
-      arm.rotation.z = origRot.z * (1 - p);
+      // 3. Return smoothly to resting pose on table
+      const p = (progress - 0.72) / 0.28;
+      arm.rotation.x = 0.30 * (1 - p);
+      arm.rotation.y = (character.position.x < 0 ? -0.35 : 0.35) * (1 - p);
+      arm.rotation.z = 0.15 * (1 - p);
     }
 
     if (progress < 1) {
