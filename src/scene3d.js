@@ -15,7 +15,12 @@ import {
   getCardBackTexture,
   getDeckRimTexture,
   getDeckRimBumpMap,
-  getFeltTexture
+  getFeltTexture,
+  getConcreteWallTexture,
+  getConcreteWallBumpMap,
+  getConcreteFloorTexture,
+  getConcreteTileTexture,
+  getConcreteTileBumpMap
 } from './textures.js';
 import {
   createSamosaPlatter,
@@ -29,10 +34,10 @@ export class TableScene3D {
     this.width = container.clientWidth || window.innerWidth;
     this.height = container.clientHeight || window.innerHeight;
 
-    // Three.js Core
+    // Three.js Core - Architectural Brutalist Cemented Room Environment
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x0A0D12);
-    this.scene.fog = new THREE.FogExp2(0x0A0D12, 0.20);
+    this.scene.background = new THREE.Color(0x949AA2);
+    this.scene.fog = new THREE.Fog(0x949AA2, 9.0, 32.0);
 
     this.camera = new THREE.PerspectiveCamera(60, this.width / this.height, 0.1, 50);
     // Eye level sitting comfortably at table with slightly wider view for full character framing
@@ -250,21 +255,29 @@ export class TableScene3D {
   }
 
   setupLighting() {
-    // 1. Ambient Light (Balanced neutral room fill so character bodies aren't black)
-    const ambientLight = new THREE.AmbientLight(0x323B4A, 1.45);
+    // 1. Architectural Room Ambient Fill (Keeps concrete walls and room architecture clearly visible)
+    const ambientLight = new THREE.AmbientLight(0x88909A, 1.65);
     this.scene.add(ambientLight);
 
-    // 2. Front Fill Light
-    const frontFill = new THREE.DirectionalLight(0xFFE8C7, 1.15);
-    frontFill.position.set(0, 3.0, 2.0);
+    // 2. Architectural Skylight Wash Light (Top-down daylight pouring down the central concrete wall)
+    const skylightWash = new THREE.DirectionalLight(0xF4F8FD, 2.8);
+    skylightWash.position.set(0, 6.2, -1.8);
+    const skylightTarget = new THREE.Object3D();
+    skylightTarget.position.set(0, 1.8, -3.4);
+    this.scene.add(skylightTarget);
+    skylightWash.target = skylightTarget;
+    skylightWash.castShadow = true;
+    skylightWash.shadow.mapSize.width = 2048;
+    skylightWash.shadow.mapSize.height = 2048;
+    skylightWash.shadow.bias = -0.0001;
+    this.scene.add(skylightWash);
+
+    // 3. Front Architectural Fill Light
+    const frontFill = new THREE.DirectionalLight(0xE5ECF4, 1.1);
+    frontFill.position.set(0, 3.4, 2.8);
     this.scene.add(frontFill);
 
-    // 3. Back Rim Light (Silhouettes character shoulders and hair cleanly)
-    const backRim = new THREE.DirectionalLight(0x6D8BA6, 0.95);
-    backRim.position.set(0, 2.5, -2.5);
-    this.scene.add(backRim);
-
-    // 4. Overhead Suspended Industrial Lamp
+    // 4. Overhead Suspended Industrial Lamp (Bright on cards!)
     this.lampRig = new THREE.Group();
     this.lampRig.position.set(0, 2.15, -0.15);
 
@@ -287,20 +300,20 @@ export class TableScene3D {
     brass.position.y = 0.16;
     this.lampRig.add(brass);
 
-    // Hanging Wire reaching ceiling mount flange at y = 3.55
-    const wireLength = 1.40;
+    // Hanging Wire reaching ceiling mount flange at y = 5.55
+    const wireLength = 3.35;
     const wireGeo = new THREE.CylinderGeometry(0.005, 0.005, wireLength, 8);
     const wire = new THREE.Mesh(wireGeo, new THREE.MeshBasicMaterial({ color: 0x111111 }));
     wire.position.y = 0.20 + wireLength / 2;
     this.lampRig.add(wire);
 
-    // Warm Incandescent Spotlight on Table Pot
-    this.spotLight = new THREE.SpotLight(0xFDF1C9, 2.4);
+    // Warm High-Intensity Spotlight on Table Cards & Pot (Bright on cards!)
+    this.spotLight = new THREE.SpotLight(0xFFF3D6, 3.2);
     this.spotLight.position.set(0, 0, 0);
-    this.spotLight.angle = 0.72;
-    this.spotLight.penumbra = 0.65;
-    this.spotLight.decay = 1.2;
-    this.spotLight.distance = 5;
+    this.spotLight.angle = 0.75;
+    this.spotLight.penumbra = 0.55;
+    this.spotLight.decay = 1.0;
+    this.spotLight.distance = 5.2;
     this.spotLight.castShadow = true;
     this.spotLight.shadow.mapSize.width = 1024;
     this.spotLight.shadow.mapSize.height = 1024;
@@ -318,20 +331,20 @@ export class TableScene3D {
     this.scene.add(this.lampRig);
 
     // Soft warm point glow inside shade
-    const bulbGlow = new THREE.PointLight(0xF8D77B, 1.2, 1.8);
+    const bulbGlow = new THREE.PointLight(0xF8D272, 1.6, 2.4);
     bulbGlow.position.set(0, -0.05, 0);
     this.lampRig.add(bulbGlow);
 
     // ========================================================
     // 5. THREE DEDICATED WARM KEY LIGHTS FOR CHARACTERS
     // ========================================================
-    // Babanrao Key Light (Directly illuminates face, mustache, glasses, and kurta across table)
+    // Babanrao Key Light (Directly illuminates face, mustache, linen shirt, and bag across table)
     const babanraoTarget = new THREE.Object3D();
     babanraoTarget.position.set(0, 1.25, -1.54);
     this.scene.add(babanraoTarget);
 
-    const babanraoLight = new THREE.SpotLight(0xFFE5C4, 3.4);
-    babanraoLight.position.set(0, 2.1, -0.95);
+    const babanraoLight = new THREE.SpotLight(0xFFE8D2, 3.4);
+    babanraoLight.position.set(0, 2.2, -0.95);
     babanraoLight.target = babanraoTarget;
     babanraoLight.angle = 0.65;
     babanraoLight.penumbra = 0.55;
@@ -339,13 +352,13 @@ export class TableScene3D {
     babanraoLight.decay = 1.1;
     this.scene.add(babanraoLight);
 
-    // Dinkar Key Light (Directly illuminates face, sunglasses, varsity jacket, and arms on left)
+    // Dinkar Key Light (Directly illuminates face, anime hair, and hoodie on left)
     const dinkarTarget = new THREE.Object3D();
     dinkarTarget.position.set(-1.32, 1.22, -0.42);
     this.scene.add(dinkarTarget);
 
-    const dinkarLight = new THREE.SpotLight(0xFFDEB0, 3.4);
-    dinkarLight.position.set(-0.65, 2.1, 0.0);
+    const dinkarLight = new THREE.SpotLight(0xFFE2C0, 3.4);
+    dinkarLight.position.set(-0.65, 2.2, 0.0);
     dinkarLight.target = dinkarTarget;
     dinkarLight.angle = 0.68;
     dinkarLight.penumbra = 0.55;
@@ -353,13 +366,13 @@ export class TableScene3D {
     dinkarLight.decay = 1.1;
     this.scene.add(dinkarLight);
 
-    // Anandi Key Light (Directly illuminates face, bindi, earrings, and emerald silk on right)
+    // Anandi Key Light (Directly illuminates face, bindi, anime hair, and hoodie on right)
     const anandiTarget = new THREE.Object3D();
     anandiTarget.position.set(1.32, 1.22, -0.42);
     this.scene.add(anandiTarget);
 
-    const anandiLight = new THREE.SpotLight(0xFFE8D6, 3.4);
-    anandiLight.position.set(0.65, 2.1, 0.0);
+    const anandiLight = new THREE.SpotLight(0xFFE8DA, 3.4);
+    anandiLight.position.set(0.65, 2.2, 0.0);
     anandiLight.target = anandiTarget;
     anandiLight.angle = 0.68;
     anandiLight.penumbra = 0.55;
@@ -367,89 +380,122 @@ export class TableScene3D {
     anandiLight.decay = 1.1;
     this.scene.add(anandiLight);
 
-    // 6. Warm Amber Wall Sconces (Background depth and rim illumination)
-    const sconceMat = new THREE.MeshStandardMaterial({ color: 0xC9A24B, metalness: 0.9, roughness: 0.2 });
-    const lampBulbMat = new THREE.MeshBasicMaterial({ color: 0xFFB347 });
-
+    // 6. Architectural Concrete Wall Grazing Lights (Subtle linear wash along the concrete wall)
     [
-      { x: -2.8, y: 2.1, z: -2.2 },
-      { x: 2.8, y: 2.1, z: -2.2 }
+      { x: -3.2, y: 3.4, z: -3.25 },
+      { x: 3.2, y: 3.4, z: -3.25 }
     ].forEach((pos) => {
-      const sconceGeo = new THREE.BoxGeometry(0.08, 0.22, 0.12);
-      const sconce = new THREE.Mesh(sconceGeo, sconceMat);
-      sconce.position.set(pos.x, pos.y, pos.z);
-      this.scene.add(sconce);
+      const fixtureGeo = new THREE.BoxGeometry(0.12, 0.28, 0.08);
+      const fixtureMat = new THREE.MeshStandardMaterial({ color: 0x3A3F45, roughness: 0.5, metalness: 0.6 });
+      const fixture = new THREE.Mesh(fixtureGeo, fixtureMat);
+      fixture.position.set(pos.x, pos.y, pos.z);
+      this.scene.add(fixture);
 
-      const bulbMesh = new THREE.Mesh(new THREE.SphereGeometry(0.04, 10, 10), lampBulbMat);
-      bulbMesh.position.set(pos.x, pos.y - 0.06, pos.z + 0.08);
-      this.scene.add(bulbMesh);
-
-      const sconceLight = new THREE.PointLight(0xFFA038, 2.2, 6.0, 1.3);
-      sconceLight.position.set(pos.x, pos.y - 0.06, pos.z + 0.12);
-      this.scene.add(sconceLight);
+      const wallWashLight = new THREE.PointLight(0xD8E2EC, 1.8, 5.0, 1.2);
+      wallWashLight.position.set(pos.x, pos.y, pos.z + 0.10);
+      this.scene.add(wallWashLight);
     });
   }
 
   setupRoomAndTable() {
-    // Floor
-    const floorGeo = new THREE.PlaneGeometry(14, 14);
-    const floorMat = new THREE.MeshStandardMaterial({ color: 0x090C10, roughness: 0.9 });
+    // 1. Polished Architectural Concrete Floor
+    const floorGeo = new THREE.PlaneGeometry(16, 16);
+    const floorMat = new THREE.MeshStandardMaterial({
+      map: getConcreteFloorTexture(),
+      roughness: 0.58,
+      metalness: 0.08
+    });
     const floor = new THREE.Mesh(floorGeo, floorMat);
+    floor.position.set(0, 0, -0.5);
     floor.rotation.x = -Math.PI / 2;
     floor.receiveShadow = true;
     this.scene.add(floor);
 
-    // Back Basement Brick/Wood Wall
-    const wallGeo = new THREE.PlaneGeometry(14, 6);
-    const wallMat = new THREE.MeshStandardMaterial({ color: 0x131822, roughness: 0.85 });
+    // 2. Monolithic Cemented Back Wall (Directly visible in POV behind Babanrao and table)
+    const wallGeo = new THREE.PlaneGeometry(14, 7.0);
+    const wallMat = new THREE.MeshStandardMaterial({
+      map: getConcreteWallTexture(),
+      bumpMap: getConcreteWallBumpMap(),
+      bumpScale: 0.035,
+      roughness: 0.80,
+      metalness: 0.04
+    });
     const wall = new THREE.Mesh(wallGeo, wallMat);
-    wall.position.set(0, 2.5, -3.2);
+    wall.position.set(0, 3.5, -3.4);
+    wall.receiveShadow = true;
     this.scene.add(wall);
 
-    // Left and Right Side Walls for complete room enclosure
-    const sideWallGeo = new THREE.PlaneGeometry(12, 6);
-    const leftWall = new THREE.Mesh(sideWallGeo, wallMat);
-    leftWall.position.set(-4.5, 2.5, 0);
+    // 3. Side & Front Concrete Walls (Full architectural enclosure)
+    const sideMat = new THREE.MeshStandardMaterial({
+      map: getConcreteTileTexture(),
+      bumpMap: getConcreteTileBumpMap(),
+      bumpScale: 0.03,
+      roughness: 0.82,
+      metalness: 0.04
+    });
+    const sideGeo = new THREE.PlaneGeometry(14, 7.0);
+
+    const leftWall = new THREE.Mesh(sideGeo, sideMat);
+    leftWall.position.set(-5.0, 3.5, -0.5);
     leftWall.rotation.y = Math.PI / 2;
+    leftWall.receiveShadow = true;
     this.scene.add(leftWall);
 
-    const rightWall = new THREE.Mesh(sideWallGeo, wallMat);
-    rightWall.position.set(4.5, 2.5, 0);
+    const rightWall = new THREE.Mesh(sideGeo, sideMat);
+    rightWall.position.set(5.0, 3.5, -0.5);
     rightWall.rotation.y = -Math.PI / 2;
+    rightWall.receiveShadow = true;
     this.scene.add(rightWall);
 
-    // Realistic Cellar Wooden Ceiling
+    const frontWall = new THREE.Mesh(sideGeo, sideMat);
+    frontWall.position.set(0, 3.5, 4.5);
+    frontWall.rotation.y = Math.PI;
+    frontWall.receiveShadow = true;
+    this.scene.add(frontWall);
+
+    // 4. Brutalist Cantilevered Concrete Ceiling Beams (Matching Reference Image)
+    const beamMat = new THREE.MeshStandardMaterial({
+      map: getConcreteTileTexture(),
+      bumpMap: getConcreteTileBumpMap(),
+      bumpScale: 0.035,
+      roughness: 0.82,
+      metalness: 0.04
+    });
+
+    // Left Cantilever Overhang (Matching Reference Image - frames upper-left in POV)
+    const leftBeamGeo = new THREE.BoxGeometry(3.3, 1.7, 8.0);
+    const leftBeam = new THREE.Mesh(leftBeamGeo, beamMat);
+    leftBeam.position.set(-3.35, 3.25, -0.5);
+    leftBeam.castShadow = true;
+    leftBeam.receiveShadow = true;
+    this.scene.add(leftBeam);
+
+    // Right Cantilever Overhang (Matching Reference Image - frames upper-right in POV)
+    const rightBeamGeo = new THREE.BoxGeometry(3.3, 1.7, 8.0);
+    const rightBeam = new THREE.Mesh(rightBeamGeo, beamMat);
+    rightBeam.position.set(3.35, 3.25, -0.5);
+    rightBeam.castShadow = true;
+    rightBeam.receiveShadow = true;
+    this.scene.add(rightBeam);
+
+    // High Concrete Ceiling capping the light well at y = 5.6
     const ceilingGeo = new THREE.PlaneGeometry(14, 14);
     const ceilingMat = new THREE.MeshStandardMaterial({
-      color: 0x121722, // Dark cellar wood/plaster
+      map: getConcreteTileTexture(),
       roughness: 0.88,
-      metalness: 0.05
+      metalness: 0.04
     });
     const ceiling = new THREE.Mesh(ceilingGeo, ceilingMat);
-    ceiling.position.set(0, 3.65, 0);
+    ceiling.position.set(0, 5.6, -0.5);
     ceiling.rotation.x = Math.PI / 2; // Facing down
     ceiling.receiveShadow = true;
     this.scene.add(ceiling);
-
-    // Heavy Timber Cross Beams / Rafters across Ceiling
-    const beamMat = new THREE.MeshStandardMaterial({
-      color: 0x24160E, // Dark aged walnut timber
-      roughness: 0.72,
-      metalness: 0.08
-    });
-    [-3.0, -1.5, 0, 1.5, 3.0].forEach((x) => {
-      const beamGeo = new THREE.BoxGeometry(0.20, 0.22, 14);
-      const beam = new THREE.Mesh(beamGeo, beamMat);
-      beam.position.set(x, 3.55, 0);
-      beam.receiveShadow = true;
-      this.scene.add(beam);
-    });
 
     // Hanging Lamp Ceiling Mount Flange
     const flangeGeo = new THREE.CylinderGeometry(0.14, 0.16, 0.05, 16);
     const flangeMat = new THREE.MeshStandardMaterial({ color: 0xC9A24B, metalness: 0.88, roughness: 0.22 });
     const flange = new THREE.Mesh(flangeGeo, flangeMat);
-    flange.position.set(0, 3.50, -0.15);
+    flange.position.set(0, 5.55, -0.15);
     this.scene.add(flange);
 
     // ========================================================

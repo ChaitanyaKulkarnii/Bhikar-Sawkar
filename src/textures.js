@@ -429,3 +429,64 @@ export function getFeltTexture() {
   texture.magFilter = THREE.LinearFilter;
   return texture;
 }
+
+// ============================================================================
+// Architectural Brutalist Concrete Room Textures
+// ============================================================================
+let cachedConcreteWall = null;
+export function getConcreteWallTexture() {
+  if (cachedConcreteWall) return cachedConcreteWall;
+  cachedConcreteWall = textureLoader.load('/concrete_back_wall.png');
+  cachedConcreteWall.colorSpace = THREE.SRGBColorSpace;
+  cachedConcreteWall.anisotropy = 16;
+  cachedConcreteWall.generateMipmaps = true;
+  return cachedConcreteWall;
+}
+
+let cachedConcreteWallBump = null;
+export function getConcreteWallBumpMap() {
+  if (cachedConcreteWallBump) return cachedConcreteWallBump;
+  cachedConcreteWallBump = textureLoader.load('/concrete_back_wall_bump.png');
+  cachedConcreteWallBump.anisotropy = 8;
+  cachedConcreteWallBump.generateMipmaps = true;
+  return cachedConcreteWallBump;
+}
+
+let cachedConcreteFloor = null;
+export function getConcreteFloorTexture() {
+  if (cachedConcreteFloor) return cachedConcreteFloor;
+  cachedConcreteFloor = textureLoader.load('/concrete_floor_arch.png');
+  cachedConcreteFloor.colorSpace = THREE.SRGBColorSpace;
+  cachedConcreteFloor.wrapS = THREE.RepeatWrapping;
+  cachedConcreteFloor.wrapT = THREE.RepeatWrapping;
+  cachedConcreteFloor.repeat.set(3, 3);
+  cachedConcreteFloor.anisotropy = 16;
+  cachedConcreteFloor.generateMipmaps = true;
+  return cachedConcreteFloor;
+}
+
+let cachedConcreteTile = null;
+export function getConcreteTileTexture() {
+  if (cachedConcreteTile) return cachedConcreteTile;
+  cachedConcreteTile = textureLoader.load('/concrete_tile.png');
+  cachedConcreteTile.colorSpace = THREE.SRGBColorSpace;
+  cachedConcreteTile.wrapS = THREE.RepeatWrapping;
+  cachedConcreteTile.wrapT = THREE.RepeatWrapping;
+  cachedConcreteTile.repeat.set(3, 2);
+  cachedConcreteTile.anisotropy = 16;
+  cachedConcreteTile.generateMipmaps = true;
+  return cachedConcreteTile;
+}
+
+let cachedConcreteTileBump = null;
+export function getConcreteTileBumpMap() {
+  if (cachedConcreteTileBump) return cachedConcreteTileBump;
+  cachedConcreteTileBump = textureLoader.load('/concrete_tile_bump.png');
+  cachedConcreteTileBump.wrapS = THREE.RepeatWrapping;
+  cachedConcreteTileBump.wrapT = THREE.RepeatWrapping;
+  cachedConcreteTileBump.repeat.set(3, 2);
+  cachedConcreteTileBump.anisotropy = 8;
+  cachedConcreteTileBump.generateMipmaps = true;
+  return cachedConcreteTileBump;
+}
+

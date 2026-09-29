@@ -147,116 +147,393 @@ export function createChair() {
   return chair;
 }
 
-// 1. Build Opponent 1: Babanrao (The Veteran Uncle across the table)
+// ============================================================================
+// Helper: 3D Neat Parted Anime Hair for Roblox Babanrao Avatar (Matching Ref)
+// ============================================================================
+function createBabanraoHair(hairMat) {
+  const hairGroup = new THREE.Group();
+
+  // 1. Crown cap sitting cleanly on top of skull (top of head is at y = 0.11)
+  // Front face ends at z = +0.070, staying 40mm BEHIND forehead plane (z = 0.110) to eliminate any z-fighting
+  const capGeo = new THREE.BoxGeometry(0.256, 0.065, 0.18);
+  const cap = new THREE.Mesh(capGeo, hairMat);
+  cap.position.set(0, 0.128, -0.02);
+  cap.castShadow = true;
+  hairGroup.add(cap);
+
+  // 2. Back hair covering the back of head and nape (z from -0.075 to -0.135)
+  const backCap = new THREE.Mesh(new THREE.BoxGeometry(0.256, 0.14, 0.06), hairMat);
+  backCap.position.set(0, 0.05, -0.105);
+  backCap.castShadow = true;
+  hairGroup.add(backCap);
+
+  // 3. Side hair framing ears/temples (ends at z = +0.050, well behind forehead)
+  const leftSideHair = new THREE.Mesh(new THREE.BoxGeometry(0.028, 0.13, 0.15), hairMat);
+  leftSideHair.position.set(-0.128, 0.05, -0.025);
+  leftSideHair.castShadow = true;
+  const rightSideHair = new THREE.Mesh(new THREE.BoxGeometry(0.028, 0.13, 0.15), hairMat);
+  rightSideHair.position.set(0.128, 0.05, -0.025);
+  rightSideHair.castShadow = true;
+  hairGroup.add(leftSideHair, rightSideHair);
+
+  // 4. Side-parted neat swept bangs (sweeping across forehead, tilted forward at z >= 0.122)
+  const bangsDef = [
+    { pos: [-0.075, 0.092, 0.122], rot: [0.22, 0.2, -0.15], scale: [0.022, 0.044, 0.016] },
+    { pos: [-0.035, 0.094, 0.124], rot: [0.24, 0.1, -0.05], scale: [0.024, 0.046, 0.018] },
+    { pos: [0.010, 0.095, 0.125], rot: [0.22, -0.05, 0.1], scale: [0.023, 0.045, 0.018] },
+    { pos: [0.050, 0.092, 0.123], rot: [0.20, -0.15, 0.2], scale: [0.023, 0.042, 0.016] },
+    { pos: [0.082, 0.088, 0.120], rot: [0.18, -0.2, 0.3], scale: [0.020, 0.036, 0.014] }
+  ];
+  bangsDef.forEach(b => {
+    const spikeGeo = new THREE.ConeGeometry(b.scale[0], b.scale[1], 4);
+    const spike = new THREE.Mesh(spikeGeo, hairMat);
+    spike.position.set(b.pos[0], b.pos[1], b.pos[2]);
+    spike.rotation.set(b.rot[0] + Math.PI, b.rot[1], b.rot[2]);
+    spike.castShadow = true;
+    hairGroup.add(spike);
+  });
+
+  // 5. Sideburns framing ears
+  [-0.125, 0.125].forEach((x, idx) => {
+    const spikeGeo = new THREE.ConeGeometry(0.026, 0.07, 4);
+    const spike = new THREE.Mesh(spikeGeo, hairMat);
+    spike.position.set(x, 0.03, 0.02);
+    spike.rotation.set(Math.PI, 0, (idx === 0 ? -0.2 : 0.2));
+    spike.castShadow = true;
+    hairGroup.add(spike);
+  });
+
+  // 6. Crown subtle layered volume
+  const crownTufts = [
+    { pos: [-0.04, 0.155, 0.01], rot: [0.1, 0.2, -0.2], scale: [0.032, 0.075, 0.03] },
+    { pos: [0.04, 0.155, 0.00], rot: [0.1, -0.2, 0.2], scale: [0.032, 0.075, 0.03] },
+    { pos: [0.0, 0.158, -0.04], rot: [-0.2, 0.0, 0.0], scale: [0.034, 0.08, 0.03] }
+  ];
+  crownTufts.forEach(c => {
+    const spikeGeo = new THREE.ConeGeometry(c.scale[0], c.scale[1], 4);
+    const spike = new THREE.Mesh(spikeGeo, hairMat);
+    spike.position.set(c.pos[0], c.pos[1], c.pos[2]);
+    spike.rotation.set(c.rot[0], c.rot[1], c.rot[2]);
+    spike.castShadow = true;
+    hairGroup.add(spike);
+  });
+
+  // 7. Back hair covering nape
+  [-0.06, 0.0, 0.06].forEach(x => {
+    const spikeGeo = new THREE.ConeGeometry(0.03, 0.07, 4);
+    const spike = new THREE.Mesh(spikeGeo, hairMat);
+    spike.position.set(x, 0.03, -0.118);
+    spike.rotation.set(-0.2 + Math.PI, 0, 0);
+    spike.castShadow = true;
+    hairGroup.add(spike);
+  });
+
+  return hairGroup;
+}
+
+// 1. Build Opponent 1: Babanrao (Roblox Veteran Uncle with Mustache & Linen Shirt from Image 2)
+let cachedBabanraoFace = null;
+let cachedBabanraoShirtFront = null;
+let cachedBabanraoShirtBack = null;
+
+function getBabanraoFaceTexture() {
+  if (!cachedBabanraoFace) {
+    cachedBabanraoFace = characterTextureLoader.load('/babanrao_face_clean.png');
+    cachedBabanraoFace.colorSpace = THREE.SRGBColorSpace;
+    cachedBabanraoFace.anisotropy = 8;
+  }
+  return cachedBabanraoFace;
+}
+
+function getBabanraoShirtFrontTexture() {
+  if (!cachedBabanraoShirtFront) {
+    cachedBabanraoShirtFront = characterTextureLoader.load('/babanrao_shirt_front.png');
+    cachedBabanraoShirtFront.colorSpace = THREE.SRGBColorSpace;
+    cachedBabanraoShirtFront.anisotropy = 8;
+  }
+  return cachedBabanraoShirtFront;
+}
+
+function getBabanraoShirtBackTexture() {
+  if (!cachedBabanraoShirtBack) {
+    cachedBabanraoShirtBack = characterTextureLoader.load('/babanrao_shirt_back.png');
+    cachedBabanraoShirtBack.colorSpace = THREE.SRGBColorSpace;
+    cachedBabanraoShirtBack.anisotropy = 8;
+  }
+  return cachedBabanraoShirtBack;
+}
+
 export function createBabanrao() {
   const group = new THREE.Group();
   group.name = 'Babanrao';
 
-  // Torso / Kurta & Jacket
-  const torsoGeo = new THREE.CylinderGeometry(0.25, 0.22, 0.65, 16);
-  const torso = new THREE.Mesh(torsoGeo, babanraoJacketMaterial);
-  torso.position.y = 0.82;
+  // Materials sampled from user's Image 2 reference
+  const babanraoSkinMat = new THREE.MeshStandardMaterial({
+    color: 0xE9D6BF, // Warm Indian olive/tan skin
+    roughness: 0.55,
+    metalness: 0.04
+  });
+
+  const babanraoHairMat = new THREE.MeshStandardMaterial({
+    color: 0x27201C, // Dark espresso / charcoal hair
+    roughness: 0.85,
+    metalness: 0.02
+  });
+
+  const babanraoShirtMat = new THREE.MeshStandardMaterial({
+    color: 0xDDD6CA, // Warm cream linen shirt
+    roughness: 0.82,
+    metalness: 0.02
+  });
+
+  const babanraoPantsMat = new THREE.MeshStandardMaterial({
+    color: 0x2A2827, // Dark charcoal trousers
+    roughness: 0.85,
+    metalness: 0.02
+  });
+
+  const babanraoLeatherMat = new THREE.MeshStandardMaterial({
+    color: 0x362B24, // Dark brown leather for bag & strap
+    roughness: 0.65,
+    metalness: 0.12
+  });
+
+  const babanraoSoleMat = new THREE.MeshStandardMaterial({
+    color: 0x3E2718, // Traditional sandal leather sole
+    roughness: 0.70,
+    metalness: 0.08
+  });
+
+  const babanraoFaceMat = new THREE.MeshStandardMaterial({
+    map: getBabanraoFaceTexture(),
+    transparent: true,
+    alphaTest: 0.02,
+    depthWrite: false,
+    polygonOffset: true,
+    polygonOffsetFactor: -1.0,
+    polygonOffsetUnits: -4.0,
+    roughness: 0.55,
+    metalness: 0.04
+  });
+
+  const babanraoShirtFrontMat = new THREE.MeshStandardMaterial({
+    map: getBabanraoShirtFrontTexture(),
+    roughness: 0.82,
+    metalness: 0.02
+  });
+
+  const babanraoShirtBackMat = new THREE.MeshStandardMaterial({
+    map: getBabanraoShirtBackTexture(),
+    roughness: 0.82,
+    metalness: 0.02
+  });
+
+  // 1. Lower Body / Trousers & Leather Sandals (Sitting on chairTop at y = 0.45)
+  const lowerBodyGroup = new THREE.Group();
+
+  // Pelvis / Hips resting on chair seat
+  const hipsGeo = new THREE.BoxGeometry(0.36, 0.10, 0.22);
+  const hips = new THREE.Mesh(hipsGeo, babanraoPantsMat);
+  hips.position.set(0, 0.52, -0.02);
+  hips.castShadow = true;
+  hips.receiveShadow = true;
+  lowerBodyGroup.add(hips);
+
+  // Thighs extending horizontally forward toward table edge
+  const thighGeo = new THREE.BoxGeometry(0.15, 0.15, 0.28);
+  const leftThigh = new THREE.Mesh(thighGeo, babanraoPantsMat);
+  leftThigh.position.set(-0.10, 0.52, 0.12);
+  leftThigh.castShadow = true;
+  leftThigh.receiveShadow = true;
+
+  const rightThigh = new THREE.Mesh(thighGeo, babanraoPantsMat);
+  rightThigh.position.set(0.10, 0.52, 0.12);
+  rightThigh.castShadow = true;
+  rightThigh.receiveShadow = true;
+  lowerBodyGroup.add(leftThigh, rightThigh);
+
+  // Shins / Lower legs extending downward from knees toward floor
+  const shinGeo = new THREE.BoxGeometry(0.14, 0.36, 0.14);
+  const leftShin = new THREE.Mesh(shinGeo, babanraoPantsMat);
+  leftShin.position.set(-0.10, 0.24, 0.23);
+  leftShin.castShadow = true;
+
+  const rightShin = new THREE.Mesh(shinGeo, babanraoPantsMat);
+  rightShin.position.set(0.10, 0.24, 0.23);
+  rightShin.castShadow = true;
+  lowerBodyGroup.add(leftShin, rightShin);
+
+  // Traditional Indian Leather Strap Sandals / Chappals (Matching Image 2)
+  [-0.10, 0.10].forEach(xPos => {
+    const sandalGroup = new THREE.Group();
+    sandalGroup.position.set(xPos, 0, 0.24);
+
+    // Leather Sole
+    const soleGeo = new THREE.BoxGeometry(0.15, 0.025, 0.22);
+    const sole = new THREE.Mesh(soleGeo, babanraoSoleMat);
+    sole.position.y = 0.012;
+    sole.castShadow = true;
+    sandalGroup.add(sole);
+
+    // Bare Foot Block with Toes
+    const footGeo = new THREE.BoxGeometry(0.13, 0.045, 0.19);
+    const foot = new THREE.Mesh(footGeo, babanraoSkinMat);
+    foot.position.y = 0.045;
+    foot.castShadow = true;
+    sandalGroup.add(foot);
+
+    // Leather Cross-straps
+    const toeStrap = new THREE.Mesh(new THREE.BoxGeometry(0.135, 0.014, 0.035), babanraoLeatherMat);
+    toeStrap.position.set(0, 0.07, 0.05);
+    const bridgeStrap = new THREE.Mesh(new THREE.BoxGeometry(0.135, 0.014, 0.03), babanraoLeatherMat);
+    bridgeStrap.position.set(0, 0.07, -0.01);
+    sandalGroup.add(toeStrap, bridgeStrap);
+
+    lowerBodyGroup.add(sandalGroup);
+  });
+
+  group.add(lowerBodyGroup);
+
+  // 2. Torso / Cream Linen Short-Sleeve Button-Down Shirt
+  const torsoMaterials = [
+    babanraoShirtMat,      // +X
+    babanraoShirtMat,      // -X
+    babanraoShirtMat,      // +Y
+    babanraoPantsMat,      // -Y
+    babanraoShirtFrontMat, // +Z (Front with buttons, pocket, and strap artwork)
+    babanraoShirtBackMat   // -Z (Back with diagonal strap artwork)
+  ];
+  const torsoGeo = new THREE.BoxGeometry(0.38, 0.44, 0.22);
+  const torso = new THREE.Mesh(torsoGeo, torsoMaterials);
+  torso.position.y = 0.88;
   torso.castShadow = true;
   torso.receiveShadow = true;
   group.add(torso);
 
-  // Kurta chest placket visible between open Nehru jacket
-  const placketGeo = new THREE.PlaneGeometry(0.09, 0.52);
-  const placket = new THREE.Mesh(placketGeo, babanraoShirtMaterial);
-  placket.position.set(0, 0.85, 0.238);
-  group.add(placket);
-
-  // Brass buttons down jacket
-  for (let b = 0; b < 4; b++) {
-    const btnGeo = new THREE.CylinderGeometry(0.012, 0.012, 0.008, 10);
-    const btn = new THREE.Mesh(btnGeo, goldTrimMaterial);
-    btn.position.set(0, 0.72 + b * 0.09, 0.245);
-    btn.rotation.x = Math.PI / 2;
-    group.add(btn);
-  }
-
-  // Shoulders (Smooth anatomical blend)
-  const shoulderGeo = new THREE.SphereGeometry(0.085, 12, 12);
-  const leftShoulder = new THREE.Mesh(shoulderGeo, babanraoJacketMaterial);
-  leftShoulder.position.set(-0.26, 1.08, 0);
-  const rightShoulder = new THREE.Mesh(shoulderGeo, babanraoJacketMaterial);
-  rightShoulder.position.set(0.26, 1.08, 0);
-  group.add(leftShoulder, rightShoulder);
-
-  // Neck & Kurta collar
-  const neckGeo = new THREE.CylinderGeometry(0.08, 0.09, 0.12, 12);
-  const neck = new THREE.Mesh(neckGeo, babanraoSkinMaterial);
-  neck.position.y = 1.18;
-  group.add(neck);
-
-  const collarGeo = new THREE.CylinderGeometry(0.11, 0.12, 0.06, 12);
-  const collar = new THREE.Mesh(collarGeo, babanraoShirtMaterial);
-  collar.position.y = 1.14;
+  // 3D Shirt Spread Collar around neck
+  const collarGeo = new THREE.TorusGeometry(0.115, 0.02, 8, 20, Math.PI * 1.5);
+  const collar = new THREE.Mesh(collarGeo, babanraoShirtMat);
+  collar.position.set(0, 1.10, 0.01);
+  collar.rotation.x = Math.PI / 2.2;
+  collar.rotation.z = Math.PI / 4;
   group.add(collar);
 
-  // Head
-  const headGeo = new THREE.SphereGeometry(0.155, 22, 22);
-  const head = new THREE.Mesh(headGeo, babanraoSkinMaterial);
-  head.position.y = 1.32;
+  // 3D Diagonal Cross-Body Leather Strap (Right Shoulder to Left Hip)
+  const strapGeo = new THREE.BoxGeometry(0.045, 0.50, 0.012);
+  const strap = new THREE.Mesh(strapGeo, babanraoLeatherMat);
+  strap.position.set(-0.02, 0.90, 0.116);
+  strap.rotation.z = -0.52; // diagonal across chest
+  strap.castShadow = true;
+  group.add(strap);
+
+  // 3D Leather Messenger Bag at Left Hip (Matching Image 2)
+  const bagGeo = new THREE.BoxGeometry(0.07, 0.16, 0.14);
+  const bag = new THREE.Mesh(bagGeo, babanraoLeatherMat);
+  bag.position.set(-0.21, 0.62, 0.03);
+  bag.castShadow = true;
+  group.add(bag);
+
+  const bagFlap = new THREE.Mesh(new THREE.BoxGeometry(0.075, 0.09, 0.145), babanraoLeatherMat);
+  bagFlap.position.set(-0.21, 0.67, 0.03);
+  group.add(bagFlap);
+
+  // 3. Neck
+  const neckGeo = new THREE.CylinderGeometry(0.065, 0.075, 0.08, 12);
+  const neck = new THREE.Mesh(neckGeo, babanraoSkinMat);
+  neck.position.y = 1.13;
+  group.add(neck);
+
+  // 4. Head (Solid Tan Skin Tone + Transparent Mustache Face Decal)
+  const headGeo = new THREE.BoxGeometry(0.24, 0.22, 0.22);
+  const head = new THREE.Mesh(headGeo, babanraoSkinMat);
+  head.position.y = 1.28;
   head.castShadow = true;
+  head.receiveShadow = true;
+
+  // Face Decal (Clean mature anime eyes, eyebrows, and classic mustache)
+  // Sized 0.18 x 0.13 centered at y = -0.015, leaving upper forehead (y = +0.05 to +0.11) 100% clean
+  const faceDecalGeo = new THREE.PlaneGeometry(0.18, 0.13);
+  const faceDecal = new THREE.Mesh(faceDecalGeo, babanraoFaceMat);
+  faceDecal.position.set(0, -0.015, 0.1108);
+  faceDecal.renderOrder = 1;
+  faceDecal.castShadow = false;
+  head.add(faceDecal);
+
+  // Add 3D Neatly Parted Hair
+  const hair = createBabanraoHair(babanraoHairMat);
+  head.add(hair);
+
   group.add(head);
 
-  // Eyes with life and focus
-  const leftEye = createEye(0.95);
-  leftEye.position.set(-0.048, 1.332, 0.138);
-  const rightEye = createEye(0.95);
-  rightEye.position.set(0.048, 1.332, 0.138);
-  group.add(leftEye, rightEye);
-
-  // Subtle graying eyebrows
-  const browMat = new THREE.MeshStandardMaterial({ color: 0x4A4D54, roughness: 0.9 });
-  const browGeo = new THREE.BoxGeometry(0.04, 0.009, 0.015);
-  const leftBrow = new THREE.Mesh(browGeo, browMat);
-  leftBrow.position.set(-0.048, 1.362, 0.145);
-  leftBrow.rotation.z = -0.1;
-  const rightBrow = new THREE.Mesh(browGeo, browMat);
-  rightBrow.position.set(0.048, 1.362, 0.145);
-  rightBrow.rotation.z = 0.1;
-  group.add(leftBrow, rightBrow);
-
-  // Fitted Graying Hair (Cleanly covers back and sides of skull)
-  const hairGeo = new THREE.SphereGeometry(0.158, 20, 20, 0, Math.PI * 2, 0, Math.PI * 0.62);
-  const hairMat = new THREE.MeshStandardMaterial({ color: 0x484B52, roughness: 0.85 });
-  const hair = new THREE.Mesh(hairGeo, hairMat);
-  hair.position.y = 1.325;
-  hair.rotation.x = -0.15;
-  group.add(hair);
-
-  // Signature Marathi Mustache with highlight
-  const stacheGeo = new THREE.BoxGeometry(0.13, 0.032, 0.045);
-  const stacheMat = new THREE.MeshStandardMaterial({ color: 0x2A2B2E, roughness: 0.85 });
-  const stache = new THREE.Mesh(stacheGeo, stacheMat);
-  stache.position.set(0, 1.265, 0.145);
-  group.add(stache);
-
-  // Spectacles with gleaming gold rims
-  const glassesGroup = new THREE.Group();
-  const rimGeo = new THREE.TorusGeometry(0.034, 0.0055, 8, 20);
-  const leftRim = new THREE.Mesh(rimGeo, goldTrimMaterial);
-  leftRim.position.set(-0.048, 1.332, 0.15);
-  const rightRim = new THREE.Mesh(rimGeo, goldTrimMaterial);
-  rightRim.position.set(0.048, 1.332, 0.15);
-  glassesGroup.add(leftRim, rightRim);
-
-  const bridgeGeo = new THREE.BoxGeometry(0.026, 0.005, 0.006);
-  const bridge = new THREE.Mesh(bridgeGeo, goldTrimMaterial);
-  bridge.position.set(0, 1.332, 0.152);
-  glassesGroup.add(bridge);
-  group.add(glassesGroup);
-
+  // 5. Short-Sleeve Linen Shirt Arms with Rolled Cuffs
   // Left Arm (Resting on table)
-  const leftArm = createArm(babanraoShirtMaterial, babanraoSkinMaterial, false, false, 'babanrao');
-  leftArm.position.set(-0.25, 1.06, 0);
+  const leftArm = new THREE.Group();
+  leftArm.position.set(-0.25, 1.02, 0);
+
+  // Upper sleeve in cream linen
+  const leftUpper = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.16, 0.14), babanraoShirtMat);
+  leftUpper.position.set(0, -0.06, 0.03);
+  leftUpper.rotation.x = 0.38;
+  leftUpper.rotation.z = -0.12;
+  leftUpper.castShadow = true;
+  leftArm.add(leftUpper);
+
+  // 3D Rolled Cuff Ring
+  const leftCuff = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.035, 0.15), babanraoShirtMat);
+  leftCuff.position.set(0, -0.14, 0.06);
+  leftCuff.rotation.x = 0.38;
+  leftCuff.rotation.z = -0.12;
+  leftArm.add(leftCuff);
+
+  // Bare forearm reaching onto table
+  const leftForearm = new THREE.Mesh(new THREE.BoxGeometry(0.125, 0.20, 0.125), babanraoSkinMat);
+  leftForearm.position.set(0.03, -0.22, 0.19);
+  leftForearm.rotation.x = 1.08;
+  leftForearm.rotation.y = 0.22;
+  leftForearm.castShadow = true;
+  leftArm.add(leftForearm);
+
+  // Hand resting on felt
+  const leftHand = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.04, 0.10), babanraoSkinMat);
+  leftHand.position.set(0.05, -0.28, 0.32);
+  leftHand.rotation.y = 0.15;
+  leftHand.castShadow = true;
+  leftHand.receiveShadow = true;
+  leftArm.add(leftHand);
+
   group.add(leftArm);
 
-  // Right Arm (Resting on table / animated for card play)
-  const rightArm = createArm(babanraoShirtMaterial, babanraoSkinMaterial, true, false, 'babanrao');
-  rightArm.position.set(0.25, 1.06, 0);
+  // Right Arm (Rigged for card throw animation)
+  const rightArm = new THREE.Group();
+  rightArm.position.set(0.25, 1.02, 0);
+
+  const rightUpper = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.16, 0.14), babanraoShirtMat);
+  rightUpper.position.set(0, -0.06, 0.03);
+  rightUpper.rotation.x = 0.38;
+  rightUpper.rotation.z = 0.12;
+  rightUpper.castShadow = true;
+  rightArm.add(rightUpper);
+
+  const rightCuff = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.035, 0.15), babanraoShirtMat);
+  rightCuff.position.set(0, -0.14, 0.06);
+  rightCuff.rotation.x = 0.38;
+  rightCuff.rotation.z = 0.12;
+  rightArm.add(rightCuff);
+
+  const rightForearm = new THREE.Mesh(new THREE.BoxGeometry(0.125, 0.20, 0.125), babanraoSkinMat);
+  rightForearm.position.set(-0.03, -0.22, 0.19);
+  rightForearm.rotation.x = 1.08;
+  rightForearm.rotation.y = -0.22;
+  rightForearm.castShadow = true;
+  rightArm.add(rightForearm);
+
+  const rightHand = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.04, 0.10), babanraoSkinMat);
+  rightHand.position.set(-0.05, -0.28, 0.32);
+  rightHand.rotation.y = -0.15;
+  rightHand.castShadow = true;
+  rightHand.receiveShadow = true;
+  rightArm.add(rightHand);
+
   group.add(rightArm);
 
   group.userData = {
@@ -264,7 +541,8 @@ export function createBabanrao() {
     torso,
     rightArm,
     leftArm,
-    baseY: 0,
+    headBaseY: 1.28,
+    torsoBaseY: 0.88,
     animTime: 0
   };
 
@@ -277,20 +555,36 @@ export function createBabanrao() {
 function createRobloxHair(hairMat) {
   const hairGroup = new THREE.Group();
 
-  // 1. Base hair crown/volume sitting cleanly on top of head box (top of head is at y = 0.11)
-  const capGeo = new THREE.BoxGeometry(0.255, 0.07, 0.24);
+  // 1. Crown cap sitting cleanly on top of skull (top of head is at y = 0.11)
+  // Front face ends at z = +0.070, staying 40mm BEHIND forehead plane (z = 0.110) to eliminate any z-fighting
+  const capGeo = new THREE.BoxGeometry(0.256, 0.065, 0.18);
   const cap = new THREE.Mesh(capGeo, hairMat);
-  cap.position.set(0, 0.10, -0.01);
+  cap.position.set(0, 0.128, -0.02);
   cap.castShadow = true;
   hairGroup.add(cap);
 
-  // 2. Front bangs (delicate stylish anime fringe resting HIGH on forehead, well above eyebrows)
+  // 2. Back hair covering the back of head and nape (z from -0.075 to -0.135)
+  const backCap = new THREE.Mesh(new THREE.BoxGeometry(0.256, 0.14, 0.06), hairMat);
+  backCap.position.set(0, 0.05, -0.105);
+  backCap.castShadow = true;
+  hairGroup.add(backCap);
+
+  // 3. Side hair framing ears/temples (ends at z = +0.050, well behind forehead)
+  const leftSideHair = new THREE.Mesh(new THREE.BoxGeometry(0.028, 0.13, 0.15), hairMat);
+  leftSideHair.position.set(-0.128, 0.05, -0.025);
+  leftSideHair.castShadow = true;
+  const rightSideHair = new THREE.Mesh(new THREE.BoxGeometry(0.028, 0.13, 0.15), hairMat);
+  rightSideHair.position.set(0.128, 0.05, -0.025);
+  rightSideHair.castShadow = true;
+  hairGroup.add(leftSideHair, rightSideHair);
+
+  // 4. Front bangs (messy layered anime fringe, tilted forward at z >= 0.122, completely clear of forehead)
   const bangsDef = [
-    { pos: [-0.075, 0.085, 0.114], rot: [0.15, 0.1, -0.2], scale: [0.022, 0.042, 0.018] },
-    { pos: [-0.038, 0.088, 0.116], rot: [0.18, -0.05, -0.06], scale: [0.024, 0.045, 0.020] },
-    { pos: [0.005, 0.090, 0.117], rot: [0.16, 0.06, 0.08], scale: [0.023, 0.044, 0.019] },
-    { pos: [0.045, 0.087, 0.115], rot: [0.14, 0.04, 0.18], scale: [0.024, 0.046, 0.020] },
-    { pos: [0.080, 0.084, 0.113], rot: [0.12, -0.08, 0.25], scale: [0.020, 0.038, 0.016] }
+    { pos: [-0.075, 0.092, 0.122], rot: [0.22, 0.1, -0.2], scale: [0.022, 0.042, 0.016] },
+    { pos: [-0.038, 0.095, 0.125], rot: [0.25, -0.05, -0.06], scale: [0.024, 0.045, 0.018] },
+    { pos: [0.005, 0.096, 0.126], rot: [0.24, 0.06, 0.08], scale: [0.023, 0.044, 0.018] },
+    { pos: [0.045, 0.093, 0.124], rot: [0.22, 0.04, 0.18], scale: [0.024, 0.046, 0.018] },
+    { pos: [0.080, 0.090, 0.121], rot: [0.18, -0.08, 0.25], scale: [0.020, 0.038, 0.015] }
   ];
 
   bangsDef.forEach(b => {
@@ -302,7 +596,7 @@ function createRobloxHair(hairMat) {
     hairGroup.add(spike);
   });
 
-  // 3. Sideburns / Side locks hugging ears (outside the face at x = +/- 0.125)
+  // 5. Sideburns / Side locks hugging ears (outside the face at x = +/- 0.125)
   const sideTufts = [
     { pos: [-0.125, 0.02, 0.04], rot: [0.1, 0.2, -0.25], scale: [0.028, 0.08, 0.03] },
     { pos: [0.125, 0.02, 0.04], rot: [0.1, -0.2, 0.25], scale: [0.028, 0.08, 0.03] },
@@ -318,14 +612,14 @@ function createRobloxHair(hairMat) {
     hairGroup.add(spike);
   });
 
-  // 4. Crown and silhouette spikes (messy layered anime spikes pointing up & outward)
+  // 6. Crown and silhouette spikes (messy layered anime spikes pointing up & outward)
   const crownSpikes = [
-    { pos: [-0.07, 0.145, 0.02], rot: [0.2, 0.1, -0.45], scale: [0.035, 0.09, 0.032] },
-    { pos: [0.06, 0.148, 0.01], rot: [0.15, -0.1, 0.42], scale: [0.036, 0.095, 0.032] },
-    { pos: [-0.01, 0.155, -0.04], rot: [-0.25, 0.05, 0.1], scale: [0.038, 0.10, 0.034] },
-    { pos: [-0.08, 0.125, -0.07], rot: [-0.4, 0.2, -0.35], scale: [0.032, 0.085, 0.030] },
-    { pos: [0.08, 0.125, -0.07], rot: [-0.4, -0.2, 0.35], scale: [0.032, 0.085, 0.030] },
-    { pos: [0.0, 0.135, 0.07], rot: [0.35, 0.0, 0.0], scale: [0.032, 0.08, 0.028] }
+    { pos: [-0.07, 0.155, 0.01], rot: [0.2, 0.1, -0.45], scale: [0.035, 0.09, 0.032] },
+    { pos: [0.06, 0.158, 0.00], rot: [0.15, -0.1, 0.42], scale: [0.036, 0.095, 0.032] },
+    { pos: [-0.01, 0.165, -0.04], rot: [-0.25, 0.05, 0.1], scale: [0.038, 0.10, 0.034] },
+    { pos: [-0.08, 0.135, -0.07], rot: [-0.4, 0.2, -0.35], scale: [0.032, 0.085, 0.030] },
+    { pos: [0.08, 0.135, -0.07], rot: [-0.4, -0.2, 0.35], scale: [0.032, 0.085, 0.030] },
+    { pos: [0.0, 0.145, 0.05], rot: [0.35, 0.0, 0.0], scale: [0.032, 0.08, 0.028] }
   ];
   crownSpikes.forEach(c => {
     const spikeGeo = new THREE.ConeGeometry(c.scale[0], c.scale[1], 4);
@@ -336,7 +630,7 @@ function createRobloxHair(hairMat) {
     hairGroup.add(spike);
   });
 
-  // 5. Back layered hair covering nape/neck (Matching Back View)
+  // 7. Back layered hair covering nape/neck (Matching Back View)
   const backTufts = [
     { pos: [-0.065, 0.02, -0.118], rot: [-0.25, 0.1, -0.15], scale: [0.032, 0.08, 0.028] },
     { pos: [0.0, 0.015, -0.122], rot: [-0.3, 0.0, 0.0], scale: [0.035, 0.085, 0.030] },
@@ -583,16 +877,22 @@ export function createDinkar() {
   head.receiveShadow = true;
 
   // Face Decal (Antialiased anime eyes, eyebrows, and smile on transparent background)
-  const faceDecalGeo = new THREE.PlaneGeometry(0.20, 0.18);
+  // Sized 0.18 x 0.13 centered at y = -0.015, leaving upper forehead (y = +0.05 to +0.11) 100% clean
+  const faceDecalGeo = new THREE.PlaneGeometry(0.18, 0.13);
   const faceDecalMat = new THREE.MeshStandardMaterial({
     map: getRobloxFaceTexture(),
     transparent: true,
     alphaTest: 0.02,
+    depthWrite: false,
+    polygonOffset: true,
+    polygonOffsetFactor: -1.0,
+    polygonOffsetUnits: -4.0,
     roughness: 0.55,
     metalness: 0.04
   });
   const faceDecal = new THREE.Mesh(faceDecalGeo, faceDecalMat);
-  faceDecal.position.set(0, -0.005, 0.111);
+  faceDecal.position.set(0, -0.015, 0.1108);
+  faceDecal.renderOrder = 1;
   faceDecal.castShadow = false;
   head.add(faceDecal);
 
@@ -682,107 +982,282 @@ export function createDinkar() {
   return group;
 }
 
-// 3. Build Opponent 3: Anandi (The Calm Mastermind on your right)
+// 3. Build Opponent 3: Anandi (Roblox Streetwear Avatar with Bindi from Image 1)
+let cachedAnandiFace = null;
+function getAnandiFaceTexture() {
+  if (!cachedAnandiFace) {
+    cachedAnandiFace = characterTextureLoader.load('/anandi_face_clean.png');
+    cachedAnandiFace.colorSpace = THREE.SRGBColorSpace;
+    cachedAnandiFace.anisotropy = 8;
+  }
+  return cachedAnandiFace;
+}
+
 export function createAnandi() {
   const group = new THREE.Group();
   group.name = 'Anandi';
 
-  // Torso / Elegant Emerald Silk Kurti / Saree
-  const torsoGeo = new THREE.CylinderGeometry(0.22, 0.19, 0.62, 16);
-  const torso = new THREE.Mesh(torsoGeo, anandiDressMaterial);
-  torso.position.y = 0.82;
+  const robloxSkinMat = new THREE.MeshStandardMaterial({
+    color: 0xF2B988,
+    roughness: 0.55,
+    metalness: 0.04
+  });
+
+  const robloxHairMat = new THREE.MeshStandardMaterial({
+    color: 0x2E2421,
+    roughness: 0.85,
+    metalness: 0.02
+  });
+
+  const robloxHoodieMat = new THREE.MeshStandardMaterial({
+    color: 0x1F1F1E,
+    roughness: 0.85,
+    metalness: 0.02
+  });
+
+  const robloxPantsMat = new THREE.MeshStandardMaterial({
+    color: 0x202020,
+    roughness: 0.88,
+    metalness: 0.02
+  });
+
+  const robloxSneakerMat = new THREE.MeshStandardMaterial({
+    color: 0x141414,
+    roughness: 0.75,
+    metalness: 0.04
+  });
+
+  const robloxWhiteTrimMat = new THREE.MeshStandardMaterial({
+    color: 0xEDEAE6,
+    roughness: 0.5,
+    metalness: 0.05
+  });
+
+  const anandiFaceMat = new THREE.MeshStandardMaterial({
+    map: getAnandiFaceTexture(),
+    transparent: true,
+    alphaTest: 0.02,
+    depthWrite: false,
+    polygonOffset: true,
+    polygonOffsetFactor: -1.0,
+    polygonOffsetUnits: -4.0,
+    roughness: 0.55,
+    metalness: 0.04
+  });
+
+  const robloxHoodieFrontMat = new THREE.MeshStandardMaterial({
+    map: getRobloxHoodieTexture(),
+    roughness: 0.85,
+    metalness: 0.02
+  });
+
+  const robloxHoodieBackMat = new THREE.MeshStandardMaterial({
+    map: getRobloxBackTexture(),
+    roughness: 0.85,
+    metalness: 0.02
+  });
+
+  // 1. Lower Body / Cargo Joggers & Sneakers (Seated on chairRight at y = 0.45)
+  const lowerBodyGroup = new THREE.Group();
+
+  const hipsGeo = new THREE.BoxGeometry(0.36, 0.10, 0.22);
+  const hips = new THREE.Mesh(hipsGeo, robloxPantsMat);
+  hips.position.set(0, 0.52, -0.02);
+  hips.castShadow = true;
+  hips.receiveShadow = true;
+  lowerBodyGroup.add(hips);
+
+  const thighGeo = new THREE.BoxGeometry(0.15, 0.15, 0.28);
+  const leftThigh = new THREE.Mesh(thighGeo, robloxPantsMat);
+  leftThigh.position.set(-0.10, 0.52, 0.12);
+  leftThigh.castShadow = true;
+  leftThigh.receiveShadow = true;
+
+  const rightThigh = new THREE.Mesh(thighGeo, robloxPantsMat);
+  rightThigh.position.set(0.10, 0.52, 0.12);
+  rightThigh.castShadow = true;
+  rightThigh.receiveShadow = true;
+  lowerBodyGroup.add(leftThigh, rightThigh);
+
+  const pocketGeo = new THREE.BoxGeometry(0.035, 0.10, 0.13);
+  const leftPocket = new THREE.Mesh(pocketGeo, robloxPantsMat);
+  leftPocket.position.set(-0.19, 0.52, 0.12);
+  leftPocket.castShadow = true;
+
+  const rightPocket = new THREE.Mesh(pocketGeo, robloxPantsMat);
+  rightPocket.position.set(0.19, 0.52, 0.12);
+  rightPocket.castShadow = true;
+  lowerBodyGroup.add(leftPocket, rightPocket);
+
+  const shinGeo = new THREE.BoxGeometry(0.14, 0.36, 0.14);
+  const leftShin = new THREE.Mesh(shinGeo, robloxPantsMat);
+  leftShin.position.set(-0.10, 0.24, 0.23);
+  leftShin.castShadow = true;
+
+  const rightShin = new THREE.Mesh(shinGeo, robloxPantsMat);
+  rightShin.position.set(0.10, 0.24, 0.23);
+  rightShin.castShadow = true;
+  lowerBodyGroup.add(leftShin, rightShin);
+
+  [-0.10, 0.10].forEach(xPos => {
+    const sneakerGroup = new THREE.Group();
+    sneakerGroup.position.set(xPos, 0, 0.24);
+
+    const soleGeo = new THREE.BoxGeometry(0.16, 0.03, 0.22);
+    const sole = new THREE.Mesh(soleGeo, robloxWhiteTrimMat);
+    sole.position.y = 0.015;
+    sole.castShadow = true;
+    sneakerGroup.add(sole);
+
+    const shoeGeo = new THREE.BoxGeometry(0.15, 0.065, 0.21);
+    const shoe = new THREE.Mesh(shoeGeo, robloxSneakerMat);
+    shoe.position.y = 0.062;
+    shoe.castShadow = true;
+    sneakerGroup.add(shoe);
+
+    const stripe1 = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.008, 0.022), robloxWhiteTrimMat);
+    stripe1.position.set(0, 0.096, 0.04);
+    const stripe2 = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.008, 0.022), robloxWhiteTrimMat);
+    stripe2.position.set(0, 0.096, 0.075);
+    sneakerGroup.add(stripe1, stripe2);
+
+    lowerBodyGroup.add(sneakerGroup);
+  });
+
+  group.add(lowerBodyGroup);
+
+  // 2. Torso / Matte Black Roblox Hoodie
+  const torsoMaterials = [
+    robloxHoodieMat,
+    robloxHoodieMat,
+    robloxHoodieMat,
+    robloxPantsMat,
+    robloxHoodieFrontMat,
+    robloxHoodieBackMat
+  ];
+  const torsoGeo = new THREE.BoxGeometry(0.38, 0.44, 0.22);
+  const torso = new THREE.Mesh(torsoGeo, torsoMaterials);
+  torso.position.y = 0.88;
   torso.castShadow = true;
   torso.receiveShadow = true;
   group.add(torso);
 
-  // Gold Zari Neckline & Border
-  const zariGeo = new THREE.TorusGeometry(0.12, 0.01, 8, 20, Math.PI);
-  const zari = new THREE.Mesh(zariGeo, goldTrimMaterial);
-  zari.position.set(0, 1.08, 0.15);
-  zari.rotation.x = Math.PI / 2.3;
-  group.add(zari);
+  const collarGeo = new THREE.TorusGeometry(0.115, 0.022, 8, 20);
+  const collar = new THREE.Mesh(collarGeo, robloxHoodieMat);
+  collar.position.set(0, 1.10, 0.01);
+  collar.rotation.x = Math.PI / 2.2;
+  group.add(collar);
 
-  // Shoulders
-  const shoulderGeo = new THREE.SphereGeometry(0.078, 12, 12);
-  const leftShoulder = new THREE.Mesh(shoulderGeo, anandiDressMaterial);
-  leftShoulder.position.set(-0.23, 1.08, 0);
-  const rightShoulder = new THREE.Mesh(shoulderGeo, anandiDressMaterial);
-  rightShoulder.position.set(0.23, 1.08, 0);
-  group.add(leftShoulder, rightShoulder);
+  [-0.042, 0.042].forEach(x => {
+    const cordGeo = new THREE.CylinderGeometry(0.0035, 0.0035, 0.12, 8);
+    const cord = new THREE.Mesh(cordGeo, robloxHoodieMat);
+    cord.position.set(x, 1.01, 0.122);
+    group.add(cord);
 
-  // Neck
-  const neckGeo = new THREE.CylinderGeometry(0.07, 0.08, 0.12, 12);
-  const neck = new THREE.Mesh(neckGeo, anandiSkinMaterial);
-  neck.position.y = 1.18;
-  group.add(neck);
-
-  // Head
-  const headGeo = new THREE.SphereGeometry(0.144, 22, 22);
-  const head = new THREE.Mesh(headGeo, anandiSkinMaterial);
-  head.position.y = 1.30;
-  head.castShadow = true;
-  group.add(head);
-
-  // Expressive Calm Eyes
-  const leftEye = createEye(0.9);
-  leftEye.position.set(-0.044, 1.315, 0.132);
-  const rightEye = createEye(0.9);
-  rightEye.position.set(0.044, 1.315, 0.132);
-  group.add(leftEye, rightEye);
-
-  // Traditional Red Bindi on Forehead!
-  const bindiGeo = new THREE.SphereGeometry(0.009, 8, 8);
-  const bindiMat = new THREE.MeshStandardMaterial({ color: 0xBF1020, roughness: 0.4 });
-  const bindi = new THREE.Mesh(bindiGeo, bindiMat);
-  bindi.position.set(0, 1.352, 0.141);
-  bindi.scale.set(1, 1, 0.4);
-  group.add(bindi);
-
-  // Golden Jhumka Earrings!
-  [-0.145, 0.145].forEach((x) => {
-    const earring = new THREE.Group();
-    const studGeo = new THREE.SphereGeometry(0.009, 8, 8);
-    const stud = new THREE.Mesh(studGeo, goldTrimMaterial);
-    earring.add(stud);
-
-    const bellGeo = new THREE.ConeGeometry(0.016, 0.025, 10);
-    const bell = new THREE.Mesh(bellGeo, goldTrimMaterial);
-    bell.position.y = -0.024;
-    earring.add(bell);
-
-    earring.position.set(x, 1.285, 0.02);
-    group.add(earring);
+    const agletGeo = new THREE.CylinderGeometry(0.0045, 0.0045, 0.022, 8);
+    const aglet = new THREE.Mesh(agletGeo, robloxWhiteTrimMat);
+    aglet.position.set(x, 0.94, 0.122);
+    group.add(aglet);
   });
 
-  // Traditional Hair & Voluminous Bun
-  const hairMat = new THREE.MeshStandardMaterial({ color: 0x0A0808, roughness: 0.75 });
-  const hairGeo = new THREE.SphereGeometry(0.148, 20, 20, 0, Math.PI * 2, 0, Math.PI * 0.65);
-  const hair = new THREE.Mesh(hairGeo, hairMat);
-  hair.position.y = 1.305;
-  hair.rotation.x = -0.15;
-  group.add(hair);
+  const backHoodGeo = new THREE.BoxGeometry(0.24, 0.16, 0.05);
+  const backHood = new THREE.Mesh(backHoodGeo, robloxHoodieMat);
+  backHood.position.set(0, 0.98, -0.12);
+  backHood.rotation.x = -0.22;
+  backHood.castShadow = true;
+  group.add(backHood);
 
-  const bunGeo = new THREE.SphereGeometry(0.075, 14, 14);
-  const bun = new THREE.Mesh(bunGeo, hairMat);
-  bun.position.set(0, 1.31, -0.135);
-  group.add(bun);
+  // 3. Neck
+  const neckGeo = new THREE.CylinderGeometry(0.065, 0.075, 0.08, 12);
+  const neck = new THREE.Mesh(neckGeo, robloxSkinMat);
+  neck.position.y = 1.13;
+  group.add(neck);
 
-  // Gold hairpin / Gajra accent on hair bun
-  const gajraGeo = new THREE.TorusGeometry(0.065, 0.012, 8, 20);
-  const gajra = new THREE.Mesh(gajraGeo, goldTrimMaterial);
-  gajra.position.set(0, 1.31, -0.125);
-  group.add(gajra);
+  // 4. Head (Classic Roblox Blocky Head with Bindi Face Decal)
+  const headGeo = new THREE.BoxGeometry(0.24, 0.22, 0.22);
+  const head = new THREE.Mesh(headGeo, robloxSkinMat);
+  head.position.y = 1.28;
+  head.castShadow = true;
+  head.receiveShadow = true;
 
-  // Arms with Gold Bangles on both wrists resting on table
-  const leftArm = createArm(anandiDressMaterial, anandiSkinMaterial, false, true);
-  leftArm.position.set(-0.23, 1.06, 0);
+  // Face Decal (Sweet anime eyes, smile, and iconic forehead bindi)
+  // Sized 0.18 x 0.13 centered at y = -0.015, leaving upper forehead (y = +0.05 to +0.11) 100% clean
+  const faceDecalGeo = new THREE.PlaneGeometry(0.18, 0.13);
+  const faceDecal = new THREE.Mesh(faceDecalGeo, anandiFaceMat);
+  faceDecal.position.set(0, -0.015, 0.1108);
+  faceDecal.renderOrder = 1;
+  faceDecal.castShadow = false;
+  head.add(faceDecal);
+
+  // Add 3D Spiky Anime Hair
+  const hair = createRobloxHair(robloxHairMat);
+  head.add(hair);
+
+  group.add(head);
+
+  // 5. Roblox Blocky Arms resting on table felt
+  const leftArm = new THREE.Group();
+  leftArm.position.set(-0.25, 1.02, 0);
+
+  const leftUpper = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.20, 0.14), robloxHoodieMat);
+  leftUpper.position.set(0, -0.08, 0.04);
+  leftUpper.rotation.x = 0.38;
+  leftUpper.rotation.z = -0.12;
+  leftUpper.castShadow = true;
+  leftArm.add(leftUpper);
+
+  const leftForearm = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.22, 0.13), robloxHoodieMat);
+  leftForearm.position.set(0.03, -0.21, 0.19);
+  leftForearm.rotation.x = 1.08;
+  leftForearm.rotation.y = 0.22;
+  leftForearm.castShadow = true;
+  leftArm.add(leftForearm);
+
+  const leftHand = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.04, 0.10), robloxSkinMat);
+  leftHand.position.set(0.05, -0.28, 0.32);
+  leftHand.rotation.y = 0.15;
+  leftHand.castShadow = true;
+  leftHand.receiveShadow = true;
+  leftArm.add(leftHand);
+
   group.add(leftArm);
 
-  const rightArm = createArm(anandiDressMaterial, anandiSkinMaterial, true, true);
-  rightArm.position.set(0.23, 1.06, 0);
+  const rightArm = new THREE.Group();
+  rightArm.position.set(0.25, 1.02, 0);
+
+  const rightUpper = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.20, 0.14), robloxHoodieMat);
+  rightUpper.position.set(0, -0.08, 0.04);
+  rightUpper.rotation.x = 0.38;
+  rightUpper.rotation.z = 0.12;
+  rightUpper.castShadow = true;
+  rightArm.add(rightUpper);
+
+  const rightForearm = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.22, 0.13), robloxHoodieMat);
+  rightForearm.position.set(-0.03, -0.21, 0.19);
+  rightForearm.rotation.x = 1.08;
+  rightForearm.rotation.y = -0.22;
+  rightForearm.castShadow = true;
+  rightArm.add(rightForearm);
+
+  const rightHand = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.04, 0.10), robloxSkinMat);
+  rightHand.position.set(-0.05, -0.28, 0.32);
+  rightHand.rotation.y = -0.15;
+  rightHand.castShadow = true;
+  rightHand.receiveShadow = true;
+  rightArm.add(rightHand);
+
   group.add(rightArm);
 
-  group.userData = { head, torso, rightArm, leftArm, animTime: 0 };
+  group.userData = {
+    head,
+    torso,
+    rightArm,
+    leftArm,
+    headBaseY: 1.28,
+    torsoBaseY: 0.88,
+    animTime: 0
+  };
+
   return group;
 }
 
