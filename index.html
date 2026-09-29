@@ -15,34 +15,15 @@
     <!-- Heartbeat Tension Vignette (Pulses when pot gets large) -->
     <div id="tension-vignette" class="tension-vignette" aria-hidden="true"></div>
 
-    <!-- Top Navigation Bar -->
+    <!-- Top Navigation Bar (Clean Minimalist HUD) -->
     <header class="top-bar">
-      <div class="brand-section">
-        <h1 class="brand-title">
-          <span>BHIKAR SAWKAR</span>
-          <span class="brand-marathi">भिकार सावकार</span>
-        </h1>
-        <div class="fpp-badge" title="First-Person Perspective Tabletop">FPP 3D TABLE</div>
-      </div>
-
-      <div class="table-stats-bar">
-        <div class="stat-chip" id="chip-pot" title="Cards in Central Pot">
-          <span>POT:</span>
-          <span class="stat-val highlight-gold" id="stat-pot">0</span>
-        </div>
-        <div class="stat-chip" title="Total Flips">
-          <span>Flips:</span>
-          <span class="stat-val" id="stat-flips">0</span>
-        </div>
-        <div class="stat-chip" title="Matches Won">
-          <span>Matches:</span>
-          <span class="stat-val" id="stat-matches">0</span>
-        </div>
-      </div>
-
+      <!-- Sound and Settings Toggles on Left -->
       <div class="action-buttons">
         <button id="btn-audio" class="btn-icon" title="Toggle Sound (Mute/Unmute)" aria-label="Toggle Sound">
           🔊
+        </button>
+        <button id="btn-settings" class="btn-icon" title="Table Settings" aria-label="Table Settings">
+          ⚙️
         </button>
         <button id="btn-speed" class="btn-icon" title="Change Game Speed" aria-label="Change Game Speed">
           ⚡
@@ -50,26 +31,13 @@
         <button id="btn-rules" class="btn-icon" title="Game Rules & Lore" aria-label="Game Rules">
           📜
         </button>
-        <button id="btn-settings" class="btn-icon" title="Table Settings" aria-label="Table Settings">
-          ⚙️
-        </button>
         <button id="btn-new-match" class="btn-icon" title="Re-deal Deck / New Match" aria-label="New Match">
           🔄
         </button>
       </div>
-    </header>
 
-    <!-- 3D Table Viewport -->
-    <main class="table-viewport" id="table-viewport">
-      <!-- Floating Stakes Indicator Banner -->
-      <div class="stakes-indicator-banner" id="stakes-indicator">
-        <span class="stakes-flame">🔥</span>
-        <span id="stakes-text">STAKES RISING</span>
-      </div>
-
-      <!-- 240° POV Free-Look Quick Navigation Bar -->
+      <!-- Quick-Look Camera POV Navigation Controls on Right -->
       <nav class="pov-controls-bar" id="pov-controls-bar" aria-label="3D Camera Controls">
-        <span class="pov-title" title="Drag table to rotate up to 240°">👁️ 240° POV</span>
         <button class="btn-pov" data-target="left" title="Look Left at Dinkar (Key A / ◄)">◂ DINKAR</button>
         <button class="btn-pov" data-target="top" title="Look Center at Babanrao (Key W / ▲)">▲ BABANRAO</button>
         <button class="btn-pov" data-target="right" title="Look Right at Anandi (Key D / ►)">▸ ANANDI</button>
@@ -77,6 +45,10 @@
         <button class="btn-pov" data-target="bottom" title="Look Down at Cards (Key S / ▼)">▼ CARDS</button>
         <button class="btn-pov btn-pov-reset" data-target="reset" title="Reset Camera to Center (Key R)">⟲ RESET</button>
       </nav>
+    </header>
+
+    <!-- 3D Table Viewport -->
+    <main class="table-viewport" id="table-viewport">
 
       <!-- Three.js Canvas Container -->
       <div id="webgl-container" class="webgl-container"></div>

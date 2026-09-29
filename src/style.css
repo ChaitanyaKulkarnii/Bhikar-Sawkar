@@ -195,83 +195,17 @@ html, body {
   100% { transform: scale(1.15) rotate(3deg); }
 }
 
-/* Top Bar Navigation */
+/* Top Bar Navigation (Sleek Minimalist HUD) */
 .top-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 24px;
-  background: rgba(10, 13, 18, 0.88);
+  padding: 8px 20px;
+  background: rgba(10, 13, 18, 0.92);
   backdrop-filter: blur(14px);
-  border-bottom: 1px solid rgba(44, 53, 69, 0.5);
+  border-bottom: 1px solid rgba(44, 53, 69, 0.4);
   z-index: 20;
-  height: 60px;
-}
-
-.brand-section {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.brand-title {
-  font-family: var(--font-display);
-  font-size: 1.2rem;
-  letter-spacing: 0.05em;
-  font-weight: 700;
-  color: var(--gold-sawkar);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.brand-marathi {
-  font-family: var(--font-marathi);
-  font-size: 1.1rem;
-  color: var(--text-main);
-  opacity: 0.9;
-  font-weight: normal;
-}
-
-.fpp-badge {
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  background: rgba(201, 162, 75, 0.15);
-  color: var(--gold-sawkar);
-  border: 1px solid var(--gold-sawkar);
-  padding: 2px 8px;
-  border-radius: 4px;
-}
-
-.table-stats-bar {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.stat-chip {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  background: var(--surface-panel);
-  padding: 4px 12px;
-  border-radius: 6px;
-  border: 1px solid var(--surface-border);
-}
-
-.stat-val {
-  color: var(--text-main);
-  font-weight: 600;
-  font-family: monospace;
-}
-
-.stat-val.highlight-gold {
-  color: var(--gold-sawkar);
-  font-size: 0.95rem;
-  font-weight: 700;
+  height: 54px;
 }
 
 .action-buttons {
@@ -300,6 +234,21 @@ html, body {
   color: var(--gold-sawkar);
   background: var(--surface-elevated);
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(201, 162, 75, 0.25);
+}
+
+.btn-icon:active {
+  transform: translateY(1px);
+}
+
+/* Specific styling for prominent sound & settings toggles on left */
+#btn-audio, #btn-settings {
+  border-color: rgba(201, 162, 75, 0.35);
+}
+
+#btn-audio:hover, #btn-settings:hover {
+  border-color: var(--gold-sawkar);
+  box-shadow: 0 0 14px rgba(201, 162, 75, 0.35);
 }
 
 /* ==========================================================================
@@ -309,7 +258,7 @@ html, body {
   flex: 1;
   position: relative;
   width: 100%;
-  height: calc(100vh - 60px);
+  height: calc(100vh - 54px);
   overflow: hidden;
 }
 
@@ -327,42 +276,28 @@ html, body {
 }
 
 /* ==========================================================================
-   270° POV QUICK NAVIGATION BAR
+   240° POV QUICK NAVIGATION BAR (Clean Header Integrated)
    ========================================================================== */
 .pov-controls-bar {
-  position: absolute;
-  top: 18px;
-  right: 20px;
   display: flex;
   align-items: center;
   gap: 6px;
-  background: rgba(14, 18, 26, 0.94);
-  border: 1px solid var(--gold-sawkar);
-  padding: 6px 12px;
-  border-radius: 24px;
-  z-index: 15;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7), 0 0 12px rgba(201, 162, 75, 0.25);
-  backdrop-filter: blur(10px);
-}
-
-.pov-title {
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  color: var(--gold-sawkar);
-  margin-right: 4px;
-  white-space: nowrap;
+  background: rgba(14, 18, 26, 0.85);
+  border: 1px solid rgba(201, 162, 75, 0.4);
+  padding: 4px 10px;
+  border-radius: 20px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
 }
 
 .btn-pov {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   color: var(--text-main);
   font-family: var(--font-body);
   font-size: 0.68rem;
   font-weight: 600;
   letter-spacing: 0.04em;
-  padding: 5px 9px;
+  padding: 4px 9px;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -370,7 +305,7 @@ html, body {
 }
 
 .btn-pov:hover {
-  background: rgba(201, 162, 75, 0.25);
+  background: rgba(201, 162, 75, 0.18);
   border-color: var(--gold-sawkar);
   color: var(--gold-sawkar);
   transform: translateY(-1px);
@@ -378,9 +313,14 @@ html, body {
 
 .btn-pov-reset {
   color: var(--gold-sawkar);
-  border-color: rgba(201, 162, 75, 0.5);
-  background: rgba(201, 162, 75, 0.1);
+  border-color: rgba(201, 162, 75, 0.3);
 }
+
+.btn-pov-reset:hover {
+  background: var(--gold-sawkar);
+  color: #0E1116;
+}
+
 
 /* Current Top Card HUD Display (Top Left corner) */
 .current-card-hud {
@@ -900,17 +840,16 @@ html, body {
 /* Mobile & Tablet */
 @media (max-width: 768px) {
   .top-bar {
-    padding: 10px 14px;
-    height: 54px;
+    padding: 6px 10px;
+    height: 48px;
   }
-  .brand-title {
-    font-size: 0.95rem;
+  .action-buttons {
+    gap: 5px;
   }
-  .brand-marathi {
-    display: none;
-  }
-  .table-stats-bar {
-    display: none;
+  .btn-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 0.88rem;
   }
   .current-card-hud {
     top: 10px;
@@ -939,16 +878,11 @@ html, body {
     font-size: 0.9rem;
   }
   .pov-controls-bar {
-    top: 10px;
-    right: 10px;
-    padding: 4px 8px;
-    gap: 4px;
-  }
-  .pov-title {
-    display: none;
+    padding: 3px 6px;
+    gap: 3px;
   }
   .btn-pov {
-    padding: 3px 6px;
-    font-size: 0.62rem;
+    padding: 3px 5px;
+    font-size: 0.58rem;
   }
 }
