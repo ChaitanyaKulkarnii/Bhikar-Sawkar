@@ -9,7 +9,7 @@ export class BhikarSawkarEngine {
     this.ruleVariation = options.ruleVariation || 'rank'; // 'rank', 'suit', 'color_rank'
     this.gameSpeed = options.gameSpeed || 'normal'; // 'normal' (900ms), 'fast' (450ms), 'turbo' (180ms)
     this.playMode = options.playMode || 'ai'; // 'ai' or 'pass_and_play'
-    this.humanName = options.humanName || 'Bhau (भाऊ)';
+    this.humanName = options.humanName || 'Bhau';
 
     this.players = [];
     this.centralPile = [];
@@ -69,7 +69,7 @@ export class BhikarSawkarEngine {
       id: 'p0',
       name: this.humanName,
       isHuman: true,
-      avatar: '🤠',
+      avatar: '1',
       role: 'The Contender',
       deck: hands[0],
       eliminated: false,
@@ -86,7 +86,7 @@ export class BhikarSawkarEngine {
         name: isHuman ? `Player ${i + 1}` : botProfile.name,
         botId: botProfile.id,
         isHuman: isHuman,
-        avatar: isHuman ? ['🧑🏽', '👩🏽', '🧔🏽'][i - 1] : botProfile.avatar,
+        avatar: isHuman ? `${i + 1}` : botProfile.avatar,
         role: isHuman ? 'Player' : botProfile.role,
         deck: hands[i],
         eliminated: false,

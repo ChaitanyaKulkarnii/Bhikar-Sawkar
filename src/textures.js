@@ -10,7 +10,7 @@ let cachedCardBack = null;
 export function getCardBackTexture() {
   if (cachedCardBack) return cachedCardBack;
 
-  cachedCardBack = textureLoader.load('/card_back.png');
+  cachedCardBack = textureLoader.load('/card_back.png?v=3');
   cachedCardBack.colorSpace = THREE.SRGBColorSpace;
   cachedCardBack.anisotropy = 16;
   cachedCardBack.generateMipmaps = true;
@@ -35,10 +35,10 @@ export function getCardFaceTexture(card) {
   ctx.fillStyle = '#FCFBF8';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Sharp outer border (ensures card separation on table)
+  // Slim, elegant outer border (softened from bold line)
   ctx.strokeStyle = '#1D2128';
-  ctx.lineWidth = 14;
-  ctx.strokeRect(7, 7, canvas.width - 14, canvas.height - 14);
+  ctx.lineWidth = 8;
+  ctx.strokeRect(4, 4, canvas.width - 8, canvas.height - 8);
 
   // Inner decorative gold hairline
   ctx.strokeStyle = 'rgba(201, 162, 75, 0.7)';

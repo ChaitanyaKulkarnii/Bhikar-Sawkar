@@ -3,9 +3,9 @@
 export const BOT_PROFILES = [
   {
     id: 'babanrao',
-    name: 'Babanrao (बबनराव)',
+    name: 'Babanrao',
     role: 'The Suspicious Veteran',
-    avatar: '👴🏽',
+    avatar: '2',
     bio: 'Plays cards at the katta every evening. Swears the deck is rigged.',
     quotes: {
       onPlay: [
@@ -35,9 +35,9 @@ export const BOT_PROFILES = [
   },
   {
     id: 'dinkar',
-    name: 'Dinkar (दिनकर)',
+    name: 'Dinkar',
     role: 'The Hype Guy',
-    avatar: '😎',
+    avatar: '3',
     bio: 'Screams "ठोक!" at every card and drinks too much cutting chai.',
     quotes: {
       onPlay: [
@@ -67,9 +67,9 @@ export const BOT_PROFILES = [
   },
   {
     id: 'anandi',
-    name: 'Anandi (आनंदी)',
+    name: 'Anandi',
     role: 'The Calm Mastermind',
-    avatar: '👑',
+    avatar: '4',
     bio: 'Quietly stacks cards and smiles right before sweeping the entire table.',
     quotes: {
       onPlay: [
