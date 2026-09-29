@@ -275,51 +275,6 @@ html, body {
   cursor: grabbing;
 }
 
-/* ==========================================================================
-   240° POV QUICK NAVIGATION BAR (Clean Header Integrated)
-   ========================================================================== */
-.pov-controls-bar {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(14, 18, 26, 0.85);
-  border: 1px solid rgba(201, 162, 75, 0.4);
-  padding: 4px 10px;
-  border-radius: 20px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
-}
-
-.btn-pov {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: var(--text-main);
-  font-family: var(--font-body);
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  padding: 4px 9px;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-
-.btn-pov:hover {
-  background: rgba(201, 162, 75, 0.18);
-  border-color: var(--gold-sawkar);
-  color: var(--gold-sawkar);
-  transform: translateY(-1px);
-}
-
-.btn-pov-reset {
-  color: var(--gold-sawkar);
-  border-color: rgba(201, 162, 75, 0.3);
-}
-
-.btn-pov-reset:hover {
-  background: var(--gold-sawkar);
-  color: #0E1116;
-}
 
 
 /* Current Top Card HUD Display (Top Left corner) */
@@ -876,13 +831,5 @@ html, body {
   .btn-flip-card {
     padding: 10px 20px;
     font-size: 0.9rem;
-  }
-  .pov-controls-bar {
-    padding: 3px 6px;
-    gap: 3px;
-  }
-  .btn-pov {
-    padding: 3px 5px;
-    font-size: 0.58rem;
   }
 }
