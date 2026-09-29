@@ -146,7 +146,12 @@ function updateHud(state) {
     els.name.textContent = player.name;
     els.avatar.textContent = player.avatar;
     els.role.textContent = player.role;
-    els.count.textContent = `${player.cardCount} 🎴`;
+    const numEl = els.count.querySelector('.count-num');
+    if (numEl) {
+      numEl.textContent = player.cardCount;
+    } else {
+      els.count.innerHTML = `<span class="count-num">${player.cardCount}</span><img src="/nameplate_card.png" class="nameplate-card-icon" alt="Cards" />`;
+    }
 
     if (idx === state.turnIndex && !player.eliminated && state.isPlaying) {
       els.hudEl.classList.add('active');

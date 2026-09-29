@@ -426,15 +426,30 @@ html, body {
 }
 
 .hud-card-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 0.85rem;
   font-weight: 700;
   color: #FFFFFF;
   background: rgba(255, 255, 255, 0.06);
-  padding: 4px 8px;
-  border-radius: 3px;
+  padding: 3px 8px;
+  border-radius: 4px;
   border: 1px solid rgba(255, 255, 255, 0.25);
   margin-left: 4px;
   font-family: monospace;
+}
+
+.nameplate-card-icon {
+  width: 14px;
+  height: 20px;
+  object-fit: cover;
+  border-radius: 2px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.75);
+  border: 1px solid rgba(201, 162, 75, 0.6);
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
 }
 
 .player-hud.active .hud-card-badge {
