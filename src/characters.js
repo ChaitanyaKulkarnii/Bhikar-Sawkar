@@ -1,60 +1,148 @@
 // 3D Stylized Tabletop Character Rigs & Animation Controller for Bhikar Sawkar
 import * as THREE from 'three';
 
-// Materials for characters
-const skinMaterial = new THREE.MeshStandardMaterial({
-  color: 0xC68642,
-  roughness: 0.6,
-  metalness: 0.05
+// Materials for characters with warm specular highlights
+const babanraoSkinMaterial = new THREE.MeshStandardMaterial({
+  color: 0xC48956,
+  roughness: 0.5,
+  metalness: 0.08
+});
+
+const dinkarSkinMaterial = new THREE.MeshStandardMaterial({
+  color: 0xBA7745,
+  roughness: 0.5,
+  metalness: 0.08
+});
+
+const anandiSkinMaterial = new THREE.MeshStandardMaterial({
+  color: 0xD69A68,
+  roughness: 0.46,
+  metalness: 0.1
+});
+
+const playerSkinMaterial = new THREE.MeshStandardMaterial({
+  color: 0xC88B58,
+  roughness: 0.52,
+  metalness: 0.06
 });
 
 const babanraoJacketMaterial = new THREE.MeshStandardMaterial({
-  color: 0x2A3439, // Dark slate Nehru waistcoat
-  roughness: 0.7
+  color: 0x2D3740, // Dark slate Nehru waistcoat
+  roughness: 0.65,
+  metalness: 0.08
 });
 
 const babanraoShirtMaterial = new THREE.MeshStandardMaterial({
-  color: 0xEAE4D8, // Off-white cotton kurta
-  roughness: 0.75
-});
-
-const dinkarJacketMaterial = new THREE.MeshStandardMaterial({
-  color: 0x8A2B2B, // Deep maroon varsity jacket
-  roughness: 0.55
-});
-
-const anandiDressMaterial = new THREE.MeshStandardMaterial({
-  color: 0x1E4D43, // Deep emerald silk
-  roughness: 0.45,
-  metalness: 0.15
-});
-
-const woodChairMaterial = new THREE.MeshStandardMaterial({
-  color: 0x26170E,
+  color: 0xF2ECE1, // Crisp off-white cotton kurta
   roughness: 0.7
 });
 
-const goldBangleMaterial = new THREE.MeshStandardMaterial({
-  color: 0xC9A24B,
-  roughness: 0.3,
-  metalness: 0.8
+const dinkarJacketMaterial = new THREE.MeshStandardMaterial({
+  color: 0x932626, // Rich maroon varsity jacket
+  roughness: 0.5
 });
 
-// Helper to build a wooden chair
+const dinkarSleeveMaterial = new THREE.MeshStandardMaterial({
+  color: 0xECE5D8, // Cream varsity sleeves
+  roughness: 0.6
+});
+
+const anandiDressMaterial = new THREE.MeshStandardMaterial({
+  color: 0x17584A, // Rich emerald silk
+  roughness: 0.42,
+  metalness: 0.2
+});
+
+const goldTrimMaterial = new THREE.MeshStandardMaterial({
+  color: 0xD4AF37,
+  roughness: 0.22,
+  metalness: 0.92
+});
+
+const woodChairMaterial = new THREE.MeshStandardMaterial({
+  color: 0x361F12,
+  roughness: 0.55,
+  metalness: 0.1
+});
+
+const eyeWhiteMaterial = new THREE.MeshStandardMaterial({
+  color: 0xFCFCFC,
+  roughness: 0.2
+});
+
+const pupilMaterial = new THREE.MeshStandardMaterial({
+  color: 0x140E0A,
+  roughness: 0.1,
+  metalness: 0.4
+});
+
+const catchlightMaterial = new THREE.MeshBasicMaterial({
+  color: 0xFFFFFF
+});
+
+// Helper: Create expressive 3D eye with sclera, pupil, and catchlight
+function createEye(scale = 1.0) {
+  const eye = new THREE.Group();
+  
+  // White eyeball
+  const scleraGeo = new THREE.SphereGeometry(0.022 * scale, 12, 12);
+  const sclera = new THREE.Mesh(scleraGeo, eyeWhiteMaterial);
+  sclera.scale.set(1.1, 0.9, 0.6);
+  eye.add(sclera);
+
+  // Dark Iris / Pupil
+  const pupilGeo = new THREE.SphereGeometry(0.012 * scale, 10, 10);
+  const pupil = new THREE.Mesh(pupilGeo, pupilMaterial);
+  pupil.position.set(0, 0, 0.01 * scale);
+  pupil.scale.set(1, 1, 0.4);
+  eye.add(pupil);
+
+  // Catchlight (tiny reflection dot that brings eyes to life!)
+  const dotGeo = new THREE.SphereGeometry(0.0035 * scale, 6, 6);
+  const dot = new THREE.Mesh(dotGeo, catchlightMaterial);
+  dot.position.set(0.005 * scale, 0.005 * scale, 0.014 * scale);
+  eye.add(dot);
+
+  return eye;
+}
+
+// Helper to build a classic wooden chair
 export function createChair() {
   const chair = new THREE.Group();
   
   // Seat
-  const seatGeo = new THREE.BoxGeometry(0.55, 0.05, 0.55);
+  const seatGeo = new THREE.BoxGeometry(0.55, 0.06, 0.55);
   const seat = new THREE.Mesh(seatGeo, woodChairMaterial);
   seat.position.y = 0.45;
   chair.add(seat);
 
-  // Backrest
+  // Backrest Frame
   const backGeo = new THREE.BoxGeometry(0.52, 0.65, 0.05);
   const back = new THREE.Mesh(backGeo, woodChairMaterial);
   back.position.set(0, 0.8, -0.24);
   chair.add(back);
+
+  // Backrest Slats (Classic wooden chair look)
+  for (let s = -0.16; s <= 0.16; s += 0.08) {
+    const slatGeo = new THREE.BoxGeometry(0.03, 0.55, 0.02);
+    const slat = new THREE.Mesh(slatGeo, woodChairMaterial);
+    slat.position.set(s, 0.8, -0.21);
+    chair.add(slat);
+  }
+
+  // 4 Chair Legs
+  const legPositions = [
+    [-0.23, 0.22, -0.23],
+    [0.23, 0.22, -0.23],
+    [-0.23, 0.22, 0.23],
+    [0.23, 0.22, 0.23]
+  ];
+  legPositions.forEach(([x, y, z]) => {
+    const legGeo = new THREE.CylinderGeometry(0.025, 0.02, 0.45, 8);
+    const leg = new THREE.Mesh(legGeo, woodChairMaterial);
+    leg.position.set(x, y, z);
+    chair.add(leg);
+  });
 
   return chair;
 }
@@ -65,23 +153,39 @@ export function createBabanrao() {
   group.name = 'Babanrao';
 
   // Torso / Kurta & Jacket
-  const torsoGeo = new THREE.CylinderGeometry(0.24, 0.22, 0.65, 16);
+  const torsoGeo = new THREE.CylinderGeometry(0.25, 0.22, 0.65, 16);
   const torso = new THREE.Mesh(torsoGeo, babanraoJacketMaterial);
   torso.position.y = 0.82;
   torso.castShadow = true;
+  torso.receiveShadow = true;
   group.add(torso);
 
+  // Kurta chest placket visible between open Nehru jacket
+  const placketGeo = new THREE.PlaneGeometry(0.09, 0.52);
+  const placket = new THREE.Mesh(placketGeo, babanraoShirtMaterial);
+  placket.position.set(0, 0.85, 0.238);
+  group.add(placket);
+
+  // Brass buttons down jacket
+  for (let b = 0; b < 4; b++) {
+    const btnGeo = new THREE.CylinderGeometry(0.012, 0.012, 0.008, 10);
+    const btn = new THREE.Mesh(btnGeo, goldTrimMaterial);
+    btn.position.set(0, 0.72 + b * 0.09, 0.245);
+    btn.rotation.x = Math.PI / 2;
+    group.add(btn);
+  }
+
   // Shoulders (Smooth anatomical blend)
-  const shoulderGeo = new THREE.SphereGeometry(0.08, 12, 12);
+  const shoulderGeo = new THREE.SphereGeometry(0.085, 12, 12);
   const leftShoulder = new THREE.Mesh(shoulderGeo, babanraoJacketMaterial);
-  leftShoulder.position.set(-0.25, 1.08, 0);
+  leftShoulder.position.set(-0.26, 1.08, 0);
   const rightShoulder = new THREE.Mesh(shoulderGeo, babanraoJacketMaterial);
-  rightShoulder.position.set(0.25, 1.08, 0);
+  rightShoulder.position.set(0.26, 1.08, 0);
   group.add(leftShoulder, rightShoulder);
 
   // Neck & Kurta collar
   const neckGeo = new THREE.CylinderGeometry(0.08, 0.09, 0.12, 12);
-  const neck = new THREE.Mesh(neckGeo, skinMaterial);
+  const neck = new THREE.Mesh(neckGeo, babanraoSkinMaterial);
   neck.position.y = 1.18;
   group.add(neck);
 
@@ -91,51 +195,68 @@ export function createBabanrao() {
   group.add(collar);
 
   // Head
-  const headGeo = new THREE.SphereGeometry(0.15, 20, 20);
-  const head = new THREE.Mesh(headGeo, skinMaterial);
+  const headGeo = new THREE.SphereGeometry(0.155, 22, 22);
+  const head = new THREE.Mesh(headGeo, babanraoSkinMaterial);
   head.position.y = 1.32;
   head.castShadow = true;
   group.add(head);
 
+  // Eyes with life and focus
+  const leftEye = createEye(0.95);
+  leftEye.position.set(-0.048, 1.332, 0.138);
+  const rightEye = createEye(0.95);
+  rightEye.position.set(0.048, 1.332, 0.138);
+  group.add(leftEye, rightEye);
+
+  // Subtle graying eyebrows
+  const browMat = new THREE.MeshStandardMaterial({ color: 0x4A4D54, roughness: 0.9 });
+  const browGeo = new THREE.BoxGeometry(0.04, 0.009, 0.015);
+  const leftBrow = new THREE.Mesh(browGeo, browMat);
+  leftBrow.position.set(-0.048, 1.362, 0.145);
+  leftBrow.rotation.z = -0.1;
+  const rightBrow = new THREE.Mesh(browGeo, browMat);
+  rightBrow.position.set(0.048, 1.362, 0.145);
+  rightBrow.rotation.z = 0.1;
+  group.add(leftBrow, rightBrow);
+
   // Fitted Graying Hair (Cleanly covers back and sides of skull)
-  const hairGeo = new THREE.SphereGeometry(0.154, 20, 20, 0, Math.PI * 2, 0, Math.PI * 0.62);
+  const hairGeo = new THREE.SphereGeometry(0.158, 20, 20, 0, Math.PI * 2, 0, Math.PI * 0.62);
   const hairMat = new THREE.MeshStandardMaterial({ color: 0x484B52, roughness: 0.85 });
   const hair = new THREE.Mesh(hairGeo, hairMat);
   hair.position.y = 1.325;
   hair.rotation.x = -0.15;
   group.add(hair);
 
-  // Signature Marathi Mustache
-  const stacheGeo = new THREE.BoxGeometry(0.12, 0.028, 0.04);
-  const stacheMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.9 });
+  // Signature Marathi Mustache with highlight
+  const stacheGeo = new THREE.BoxGeometry(0.13, 0.032, 0.045);
+  const stacheMat = new THREE.MeshStandardMaterial({ color: 0x2A2B2E, roughness: 0.85 });
   const stache = new THREE.Mesh(stacheGeo, stacheMat);
-  stache.position.set(0, 1.27, 0.142);
+  stache.position.set(0, 1.265, 0.145);
   group.add(stache);
 
-  // Spectacles
+  // Spectacles with gleaming gold rims
   const glassesGroup = new THREE.Group();
-  const rimGeo = new THREE.TorusGeometry(0.032, 0.005, 8, 16);
-  const rimMat = new THREE.MeshStandardMaterial({ color: 0xC9A24B, metalness: 0.9, roughness: 0.2 });
-  const leftRim = new THREE.Mesh(rimGeo, rimMat);
-  leftRim.position.set(-0.045, 1.33, 0.145);
-  const rightRim = new THREE.Mesh(rimGeo, rimMat);
-  rightRim.position.set(0.045, 1.33, 0.145);
+  const rimGeo = new THREE.TorusGeometry(0.034, 0.0055, 8, 20);
+  const leftRim = new THREE.Mesh(rimGeo, goldTrimMaterial);
+  leftRim.position.set(-0.048, 1.332, 0.15);
+  const rightRim = new THREE.Mesh(rimGeo, goldTrimMaterial);
+  rightRim.position.set(0.048, 1.332, 0.15);
   glassesGroup.add(leftRim, rightRim);
 
-  const bridgeGeo = new THREE.BoxGeometry(0.025, 0.005, 0.005);
-  const bridge = new THREE.Mesh(bridgeGeo, rimMat);
-  bridge.position.set(0, 1.33, 0.148);
+  const bridgeGeo = new THREE.BoxGeometry(0.026, 0.005, 0.006);
+  const bridge = new THREE.Mesh(bridgeGeo, goldTrimMaterial);
+  bridge.position.set(0, 1.332, 0.152);
   glassesGroup.add(bridge);
   group.add(glassesGroup);
 
   // Left Arm (Resting on table)
-  const leftArm = createArm(babanraoShirtMaterial, skinMaterial, false);
+  const leftArm = createArm(babanraoShirtMaterial, babanraoSkinMaterial, false);
   leftArm.position.set(-0.25, 1.05, 0);
   leftArm.rotation.set(0.7, 0.3, -0.4);
   group.add(leftArm);
 
   // Right Arm (Animated for card play & table slap)
-  const rightArm = createArm(babanraoShirtMaterial, skinMaterial, true);
+  const rightArm = createArm(babanraoShirtMaterial, babanraoSkinMaterial, true);
   rightArm.position.set(0.25, 1.05, 0);
   rightArm.rotation.set(0.7, -0.3, 0.4);
   group.add(rightArm);
@@ -152,63 +273,109 @@ export function createBabanrao() {
   return group;
 }
 
-// 2. Build Opponent 2: Dinkar (The Hype Guy)
+// 2. Build Opponent 2: Dinkar (The Hype Guy on your left)
 export function createDinkar() {
   const group = new THREE.Group();
   group.name = 'Dinkar';
 
-  // Torso / Varsity Jacket
+  // Torso / Varsity Jacket with rich maroon fabric
   const torsoGeo = new THREE.CylinderGeometry(0.25, 0.21, 0.65, 16);
   const torso = new THREE.Mesh(torsoGeo, dinkarJacketMaterial);
   torso.position.y = 0.82;
   torso.castShadow = true;
+  torso.receiveShadow = true;
   group.add(torso);
 
-  // Shoulders
-  const shoulderGeo = new THREE.SphereGeometry(0.085, 12, 12);
-  const leftShoulder = new THREE.Mesh(shoulderGeo, dinkarJacketMaterial);
+  // Varsity collar ribbing
+  const ribGeo = new THREE.CylinderGeometry(0.12, 0.13, 0.05, 14);
+  const ribMat = new THREE.MeshStandardMaterial({ color: 0xF5F0E6, roughness: 0.6 });
+  const rib = new THREE.Mesh(ribGeo, ribMat);
+  rib.position.y = 1.13;
+  group.add(rib);
+
+  // Shoulders (Varsity cream contrast)
+  const shoulderGeo = new THREE.SphereGeometry(0.088, 12, 12);
+  const leftShoulder = new THREE.Mesh(shoulderGeo, dinkarSleeveMaterial);
   leftShoulder.position.set(-0.26, 1.08, 0);
-  const rightShoulder = new THREE.Mesh(shoulderGeo, dinkarJacketMaterial);
+  const rightShoulder = new THREE.Mesh(shoulderGeo, dinkarSleeveMaterial);
   rightShoulder.position.set(0.26, 1.08, 0);
   group.add(leftShoulder, rightShoulder);
 
   // Neck
   const neckGeo = new THREE.CylinderGeometry(0.08, 0.09, 0.12, 12);
-  const neck = new THREE.Mesh(neckGeo, skinMaterial);
+  const neck = new THREE.Mesh(neckGeo, dinkarSkinMaterial);
   neck.position.y = 1.18;
   group.add(neck);
 
+  // Bold Gold Chain Necklace!
+  const chainGeo = new THREE.TorusGeometry(0.10, 0.012, 8, 24);
+  const chain = new THREE.Mesh(chainGeo, goldTrimMaterial);
+  chain.position.set(0, 1.12, 0.08);
+  chain.rotation.x = Math.PI / 2.6;
+  group.add(chain);
+
   // Head
-  const headGeo = new THREE.SphereGeometry(0.15, 20, 20);
-  const head = new THREE.Mesh(headGeo, skinMaterial);
+  const headGeo = new THREE.SphereGeometry(0.152, 22, 22);
+  const head = new THREE.Mesh(headGeo, dinkarSkinMaterial);
   head.position.y = 1.32;
   head.castShadow = true;
   group.add(head);
 
-  // Fitted Modern Hair Cap
-  const hairGeo = new THREE.SphereGeometry(0.155, 20, 20, 0, Math.PI * 2, 0, Math.PI * 0.6);
+  // Modern styled hair cap
+  const hairGeo = new THREE.SphereGeometry(0.158, 20, 20, 0, Math.PI * 2, 0, Math.PI * 0.6);
   const hairMat = new THREE.MeshStandardMaterial({ color: 0x161311, roughness: 0.8 });
   const hair = new THREE.Mesh(hairGeo, hairMat);
   hair.position.y = 1.33;
   hair.rotation.x = -0.1;
   group.add(hair);
 
-  // Sunglasses on eyes
+  // High-End Sunglasses with Gold Rims and Reflection Streaks
   const shadesGroup = new THREE.Group();
-  const frameGeo = new THREE.BoxGeometry(0.16, 0.045, 0.02);
-  const shadesMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.1, metalness: 0.9 });
-  const frame = new THREE.Mesh(frameGeo, shadesMat);
+  
+  // Gold frames
+  const frameGeo = new THREE.BoxGeometry(0.165, 0.048, 0.02);
+  const frameMat = new THREE.MeshStandardMaterial({ color: 0xD4AF37, metalness: 0.95, roughness: 0.2 });
+  const frame = new THREE.Mesh(frameGeo, frameMat);
   frame.position.set(0, 1.33, 0.145);
   shadesGroup.add(frame);
+
+  // Dark polarized lenses
+  const lensGeo = new THREE.BoxGeometry(0.065, 0.038, 0.008);
+  const lensMat = new THREE.MeshStandardMaterial({ color: 0x0A0D12, metalness: 0.9, roughness: 0.05 });
+  const leftLens = new THREE.Mesh(lensGeo, lensMat);
+  leftLens.position.set(-0.042, 1.33, 0.156);
+  const rightLens = new THREE.Mesh(lensGeo, lensMat);
+  rightLens.position.set(0.042, 1.33, 0.156);
+  shadesGroup.add(leftLens, rightLens);
+
+  // Bright reflection glare strips across sunglasses
+  const glareGeo = new THREE.PlaneGeometry(0.035, 0.007);
+  const glareMat = new THREE.MeshBasicMaterial({ color: 0xFFFFFF });
+  const leftGlare = new THREE.Mesh(glareGeo, glareMat);
+  leftGlare.position.set(-0.042, 1.338, 0.161);
+  leftGlare.rotation.z = 0.3;
+  const rightGlare = new THREE.Mesh(glareGeo, glareMat);
+  rightGlare.position.set(0.042, 1.338, 0.161);
+  rightGlare.rotation.z = 0.3;
+  shadesGroup.add(leftGlare, rightGlare);
+
   group.add(shadesGroup);
 
-  // Arms
-  const leftArm = createArm(dinkarJacketMaterial, skinMaterial, false);
+  // Smirking Mouth
+  const smileGeo = new THREE.TorusGeometry(0.026, 0.004, 6, 12, Math.PI * 0.7);
+  const smileMat = new THREE.MeshStandardMaterial({ color: 0x4D211A, roughness: 0.6 });
+  const smile = new THREE.Mesh(smileGeo, smileMat);
+  smile.position.set(0.015, 1.255, 0.145);
+  smile.rotation.z = Math.PI * 0.9;
+  group.add(smile);
+
+  // Cream Sleeves on Arms
+  const leftArm = createArm(dinkarSleeveMaterial, dinkarSkinMaterial, false);
   leftArm.position.set(-0.26, 1.05, 0);
   leftArm.rotation.set(0.7, 0.2, -0.3);
   group.add(leftArm);
 
-  const rightArm = createArm(dinkarJacketMaterial, skinMaterial, true);
+  const rightArm = createArm(dinkarSleeveMaterial, dinkarSkinMaterial, true);
   rightArm.position.set(0.26, 1.05, 0);
   rightArm.rotation.set(0.7, -0.2, 0.3);
   group.add(rightArm);
@@ -217,59 +384,104 @@ export function createDinkar() {
   return group;
 }
 
-// 3. Build Opponent 3: Anandi (The Calm Mastermind)
+// 3. Build Opponent 3: Anandi (The Calm Mastermind on your right)
 export function createAnandi() {
   const group = new THREE.Group();
   group.name = 'Anandi';
 
-  // Torso / Elegant Emerald Saree/Kurti
-  const torsoGeo = new THREE.CylinderGeometry(0.21, 0.19, 0.62, 16);
+  // Torso / Elegant Emerald Silk Kurti / Saree
+  const torsoGeo = new THREE.CylinderGeometry(0.22, 0.19, 0.62, 16);
   const torso = new THREE.Mesh(torsoGeo, anandiDressMaterial);
   torso.position.y = 0.82;
   torso.castShadow = true;
+  torso.receiveShadow = true;
   group.add(torso);
 
+  // Gold Zari Neckline & Border
+  const zariGeo = new THREE.TorusGeometry(0.12, 0.01, 8, 20, Math.PI);
+  const zari = new THREE.Mesh(zariGeo, goldTrimMaterial);
+  zari.position.set(0, 1.08, 0.15);
+  zari.rotation.x = Math.PI / 2.3;
+  group.add(zari);
+
   // Shoulders
-  const shoulderGeo = new THREE.SphereGeometry(0.075, 12, 12);
+  const shoulderGeo = new THREE.SphereGeometry(0.078, 12, 12);
   const leftShoulder = new THREE.Mesh(shoulderGeo, anandiDressMaterial);
-  leftShoulder.position.set(-0.22, 1.08, 0);
+  leftShoulder.position.set(-0.23, 1.08, 0);
   const rightShoulder = new THREE.Mesh(shoulderGeo, anandiDressMaterial);
-  rightShoulder.position.set(0.22, 1.08, 0);
+  rightShoulder.position.set(0.23, 1.08, 0);
   group.add(leftShoulder, rightShoulder);
 
   // Neck
   const neckGeo = new THREE.CylinderGeometry(0.07, 0.08, 0.12, 12);
-  const neck = new THREE.Mesh(neckGeo, skinMaterial);
+  const neck = new THREE.Mesh(neckGeo, anandiSkinMaterial);
   neck.position.y = 1.18;
   group.add(neck);
 
   // Head
-  const headGeo = new THREE.SphereGeometry(0.14, 20, 20);
-  const head = new THREE.Mesh(headGeo, skinMaterial);
+  const headGeo = new THREE.SphereGeometry(0.144, 22, 22);
+  const head = new THREE.Mesh(headGeo, anandiSkinMaterial);
   head.position.y = 1.30;
   head.castShadow = true;
   group.add(head);
 
-  // Traditional Fitted Hair & Bun
+  // Expressive Calm Eyes
+  const leftEye = createEye(0.9);
+  leftEye.position.set(-0.044, 1.315, 0.132);
+  const rightEye = createEye(0.9);
+  rightEye.position.set(0.044, 1.315, 0.132);
+  group.add(leftEye, rightEye);
+
+  // Traditional Red Bindi on Forehead!
+  const bindiGeo = new THREE.SphereGeometry(0.009, 8, 8);
+  const bindiMat = new THREE.MeshStandardMaterial({ color: 0xBF1020, roughness: 0.4 });
+  const bindi = new THREE.Mesh(bindiGeo, bindiMat);
+  bindi.position.set(0, 1.352, 0.141);
+  bindi.scale.set(1, 1, 0.4);
+  group.add(bindi);
+
+  // Golden Jhumka Earrings!
+  [-0.145, 0.145].forEach((x) => {
+    const earring = new THREE.Group();
+    const studGeo = new THREE.SphereGeometry(0.009, 8, 8);
+    const stud = new THREE.Mesh(studGeo, goldTrimMaterial);
+    earring.add(stud);
+
+    const bellGeo = new THREE.ConeGeometry(0.016, 0.025, 10);
+    const bell = new THREE.Mesh(bellGeo, goldTrimMaterial);
+    bell.position.y = -0.024;
+    earring.add(bell);
+
+    earring.position.set(x, 1.285, 0.02);
+    group.add(earring);
+  });
+
+  // Traditional Hair & Voluminous Bun
   const hairMat = new THREE.MeshStandardMaterial({ color: 0x0A0808, roughness: 0.75 });
-  const hairGeo = new THREE.SphereGeometry(0.145, 20, 20, 0, Math.PI * 2, 0, Math.PI * 0.65);
+  const hairGeo = new THREE.SphereGeometry(0.148, 20, 20, 0, Math.PI * 2, 0, Math.PI * 0.65);
   const hair = new THREE.Mesh(hairGeo, hairMat);
   hair.position.y = 1.305;
   hair.rotation.x = -0.15;
   group.add(hair);
 
-  const bunGeo = new THREE.SphereGeometry(0.07, 14, 14);
+  const bunGeo = new THREE.SphereGeometry(0.075, 14, 14);
   const bun = new THREE.Mesh(bunGeo, hairMat);
   bun.position.set(0, 1.31, -0.135);
   group.add(bun);
 
-  // Arms with Gold Bangles
-  const leftArm = createArm(anandiDressMaterial, skinMaterial, false, true);
+  // Gold hairpin / Gajra accent on hair bun
+  const gajraGeo = new THREE.TorusGeometry(0.065, 0.012, 8, 20);
+  const gajra = new THREE.Mesh(gajraGeo, goldTrimMaterial);
+  gajra.position.set(0, 1.31, -0.125);
+  group.add(gajra);
+
+  // Arms with Gold Bangles on both wrists
+  const leftArm = createArm(anandiDressMaterial, anandiSkinMaterial, false, true);
   leftArm.position.set(-0.23, 1.05, 0);
   leftArm.rotation.set(0.7, 0.3, -0.3);
   group.add(leftArm);
 
-  const rightArm = createArm(anandiDressMaterial, skinMaterial, true, true);
+  const rightArm = createArm(anandiDressMaterial, anandiSkinMaterial, true, true);
   rightArm.position.set(0.23, 1.05, 0);
   rightArm.rotation.set(0.7, -0.3, 0.3);
   group.add(rightArm);
@@ -278,7 +490,7 @@ export function createAnandi() {
   return group;
 }
 
-// 4. First-Person Player Hands (Foreground in front of camera)
+// 4. First-Person Player Hands (Grounded on table in front of player)
 export function createPlayerArms() {
   const group = new THREE.Group();
   group.name = 'PlayerArms';
@@ -286,43 +498,56 @@ export function createPlayerArms() {
   // Left Arm resting on table edge
   const leftArm = new THREE.Group();
   const leftForearm = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.05, 0.04, 0.55, 10),
-    skinMaterial
+    new THREE.CylinderGeometry(0.045, 0.038, 0.35, 12),
+    playerSkinMaterial
   );
-  leftForearm.position.set(0, -0.22, 0.1);
-  leftForearm.rotation.x = 1.2;
+  leftForearm.position.set(0, 0.02, 0.08);
+  leftForearm.rotation.x = 1.35;
+  leftForearm.castShadow = true;
   leftArm.add(leftForearm);
 
   const leftHand = new THREE.Mesh(
-    new THREE.BoxGeometry(0.09, 0.04, 0.13),
-    skinMaterial
+    new THREE.BoxGeometry(0.085, 0.032, 0.12),
+    playerSkinMaterial
   );
-  leftHand.position.set(0, -0.06, 0.32);
-  leftHand.rotation.x = 0.2;
+  leftHand.position.set(0, 0.016, -0.07);
+  leftHand.rotation.x = -0.08;
+  leftHand.castShadow = true;
+  leftHand.receiveShadow = true;
   leftArm.add(leftHand);
 
-  leftArm.position.set(-0.38, -0.25, -0.45);
+  // Watch on left wrist
+  const watchGeo = new THREE.CylinderGeometry(0.042, 0.042, 0.018, 12);
+  const watch = new THREE.Mesh(watchGeo, goldTrimMaterial);
+  watch.position.set(0, 0.024, 0.01);
+  watch.rotation.x = 1.35;
+  leftArm.add(watch);
+
+  leftArm.position.set(-0.28, 0, 0);
   group.add(leftArm);
 
   // Right Arm (Ready to flip cards into the pot!)
   const rightArm = new THREE.Group();
   const rightForearm = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.05, 0.04, 0.55, 10),
-    skinMaterial
+    new THREE.CylinderGeometry(0.045, 0.038, 0.35, 12),
+    playerSkinMaterial
   );
-  rightForearm.position.set(0, -0.22, 0.1);
-  rightForearm.rotation.x = 1.2;
+  rightForearm.position.set(0, 0.02, 0.08);
+  rightForearm.rotation.x = 1.35;
+  rightForearm.castShadow = true;
   rightArm.add(rightForearm);
 
   const rightHand = new THREE.Mesh(
-    new THREE.BoxGeometry(0.09, 0.04, 0.13),
-    skinMaterial
+    new THREE.BoxGeometry(0.085, 0.032, 0.12),
+    playerSkinMaterial
   );
-  rightHand.position.set(0, -0.06, 0.32);
-  rightHand.rotation.x = 0.2;
+  rightHand.position.set(0, 0.016, -0.07);
+  rightHand.rotation.x = -0.08;
+  rightHand.castShadow = true;
+  rightHand.receiveShadow = true;
   rightArm.add(rightHand);
 
-  rightArm.position.set(0.38, -0.25, -0.45);
+  rightArm.position.set(0.28, 0, 0);
   group.add(rightArm);
 
   group.userData = {
@@ -359,13 +584,15 @@ function createArm(sleeveMat, handSkinMat, isRight = false, addBangle = false) {
   hand.rotation.x = 0.2;
   arm.add(hand);
 
-  // Gold Bangle for Anandi
+  // Gold Bangles for Anandi
   if (addBangle) {
-    const bangleGeo = new THREE.TorusGeometry(0.046, 0.007, 8, 16);
-    const bangle = new THREE.Mesh(bangleGeo, goldBangleMaterial);
-    bangle.position.set(0, -0.48, 0.2);
-    bangle.rotation.x = Math.PI / 2;
-    arm.add(bangle);
+    [-0.46, -0.48, -0.50].forEach((yPos) => {
+      const bangleGeo = new THREE.TorusGeometry(0.046, 0.006, 8, 16);
+      const bangle = new THREE.Mesh(bangleGeo, goldTrimMaterial);
+      bangle.position.set(0, yPos, 0.18 + (yPos + 0.48) * 0.4);
+      bangle.rotation.x = Math.PI / 2.2;
+      arm.add(bangle);
+    });
   }
 
   arm.userData = { upper, fore, hand, isRight };
@@ -468,27 +695,27 @@ export function animatePlayerThrow(playerArms, onDrop, onComplete) {
     const now = performance.now();
     const progress = Math.min(1, (now - startTime) / duration);
 
-    if (progress < 0.4) {
-      // Reach down to personal stack
-      const p = progress / 0.4;
-      rightArm.position.y = startPos.y - 0.08 * p;
-      rightArm.position.z = startPos.z - 0.15 * p;
+    if (progress < 0.35) {
+      // 1. Lift slightly and tap personal deck
+      const p = progress / 0.35;
+      rightArm.position.y = startPos.y + 0.05 * Math.sin(p * Math.PI);
+      rightArm.position.z = startPos.z - 0.04 * p;
     } else if (progress < 0.7) {
-      // Throw card forward toward pot
-      const p = (progress - 0.4) / 0.3;
-      rightArm.position.y = startPos.y + 0.12 * p;
-      rightArm.position.z = startPos.z + 0.25 * p;
-      rightArm.position.x = startPos.x - 0.15 * p;
+      // 2. Flick forward into center pot!
+      const p = (progress - 0.35) / 0.35;
+      rightArm.position.y = startPos.y + 0.09 * Math.sin(p * Math.PI);
+      rightArm.position.z = startPos.z - 0.04 - 0.22 * p;
+      rightArm.position.x = startPos.x - 0.12 * p;
 
       if (!dropped && progress > 0.55) {
         dropped = true;
         if (onDrop) onDrop();
       }
     } else {
-      // Recover back to rest
+      // 3. Return smoothly to resting spot beside deck
       const p = (progress - 0.7) / 0.3;
       rightArm.position.lerpVectors(
-        new THREE.Vector3(startPos.x - 0.15, startPos.y + 0.12, startPos.z + 0.25),
+        new THREE.Vector3(startPos.x - 0.12, startPos.y, startPos.z - 0.26),
         startPos,
         p
       );

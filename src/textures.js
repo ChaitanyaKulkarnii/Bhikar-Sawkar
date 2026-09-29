@@ -131,36 +131,172 @@ export function getCardFaceTexture(card) {
   return texture;
 }
 
-// 3. Billiard Felt Baize Texture
+// 3. Luxurious High-Detail Billiard Felt Baize Texture (2048x2048)
 export function getFeltTexture() {
   const canvas = document.createElement('canvas');
-  canvas.width = 1024;
-  canvas.height = 1024;
+  canvas.width = 2048;
+  canvas.height = 2048;
   const ctx = canvas.getContext('2d');
 
-  ctx.fillStyle = '#12372F';
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2;
+
+  // 1. Deep Billiard Green Felt Base with Radial Lighting
+  const baseGrad = ctx.createRadialGradient(cx, cy, 100, cx, cy, 980);
+  baseGrad.addColorStop(0, '#18473C');   // brighter warm center under lamp
+  baseGrad.addColorStop(0.65, '#12372F'); // standard rich baize
+  baseGrad.addColorStop(1, '#0C231E');   // deep shadow toward mahogany rim
+  ctx.fillStyle = baseGrad;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Tactile felt grain
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.035)';
-  for (let i = 0; i < 30000; i++) {
+  // 2. Micro Woven Felt Fibers (tactile texture)
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.032)';
+  for (let i = 0; i < 45000; i++) {
     const x = Math.random() * canvas.width;
     const y = Math.random() * canvas.height;
-    ctx.fillRect(x, y, 1.5, 1.5);
+    ctx.fillRect(x, y, 1.8, 1.8);
+  }
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.055)';
+  for (let i = 0; i < 45000; i++) {
+    const x = Math.random() * canvas.width;
+    const y = Math.random() * canvas.height;
+    ctx.fillRect(x, y, 1.8, 1.8);
   }
 
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-  for (let i = 0; i < 30000; i++) {
-    const x = Math.random() * canvas.width;
-    const y = Math.random() * canvas.height;
-    ctx.fillRect(x, y, 1.5, 1.5);
+  // 3. Outer Concentric Gold Borders
+  ctx.strokeStyle = 'rgba(201, 162, 75, 0.65)';
+  ctx.lineWidth = 10;
+  ctx.beginPath();
+  ctx.arc(cx, cy, 940, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.strokeStyle = 'rgba(229, 191, 101, 0.4)';
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.arc(cx, cy, 915, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Fine dashed decorative track
+  ctx.setLineDash([12, 12]);
+  ctx.strokeStyle = 'rgba(201, 162, 75, 0.35)';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(cx, cy, 890, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // 4. Central Pot Arena Ring (Where cards land)
+  const potGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 420);
+  potGrad.addColorStop(0, 'rgba(201, 162, 75, 0.1)');
+  potGrad.addColorStop(1, 'rgba(0, 0, 0, 0.15)');
+  ctx.fillStyle = potGrad;
+  ctx.beginPath();
+  ctx.arc(cx, cy, 400, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.strokeStyle = '#C9A24B';
+  ctx.lineWidth = 8;
+  ctx.beginPath();
+  ctx.arc(cx, cy, 400, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.strokeStyle = 'rgba(229, 191, 101, 0.6)';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(cx, cy, 380, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Central Devanagari Watermark
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.fillStyle = 'rgba(201, 162, 75, 0.32)';
+  ctx.font = 'bold 72px "Yatra One", serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('भिकार सावकार', 0, 0);
+
+  // Inner Ornate Rosette around Center
+  ctx.strokeStyle = 'rgba(201, 162, 75, 0.25)';
+  ctx.lineWidth = 4;
+  for (let a = 0; a < 8; a++) {
+    ctx.rotate(Math.PI / 4);
+    ctx.strokeRect(-90, -90, 180, 180);
   }
+  ctx.restore();
+
+  // 5. Four Player Deck Placement Wells (Gold Frames on Felt)
+  const deckPositions = [
+    { x: cx, y: cy + 620, label: 'YOU (भाऊ)' },       // Bottom (Player)
+    { x: cx, y: cy - 620, label: 'BABANRAO' },        // Top
+    { x: cx - 620, y: cy, label: 'DINKAR' },          // Left
+    { x: cx + 620, y: cy, label: 'ANANDI' }           // Right
+  ];
+
+  deckPositions.forEach(({ x, y, label }) => {
+    ctx.save();
+    ctx.translate(x, y);
+
+    // Subtle dark well shadow
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.22)';
+    ctx.fillRect(-110, -150, 220, 300);
+
+    // Gold Double Border
+    ctx.strokeStyle = '#C9A24B';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(-110, -150, 220, 300);
+
+    ctx.strokeStyle = 'rgba(229, 191, 101, 0.5)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(-102, -142, 204, 284);
+
+    // Corner Ornaments
+    const cornerSize = 16;
+    ctx.fillStyle = '#C9A24B';
+    ctx.fillRect(-112, -152, cornerSize, cornerSize);
+    ctx.fillRect(112 - cornerSize, -152, cornerSize, cornerSize);
+    ctx.fillRect(-112, 152 - cornerSize, cornerSize, cornerSize);
+    ctx.fillRect(112 - cornerSize, 152 - cornerSize, cornerSize, cornerSize);
+
+    // Station Name Label
+    ctx.fillStyle = 'rgba(201, 162, 75, 0.7)';
+    ctx.font = 'bold 24px Outfit, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(label, 0, 175);
+
+    ctx.restore();
+  });
+
+  // 6. Embossed Gold Suits in 4 Quadrants
+  const suitEmblems = [
+    { char: '♠', x: cx - 480, y: cy - 480 },
+    { char: '♥', x: cx + 480, y: cy - 480 },
+    { char: '♦', x: cx + 480, y: cy + 480 },
+    { char: '♣', x: cx - 480, y: cy + 480 }
+  ];
+
+  suitEmblems.forEach(({ char, x, y }) => {
+    ctx.save();
+    ctx.fillStyle = 'rgba(201, 162, 75, 0.35)';
+    ctx.font = '130px serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(char, x, y);
+
+    // Outer circle
+    ctx.strokeStyle = 'rgba(201, 162, 75, 0.3)';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(x, y, 90, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  });
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-  texture.repeat.set(4, 4);
-  texture.anisotropy = 8;
+  texture.anisotropy = 16;
+  texture.generateMipmaps = true;
+  texture.minFilter = THREE.LinearMipmapLinearFilter;
+  texture.magFilter = THREE.LinearFilter;
   return texture;
 }

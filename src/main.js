@@ -454,6 +454,18 @@ document.getElementById('group-mode').addEventListener('click', (e) => {
   engine.initMatch();
 });
 
+// Wire 270° POV Quick-Look Camera Buttons
+document.querySelectorAll('.btn-pov').forEach((btn) => {
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const target = btn.getAttribute('data-target');
+    if (target && scene3d.lookAtSeat) {
+      scene3d.lookAtSeat(target);
+      sounds.playCardFlip();
+    }
+  });
+});
+
 // First Interaction Audio Unlock
 window.addEventListener('click', () => {
   sounds.ensureContext();

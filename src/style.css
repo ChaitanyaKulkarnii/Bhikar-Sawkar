@@ -326,6 +326,62 @@ html, body {
   cursor: grabbing;
 }
 
+/* ==========================================================================
+   270° POV QUICK NAVIGATION BAR
+   ========================================================================== */
+.pov-controls-bar {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(14, 18, 26, 0.94);
+  border: 1px solid var(--gold-sawkar);
+  padding: 6px 12px;
+  border-radius: 24px;
+  z-index: 15;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7), 0 0 12px rgba(201, 162, 75, 0.25);
+  backdrop-filter: blur(10px);
+}
+
+.pov-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--gold-sawkar);
+  margin-right: 4px;
+  white-space: nowrap;
+}
+
+.btn-pov {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: var(--text-main);
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 5px 9px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-pov:hover {
+  background: rgba(201, 162, 75, 0.25);
+  border-color: var(--gold-sawkar);
+  color: var(--gold-sawkar);
+  transform: translateY(-1px);
+}
+
+.btn-pov-reset {
+  color: var(--gold-sawkar);
+  border-color: rgba(201, 162, 75, 0.5);
+  background: rgba(201, 162, 75, 0.1);
+}
+
 /* Current Top Card HUD Display (Top Left corner) */
 .current-card-hud {
   position: absolute;
@@ -383,30 +439,28 @@ html, body {
   flex-direction: column;
   align-items: center;
   z-index: 12;
-  transition: all 0.25s ease;
+  transition: opacity 0.2s ease, transform 0.05s linear;
   pointer-events: none;
 }
 
-/* Top Seat (Babanrao) */
+/* Fallback default positions before 3D projection kicks in */
 .hud-top {
-  top: 14px;
+  top: 60px;
   left: 50%;
   transform: translateX(-50%);
 }
 
-/* Left Seat (Dinkar) */
 .hud-left {
   top: 36%;
-  left: 24px;
+  left: 18%;
 }
 
-/* Right Seat (Anandi) */
 .hud-right {
   top: 36%;
-  right: 24px;
+  left: 82%;
 }
 
-/* Bottom Seat (You / Bhau) */
+/* Bottom Seat (You / Bhau) remains anchored at bottom left */
 .hud-bottom {
   bottom: 18px;
   left: 24px;
@@ -883,5 +937,18 @@ html, body {
   .btn-flip-card {
     padding: 10px 20px;
     font-size: 0.9rem;
+  }
+  .pov-controls-bar {
+    top: 10px;
+    right: 10px;
+    padding: 4px 8px;
+    gap: 4px;
+  }
+  .pov-title {
+    display: none;
+  }
+  .btn-pov {
+    padding: 3px 6px;
+    font-size: 0.62rem;
   }
 }
