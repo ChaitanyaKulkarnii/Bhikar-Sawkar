@@ -4,23 +4,23 @@ import * as THREE from 'three';
 // Materials for characters
 const skinMaterial = new THREE.MeshStandardMaterial({
   color: 0xC68642,
-  roughness: 0.65,
+  roughness: 0.6,
   metalness: 0.05
 });
 
 const babanraoJacketMaterial = new THREE.MeshStandardMaterial({
   color: 0x2A3439, // Dark slate Nehru waistcoat
-  roughness: 0.75
+  roughness: 0.7
 });
 
 const babanraoShirtMaterial = new THREE.MeshStandardMaterial({
   color: 0xEAE4D8, // Off-white cotton kurta
-  roughness: 0.8
+  roughness: 0.75
 });
 
 const dinkarJacketMaterial = new THREE.MeshStandardMaterial({
   color: 0x8A2B2B, // Deep maroon varsity jacket
-  roughness: 0.6
+  roughness: 0.55
 });
 
 const anandiDressMaterial = new THREE.MeshStandardMaterial({
@@ -65,38 +65,51 @@ export function createBabanrao() {
   group.name = 'Babanrao';
 
   // Torso / Kurta & Jacket
-  const torsoGeo = new THREE.CylinderGeometry(0.24, 0.22, 0.65, 12);
+  const torsoGeo = new THREE.CylinderGeometry(0.24, 0.22, 0.65, 16);
   const torso = new THREE.Mesh(torsoGeo, babanraoJacketMaterial);
   torso.position.y = 0.82;
   torso.castShadow = true;
   group.add(torso);
 
-  // Kurta collar
-  const collarGeo = new THREE.CylinderGeometry(0.12, 0.13, 0.08, 12);
+  // Shoulders (Smooth anatomical blend)
+  const shoulderGeo = new THREE.SphereGeometry(0.08, 12, 12);
+  const leftShoulder = new THREE.Mesh(shoulderGeo, babanraoJacketMaterial);
+  leftShoulder.position.set(-0.25, 1.08, 0);
+  const rightShoulder = new THREE.Mesh(shoulderGeo, babanraoJacketMaterial);
+  rightShoulder.position.set(0.25, 1.08, 0);
+  group.add(leftShoulder, rightShoulder);
+
+  // Neck & Kurta collar
+  const neckGeo = new THREE.CylinderGeometry(0.08, 0.09, 0.12, 12);
+  const neck = new THREE.Mesh(neckGeo, skinMaterial);
+  neck.position.y = 1.18;
+  group.add(neck);
+
+  const collarGeo = new THREE.CylinderGeometry(0.11, 0.12, 0.06, 12);
   const collar = new THREE.Mesh(collarGeo, babanraoShirtMaterial);
-  collar.position.y = 1.16;
+  collar.position.y = 1.14;
   group.add(collar);
 
   // Head
-  const headGeo = new THREE.SphereGeometry(0.15, 16, 16);
+  const headGeo = new THREE.SphereGeometry(0.15, 20, 20);
   const head = new THREE.Mesh(headGeo, skinMaterial);
   head.position.y = 1.32;
   head.castShadow = true;
   group.add(head);
 
-  // Graying hair
-  const hairGeo = new THREE.SphereGeometry(0.155, 16, 16, 0, Math.PI * 2, 0, Math.PI * 0.5);
-  const hairMat = new THREE.MeshStandardMaterial({ color: 0x4A4D52, roughness: 0.9 });
+  // Fitted Graying Hair (Cleanly covers back and sides of skull)
+  const hairGeo = new THREE.SphereGeometry(0.154, 20, 20, 0, Math.PI * 2, 0, Math.PI * 0.62);
+  const hairMat = new THREE.MeshStandardMaterial({ color: 0x484B52, roughness: 0.85 });
   const hair = new THREE.Mesh(hairGeo, hairMat);
-  hair.position.y = 1.33;
-  hair.rotation.x = -0.2;
+  hair.position.y = 1.325;
+  hair.rotation.x = -0.15;
   group.add(hair);
 
   // Signature Marathi Mustache
-  const stacheGeo = new THREE.BoxGeometry(0.12, 0.03, 0.04);
+  const stacheGeo = new THREE.BoxGeometry(0.12, 0.028, 0.04);
   const stacheMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.9 });
   const stache = new THREE.Mesh(stacheGeo, stacheMat);
-  stache.position.set(0, 1.27, 0.14);
+  stache.position.set(0, 1.27, 0.142);
   group.add(stache);
 
   // Spectacles
@@ -108,17 +121,22 @@ export function createBabanrao() {
   const rightRim = new THREE.Mesh(rimGeo, rimMat);
   rightRim.position.set(0.045, 1.33, 0.145);
   glassesGroup.add(leftRim, rightRim);
+
+  const bridgeGeo = new THREE.BoxGeometry(0.025, 0.005, 0.005);
+  const bridge = new THREE.Mesh(bridgeGeo, rimMat);
+  bridge.position.set(0, 1.33, 0.148);
+  glassesGroup.add(bridge);
   group.add(glassesGroup);
 
   // Left Arm (Resting on table)
   const leftArm = createArm(babanraoShirtMaterial, skinMaterial, false);
-  leftArm.position.set(-0.26, 1.05, 0);
+  leftArm.position.set(-0.25, 1.05, 0);
   leftArm.rotation.set(0.7, 0.3, -0.4);
   group.add(leftArm);
 
   // Right Arm (Animated for card play & table slap)
   const rightArm = createArm(babanraoShirtMaterial, skinMaterial, true);
-  rightArm.position.set(0.26, 1.05, 0);
+  rightArm.position.set(0.25, 1.05, 0);
   rightArm.rotation.set(0.7, -0.3, 0.4);
   group.add(rightArm);
 
@@ -139,42 +157,59 @@ export function createDinkar() {
   const group = new THREE.Group();
   group.name = 'Dinkar';
 
-  // Torso / Varsity Hoodie
-  const torsoGeo = new THREE.CylinderGeometry(0.25, 0.21, 0.65, 12);
+  // Torso / Varsity Jacket
+  const torsoGeo = new THREE.CylinderGeometry(0.25, 0.21, 0.65, 16);
   const torso = new THREE.Mesh(torsoGeo, dinkarJacketMaterial);
   torso.position.y = 0.82;
   torso.castShadow = true;
   group.add(torso);
 
+  // Shoulders
+  const shoulderGeo = new THREE.SphereGeometry(0.085, 12, 12);
+  const leftShoulder = new THREE.Mesh(shoulderGeo, dinkarJacketMaterial);
+  leftShoulder.position.set(-0.26, 1.08, 0);
+  const rightShoulder = new THREE.Mesh(shoulderGeo, dinkarJacketMaterial);
+  rightShoulder.position.set(0.26, 1.08, 0);
+  group.add(leftShoulder, rightShoulder);
+
+  // Neck
+  const neckGeo = new THREE.CylinderGeometry(0.08, 0.09, 0.12, 12);
+  const neck = new THREE.Mesh(neckGeo, skinMaterial);
+  neck.position.y = 1.18;
+  group.add(neck);
+
   // Head
-  const headGeo = new THREE.SphereGeometry(0.15, 16, 16);
+  const headGeo = new THREE.SphereGeometry(0.15, 20, 20);
   const head = new THREE.Mesh(headGeo, skinMaterial);
   head.position.y = 1.32;
   head.castShadow = true;
   group.add(head);
 
-  // Modern hair
-  const hairGeo = new THREE.BoxGeometry(0.26, 0.12, 0.24);
-  const hairMat = new THREE.MeshStandardMaterial({ color: 0x1A1412, roughness: 0.9 });
+  // Fitted Modern Hair Cap
+  const hairGeo = new THREE.SphereGeometry(0.155, 20, 20, 0, Math.PI * 2, 0, Math.PI * 0.6);
+  const hairMat = new THREE.MeshStandardMaterial({ color: 0x161311, roughness: 0.8 });
   const hair = new THREE.Mesh(hairGeo, hairMat);
-  hair.position.set(0, 1.42, -0.02);
+  hair.position.y = 1.33;
+  hair.rotation.x = -0.1;
   group.add(hair);
 
-  // Sunglasses perched on forehead
-  const shadesGeo = new THREE.BoxGeometry(0.18, 0.04, 0.06);
+  // Sunglasses on eyes
+  const shadesGroup = new THREE.Group();
+  const frameGeo = new THREE.BoxGeometry(0.16, 0.045, 0.02);
   const shadesMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.1, metalness: 0.9 });
-  const shades = new THREE.Mesh(shadesGeo, shadesMat);
-  shades.position.set(0, 1.41, 0.12);
-  group.add(shades);
+  const frame = new THREE.Mesh(frameGeo, shadesMat);
+  frame.position.set(0, 1.33, 0.145);
+  shadesGroup.add(frame);
+  group.add(shadesGroup);
 
   // Arms
   const leftArm = createArm(dinkarJacketMaterial, skinMaterial, false);
-  leftArm.position.set(-0.27, 1.05, 0);
+  leftArm.position.set(-0.26, 1.05, 0);
   leftArm.rotation.set(0.7, 0.2, -0.3);
   group.add(leftArm);
 
   const rightArm = createArm(dinkarJacketMaterial, skinMaterial, true);
-  rightArm.position.set(0.27, 1.05, 0);
+  rightArm.position.set(0.26, 1.05, 0);
   rightArm.rotation.set(0.7, -0.2, 0.3);
   group.add(rightArm);
 
@@ -188,40 +223,54 @@ export function createAnandi() {
   group.name = 'Anandi';
 
   // Torso / Elegant Emerald Saree/Kurti
-  const torsoGeo = new THREE.CylinderGeometry(0.21, 0.19, 0.62, 12);
+  const torsoGeo = new THREE.CylinderGeometry(0.21, 0.19, 0.62, 16);
   const torso = new THREE.Mesh(torsoGeo, anandiDressMaterial);
   torso.position.y = 0.82;
   torso.castShadow = true;
   group.add(torso);
 
+  // Shoulders
+  const shoulderGeo = new THREE.SphereGeometry(0.075, 12, 12);
+  const leftShoulder = new THREE.Mesh(shoulderGeo, anandiDressMaterial);
+  leftShoulder.position.set(-0.22, 1.08, 0);
+  const rightShoulder = new THREE.Mesh(shoulderGeo, anandiDressMaterial);
+  rightShoulder.position.set(0.22, 1.08, 0);
+  group.add(leftShoulder, rightShoulder);
+
+  // Neck
+  const neckGeo = new THREE.CylinderGeometry(0.07, 0.08, 0.12, 12);
+  const neck = new THREE.Mesh(neckGeo, skinMaterial);
+  neck.position.y = 1.18;
+  group.add(neck);
+
   // Head
-  const headGeo = new THREE.SphereGeometry(0.14, 16, 16);
+  const headGeo = new THREE.SphereGeometry(0.14, 20, 20);
   const head = new THREE.Mesh(headGeo, skinMaterial);
   head.position.y = 1.30;
   head.castShadow = true;
   group.add(head);
 
-  // Traditional Hair Bun
-  const hairMat = new THREE.MeshStandardMaterial({ color: 0x0A0808, roughness: 0.8 });
-  const hairTop = new THREE.SphereGeometry(0.145, 16, 16, 0, Math.PI * 2, 0, Math.PI * 0.55);
-  const hair = new THREE.Mesh(hairTop, hairMat);
-  hair.position.y = 1.31;
+  // Traditional Fitted Hair & Bun
+  const hairMat = new THREE.MeshStandardMaterial({ color: 0x0A0808, roughness: 0.75 });
+  const hairGeo = new THREE.SphereGeometry(0.145, 20, 20, 0, Math.PI * 2, 0, Math.PI * 0.65);
+  const hair = new THREE.Mesh(hairGeo, hairMat);
+  hair.position.y = 1.305;
   hair.rotation.x = -0.15;
   group.add(hair);
 
-  const bunGeo = new THREE.SphereGeometry(0.07, 12, 12);
+  const bunGeo = new THREE.SphereGeometry(0.07, 14, 14);
   const bun = new THREE.Mesh(bunGeo, hairMat);
-  bun.position.set(0, 1.31, -0.14);
+  bun.position.set(0, 1.31, -0.135);
   group.add(bun);
 
   // Arms with Gold Bangles
   const leftArm = createArm(anandiDressMaterial, skinMaterial, false, true);
-  leftArm.position.set(-0.24, 1.05, 0);
+  leftArm.position.set(-0.23, 1.05, 0);
   leftArm.rotation.set(0.7, 0.3, -0.3);
   group.add(leftArm);
 
   const rightArm = createArm(anandiDressMaterial, skinMaterial, true, true);
-  rightArm.position.set(0.24, 1.05, 0);
+  rightArm.position.set(0.23, 1.05, 0);
   rightArm.rotation.set(0.7, -0.3, 0.3);
   group.add(rightArm);
 

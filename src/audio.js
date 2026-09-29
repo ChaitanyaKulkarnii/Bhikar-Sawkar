@@ -325,7 +325,7 @@ class SoundEngine {
     if (!this.ctx) return;
 
     const t = this.ctx.currentTime;
-    const vol = Math.min(0.4, 0.12 * intensity);
+    const vol = Math.min(0.18, 0.05 * intensity);
 
     // First beat: Lub
     const osc1 = this.ctx.createOscillator();

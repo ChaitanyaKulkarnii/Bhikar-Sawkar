@@ -75,13 +75,13 @@ function updateHud(state) {
   statFlips.textContent = state.stats.roundFlips;
   statMatches.textContent = state.stats.matchesCount;
 
-  // Tension Vignette & Heartbeat
-  if (state.centralPileCount >= 18) {
-    tensionVignette.className = 'tension-vignette active super-high';
-    sounds.playHeartbeat(2);
-  } else if (state.centralPileCount >= 8) {
-    tensionVignette.className = 'tension-vignette active';
+  // Tension Vignette & Heartbeat (Only on genuinely large high-stakes pots)
+  if (state.centralPileCount >= 24) {
+    tensionVignette.className = 'tension-vignette super-high';
     sounds.playHeartbeat(1.2);
+  } else if (state.centralPileCount >= 14) {
+    tensionVignette.className = 'tension-vignette active';
+    sounds.playHeartbeat(0.8);
   } else {
     tensionVignette.className = 'tension-vignette';
   }

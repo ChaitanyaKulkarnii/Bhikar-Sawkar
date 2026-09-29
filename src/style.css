@@ -84,41 +84,35 @@ html, body {
   overflow: hidden;
 }
 
-/* Heartbeat Tension Vignette (Buckshot style high stakes) */
+/* Cinematic Table Tension Vignette (Subtle & Non-Intrusive) */
 .tension-vignette {
   position: absolute;
   inset: 0;
   pointer-events: none;
   z-index: 8;
   opacity: 0;
-  background: radial-gradient(circle at 50% 50%, transparent 45%, rgba(212, 70, 59, 0.45) 85%, rgba(10, 13, 18, 0.95) 100%);
-  transition: opacity 0.5s ease;
+  box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.7);
+  transition: opacity 0.8s ease;
 }
 
 .tension-vignette.active {
-  opacity: 0.85;
-  animation: heartbeatPulse 1.2s infinite ease-in-out;
+  opacity: 0.35;
+  animation: subtleTensionBreath 2.4s infinite ease-in-out;
 }
 
 .tension-vignette.super-high {
-  opacity: 1;
-  animation: heartbeatPulseFast 0.65s infinite ease-in-out;
+  opacity: 0.55;
+  box-shadow: inset 0 0 140px rgba(0, 0, 0, 0.85), inset 0 0 30px rgba(201, 162, 75, 0.12);
+  animation: subtleTensionBreath 1.6s infinite ease-in-out;
 }
 
-@keyframes heartbeatPulse {
-  0% { transform: scale(1); opacity: 0.5; }
-  15% { transform: scale(1.02); opacity: 0.85; }
-  30% { transform: scale(1); opacity: 0.6; }
-  45% { transform: scale(1.03); opacity: 0.95; }
-  100% { transform: scale(1); opacity: 0.5; }
-}
-
-@keyframes heartbeatPulseFast {
-  0% { transform: scale(1); opacity: 0.7; }
-  25% { transform: scale(1.04); opacity: 1; }
-  50% { transform: scale(1); opacity: 0.75; }
-  75% { transform: scale(1.05); opacity: 1; }
-  100% { transform: scale(1); opacity: 0.7; }
+@keyframes subtleTensionBreath {
+  0%, 100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 0.48;
+  }
 }
 
 /* Top Bar Navigation */
