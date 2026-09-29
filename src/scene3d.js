@@ -33,7 +33,7 @@ export class TableScene3D {
     this.renderer.setSize(this.width, this.height);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.shadowMap.type = THREE.PCFShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.15;
     this.container.appendChild(this.renderer.domElement);
@@ -70,7 +70,8 @@ export class TableScene3D {
 
     // Shake & Impact
     this.shakeAmount = 0;
-    this.clock = new THREE.Clock();
+    this.startTime = performance.now();
+    this.lastTime = performance.now();
 
     // Resize Handler
     window.addEventListener('resize', () => this.onResize());
@@ -422,8 +423,10 @@ export class TableScene3D {
 
   animate() {
     requestAnimationFrame(this.animate);
-    const delta = this.clock.getDelta();
-    const time = this.clock.getElapsedTime();
+    const now = performance.now();
+    const delta = Math.min(0.1, (now - this.lastTime) / 1000);
+    const time = (now - this.startTime) / 1000;
+    this.lastTime = now;
 
     // 1. Mouse Head Look (First Person subtle look-around)
     this.mouse.x += (this.mouse.targetX - this.mouse.x) * 0.06;
@@ -459,7 +462,6 @@ export class TableScene3D {
     }
 
     // 4. Update Flying Cards
-    const now = performance.now();
     for (let i = this.flyingCards.length - 1; i >= 0; i--) {
       const active = this.flyingCards[i].update(now);
       if (!active) {
