@@ -15,10 +15,22 @@
     <!-- Heartbeat Tension Vignette (Pulses when pot gets large) -->
     <div id="tension-vignette" class="tension-vignette" aria-hidden="true"></div>
 
-    <!-- Top Navigation Bar (Clean Minimalist HUD) -->
-    <header class="top-bar">
-      <!-- Sound and Settings Toggles on Left -->
-      <div class="action-buttons">
+    <!-- 3D Table Viewport (Full Screen 100vh) -->
+    <main class="table-viewport" id="table-viewport">
+
+      <!-- Three.js Canvas Container -->
+      <div id="webgl-container" class="webgl-container"></div>
+
+      <!-- Current Top Card HUD Preview (Crisp high-contrast inspection) -->
+      <div class="current-card-hud" id="current-card-hud" title="Last Played Card on Table">
+        <div class="hud-label">LAST CARD</div>
+        <div class="hud-card-display" id="hud-card-display">
+          <span class="hud-empty-pot">EMPTY POT</span>
+        </div>
+      </div>
+
+      <!-- Left Vertical Action Controls (Sound, Settings, Speed, Rules, New Match) -->
+      <aside class="action-buttons-vertical" id="action-buttons-vertical" aria-label="Game Controls">
         <button id="btn-audio" class="btn-icon" title="Toggle Sound (Mute/Unmute)" aria-label="Toggle Sound">
           🔊
         </button>
@@ -34,22 +46,7 @@
         <button id="btn-new-match" class="btn-icon" title="Re-deal Deck / New Match" aria-label="New Match">
           🔄
         </button>
-      </div>
-    </header>
-
-    <!-- 3D Table Viewport -->
-    <main class="table-viewport" id="table-viewport">
-
-      <!-- Three.js Canvas Container -->
-      <div id="webgl-container" class="webgl-container"></div>
-
-      <!-- Current Top Card HUD Preview (Crisp high-contrast inspection) -->
-      <div class="current-card-hud" id="current-card-hud" title="Last Played Card on Table">
-        <div class="hud-label">LAST CARD</div>
-        <div class="hud-card-display" id="hud-card-display">
-          <span class="hud-empty-pot">EMPTY POT</span>
-        </div>
-      </div>
+      </aside>
 
       <!-- 4 Character HUD Stations (Hovering over 3D seats) -->
       <!-- Seat Top: Babanrao (The Veteran Uncle sitting directly across) -->

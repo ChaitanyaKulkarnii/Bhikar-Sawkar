@@ -195,53 +195,49 @@ html, body {
   100% { transform: scale(1.15) rotate(3deg); }
 }
 
-/* Top Bar Navigation (Sleek Minimalist HUD) */
-.top-bar {
+/* ==========================================================================
+   LEFT VERTICAL ACTION CONTROLS TOOLBAR (Docked Vertically under LAST CARD)
+   ========================================================================== */
+.action-buttons-vertical {
+  position: absolute;
+  top: 116px;
+  left: 20px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 20px;
-  background: rgba(10, 13, 18, 0.92);
-  backdrop-filter: blur(14px);
-  border-bottom: 1px solid rgba(44, 53, 69, 0.4);
-  z-index: 20;
-  height: 54px;
-}
-
-.action-buttons {
-  display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 8px;
+  z-index: 15;
 }
 
-.btn-icon {
-  background: var(--surface-panel);
+.action-buttons-vertical .btn-icon {
+  background: rgba(14, 18, 24, 0.92);
   color: var(--text-main);
   border: 1px solid var(--surface-border);
-  border-radius: 8px;
-  width: 36px;
-  height: 36px;
+  border-radius: 10px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 1rem;
+  font-size: 1.05rem;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
 }
 
-.btn-icon:hover {
+.action-buttons-vertical .btn-icon:hover {
   border-color: var(--gold-sawkar);
   color: var(--gold-sawkar);
-  background: var(--surface-elevated);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(201, 162, 75, 0.25);
+  background: rgba(28, 34, 46, 0.95);
+  transform: translateX(3px);
+  box-shadow: 0 4px 16px rgba(201, 162, 75, 0.35);
 }
 
-.btn-icon:active {
-  transform: translateY(1px);
+.action-buttons-vertical .btn-icon:active {
+  transform: translateX(1px);
 }
 
-/* Specific styling for prominent sound & settings toggles on left */
+/* Specific styling for prominent sound & settings toggles */
 #btn-audio, #btn-settings {
   border-color: rgba(201, 162, 75, 0.35);
 }
@@ -252,13 +248,12 @@ html, body {
 }
 
 /* ==========================================================================
-   3D TABLE VIEWPORT & THREE.JS CANVAS
+   3D TABLE VIEWPORT & THREE.JS CANVAS (Full Screen Immersion)
    ========================================================================== */
 .table-viewport {
-  flex: 1;
   position: relative;
-  width: 100%;
-  height: calc(100vh - 54px);
+  width: 100vw;
+  height: 100vh;
   overflow: hidden;
 }
 
@@ -794,17 +789,15 @@ html, body {
 
 /* Mobile & Tablet */
 @media (max-width: 768px) {
-  .top-bar {
-    padding: 6px 10px;
-    height: 48px;
+  .action-buttons-vertical {
+    top: 86px;
+    left: 10px;
+    gap: 6px;
   }
-  .action-buttons {
-    gap: 5px;
-  }
-  .btn-icon {
-    width: 32px;
-    height: 32px;
-    font-size: 0.88rem;
+  .action-buttons-vertical .btn-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 0.9rem;
   }
   .current-card-hud {
     top: 10px;
