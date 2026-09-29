@@ -340,11 +340,11 @@ export class TableScene3D {
     // ========================================================
     // Babanrao Key Light (Directly illuminates face, mustache, linen shirt, and bag across table)
     const babanraoTarget = new THREE.Object3D();
-    babanraoTarget.position.set(0, 1.25, -1.54);
+    babanraoTarget.position.set(0, 1.20, -1.39);
     this.scene.add(babanraoTarget);
 
     const babanraoLight = new THREE.SpotLight(0xFFE8D2, 3.4);
-    babanraoLight.position.set(0, 2.2, -0.95);
+    babanraoLight.position.set(0, 2.2, -0.85);
     babanraoLight.target = babanraoTarget;
     babanraoLight.angle = 0.65;
     babanraoLight.penumbra = 0.55;
@@ -354,11 +354,11 @@ export class TableScene3D {
 
     // Dinkar Key Light (Directly illuminates face, anime hair, and hoodie on left)
     const dinkarTarget = new THREE.Object3D();
-    dinkarTarget.position.set(-1.32, 1.22, -0.42);
+    dinkarTarget.position.set(-1.22, 1.20, -0.39);
     this.scene.add(dinkarTarget);
 
     const dinkarLight = new THREE.SpotLight(0xFFE2C0, 3.4);
-    dinkarLight.position.set(-0.65, 2.2, 0.0);
+    dinkarLight.position.set(-0.60, 2.2, 0.0);
     dinkarLight.target = dinkarTarget;
     dinkarLight.angle = 0.68;
     dinkarLight.penumbra = 0.55;
@@ -368,11 +368,11 @@ export class TableScene3D {
 
     // Anandi Key Light (Directly illuminates face, bindi, anime hair, and hoodie on right)
     const anandiTarget = new THREE.Object3D();
-    anandiTarget.position.set(1.32, 1.22, -0.42);
+    anandiTarget.position.set(1.22, 1.20, -0.39);
     this.scene.add(anandiTarget);
 
     const anandiLight = new THREE.SpotLight(0xFFE8DA, 3.4);
-    anandiLight.position.set(0.65, 2.2, 0.0);
+    anandiLight.position.set(0.60, 2.2, 0.0);
     anandiLight.target = anandiTarget;
     anandiLight.angle = 0.68;
     anandiLight.penumbra = 0.55;
@@ -677,20 +677,20 @@ export class TableScene3D {
     // 1. Across table: Babanrao (The Veteran Uncle)
     // Seated comfortably behind the leather rail with hands resting on felt
     const babanrao = createBabanrao();
-    babanrao.position.set(0, 0, -1.54);
+    babanrao.position.set(0, 0, -1.39);
     babanrao.rotation.y = 0;
     const chairTop = createChair();
-    chairTop.position.set(0, 0, -1.56);
+    chairTop.position.set(0, 0, -1.41);
     this.scene.add(chairTop, babanrao);
     this.characters['top'] = babanrao;
 
     // 2. Left seat: Dinkar (The Hype Guy)
     // Directed squarely toward table center (0, 0, -0.15)
     const dinkar = createDinkar();
-    dinkar.position.set(-1.32, 0, -0.42);
+    dinkar.position.set(-1.22, 0, -0.39);
     dinkar.rotation.y = 1.369; // 78.4 degrees facing center of table
     const chairLeft = createChair();
-    chairLeft.position.set(-1.35, 0, -0.43);
+    chairLeft.position.set(-1.25, 0, -0.40);
     chairLeft.rotation.y = 1.369;
     this.scene.add(chairLeft, dinkar);
     this.characters['left'] = dinkar;
@@ -698,10 +698,10 @@ export class TableScene3D {
     // 3. Right seat: Anandi (The Mastermind)
     // Directed squarely toward table center (0, 0, -0.15)
     const anandi = createAnandi();
-    anandi.position.set(1.32, 0, -0.42);
+    anandi.position.set(1.22, 0, -0.39);
     anandi.rotation.y = -1.369; // -78.4 degrees facing center of table
     const chairRight = createChair();
-    chairRight.position.set(1.35, 0, -0.43);
+    chairRight.position.set(1.25, 0, -0.40);
     chairRight.rotation.y = -1.369;
     this.scene.add(chairRight, anandi);
     this.characters['right'] = anandi;

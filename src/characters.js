@@ -263,14 +263,128 @@ function getBabanraoShirtBackTexture() {
   return cachedBabanraoShirtBack;
 }
 
+// ============================================================================
+// Helper: Seamless Roblox Character Arm Rig with Connected 3D Block Hands
+// ============================================================================
+function createRobloxCharacterArm(isRight, skinMat, sleeveMat, isShortSleeve = false, shirtCuffMat = null) {
+  const shoulder = new THREE.Group();
+  const sideSign = isRight ? 1 : -1;
+  shoulder.name = (isRight ? 'Right' : 'Left') + 'Arm';
+  // Shoulder pivot at x = +/- 0.24, y = 1.04, z = 0
+  shoulder.position.set(sideSign * 0.24, 1.04, 0);
+
+  // 1. Upper Arm Group (angles down, slightly forward, and inward towards body center)
+  const upper = new THREE.Group();
+  upper.rotation.set(-0.38, sideSign * -0.45, sideSign * 0.12);
+  shoulder.add(upper);
+
+  const L1 = 0.21; // Upper arm length
+  if (isShortSleeve) {
+    // Linen short sleeve for Babanrao
+    const sleeveGeo = new THREE.BoxGeometry(0.170, 0.11, 0.170);
+    const sleeveMesh = new THREE.Mesh(sleeveGeo, sleeveMat);
+    sleeveMesh.position.set(0, -0.055, 0);
+    sleeveMesh.castShadow = true;
+    sleeveMesh.receiveShadow = true;
+    upper.add(sleeveMesh);
+
+    // 3D Rolled Linen Cuff Ring around bicep
+    const cuffGeo = new THREE.BoxGeometry(0.182, 0.040, 0.182);
+    const cuffMesh = new THREE.Mesh(cuffGeo, shirtCuffMat || sleeveMat);
+    cuffMesh.position.set(0, -0.11, 0);
+    cuffMesh.castShadow = true;
+    cuffMesh.receiveShadow = true;
+    upper.add(cuffMesh);
+
+    // Bare tan skin arm emerging from sleeve down to elbow
+    const skinBicepGeo = new THREE.BoxGeometry(0.158, 0.10, 0.158);
+    const skinBicepMesh = new THREE.Mesh(skinBicepGeo, skinMat);
+    skinBicepMesh.position.set(0, -0.16, 0);
+    skinBicepMesh.castShadow = true;
+    skinBicepMesh.receiveShadow = true;
+    upper.add(skinBicepMesh);
+  } else {
+    // Full hoodie sleeve for Dinkar & Anandi down to elbow
+    const sleeveGeo = new THREE.BoxGeometry(0.168, L1, 0.168);
+    const sleeveMesh = new THREE.Mesh(sleeveGeo, sleeveMat);
+    sleeveMesh.position.set(0, -L1 / 2, 0);
+    sleeveMesh.castShadow = true;
+    sleeveMesh.receiveShadow = true;
+    upper.add(sleeveMesh);
+  }
+
+  // 2. Elbow Group (pivots at the bottom of upper arm)
+  const elbow = new THREE.Group();
+  elbow.position.set(0, -L1, 0);
+  elbow.rotation.set(-0.80, 0, 0);
+  upper.add(elbow);
+
+  const L2 = 0.20; // Forearm length
+  const forearmMat = isShortSleeve ? skinMat : sleeveMat;
+  const forearmGeo = new THREE.BoxGeometry(isShortSleeve ? 0.158 : 0.165, L2, isShortSleeve ? 0.158 : 0.165);
+  const forearmMesh = new THREE.Mesh(forearmGeo, forearmMat);
+  forearmMesh.position.set(0, -L2 / 2, 0);
+  forearmMesh.castShadow = true;
+  forearmMesh.receiveShadow = true;
+  elbow.add(forearmMesh);
+
+  // If full hoodie sleeve, add 3D ribbed cuff band at wrist
+  if (!isShortSleeve) {
+    const wristCuffGeo = new THREE.BoxGeometry(0.176, 0.038, 0.176);
+    const wristCuffMesh = new THREE.Mesh(wristCuffGeo, sleeveMat);
+    wristCuffMesh.position.set(0, -L2 + 0.016, 0);
+    wristCuffMesh.castShadow = true;
+    wristCuffMesh.receiveShadow = true;
+    elbow.add(wristCuffMesh);
+  }
+
+  // 3. Wrist Group (pivots at the end of forearm, flattens horizontally to baize)
+  const wrist = new THREE.Group();
+  wrist.position.set(0, -L2, 0);
+  wrist.rotation.set(1.18, sideSign * 0.25, sideSign * -0.12);
+  elbow.add(wrist);
+
+  // 4. Roblox Solid Block Hand Group (nested inside wrist with 15mm overlap for ZERO gap)
+  const handGroup = new THREE.Group();
+  handGroup.position.set(0, 0, 0.065);
+  wrist.add(handGroup);
+
+  // Main Roblox Solid Block Palm/Fist (Thickness 0.080, Width 0.160, Depth 0.130)
+  const handBlockGeo = new THREE.BoxGeometry(0.160, 0.080, 0.130);
+  const handBlock = new THREE.Mesh(handBlockGeo, skinMat);
+  handBlock.position.set(0, 0, 0);
+  handBlock.castShadow = true;
+  handBlock.receiveShadow = true;
+  handGroup.add(handBlock);
+
+  // Classic Roblox Front Grip Lip (resting firmly on table felt)
+  const gripLipGeo = new THREE.BoxGeometry(0.154, 0.045, 0.030);
+  const gripLip = new THREE.Mesh(gripLipGeo, skinMat);
+  gripLip.position.set(0, -0.018, 0.068);
+  gripLip.castShadow = true;
+  gripLip.receiveShadow = true;
+  handGroup.add(gripLip);
+
+  // Thumb tab on inner side (towards body center)
+  const thumbGeo = new THREE.BoxGeometry(0.032, 0.065, 0.048);
+  const thumb = new THREE.Mesh(thumbGeo, skinMat);
+  thumb.position.set(sideSign * -0.082, -0.005, 0.012);
+  thumb.rotation.y = sideSign * 0.28;
+  thumb.castShadow = true;
+  thumb.receiveShadow = true;
+  handGroup.add(thumb);
+
+  return shoulder;
+}
+
 export function createBabanrao() {
   const group = new THREE.Group();
   group.name = 'Babanrao';
 
-  // Materials sampled from user's Image 2 reference
+  // Materials sampled from user's Image 2 reference (warm golden Indian skin, distinct from linen shirt)
   const babanraoSkinMat = new THREE.MeshStandardMaterial({
-    color: 0xE9D6BF, // Warm Indian olive/tan skin
-    roughness: 0.55,
+    color: 0xCD9B6D, // Warm golden tan Indian skin
+    roughness: 0.50,
     metalness: 0.04
   });
 
@@ -465,75 +579,11 @@ export function createBabanrao() {
 
   group.add(head);
 
-  // 5. Short-Sleeve Linen Shirt Arms with Rolled Cuffs
-  // Left Arm (Resting on table)
-  const leftArm = new THREE.Group();
-  leftArm.position.set(-0.25, 1.02, 0);
-
-  // Upper sleeve in cream linen
-  const leftUpper = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.16, 0.14), babanraoShirtMat);
-  leftUpper.position.set(0, -0.06, 0.03);
-  leftUpper.rotation.x = 0.38;
-  leftUpper.rotation.z = -0.12;
-  leftUpper.castShadow = true;
-  leftArm.add(leftUpper);
-
-  // 3D Rolled Cuff Ring
-  const leftCuff = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.035, 0.15), babanraoShirtMat);
-  leftCuff.position.set(0, -0.14, 0.06);
-  leftCuff.rotation.x = 0.38;
-  leftCuff.rotation.z = -0.12;
-  leftArm.add(leftCuff);
-
-  // Bare forearm reaching onto table
-  const leftForearm = new THREE.Mesh(new THREE.BoxGeometry(0.125, 0.20, 0.125), babanraoSkinMat);
-  leftForearm.position.set(0.03, -0.22, 0.19);
-  leftForearm.rotation.x = 1.08;
-  leftForearm.rotation.y = 0.22;
-  leftForearm.castShadow = true;
-  leftArm.add(leftForearm);
-
-  // Hand resting on felt
-  const leftHand = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.04, 0.10), babanraoSkinMat);
-  leftHand.position.set(0.05, -0.28, 0.32);
-  leftHand.rotation.y = 0.15;
-  leftHand.castShadow = true;
-  leftHand.receiveShadow = true;
-  leftArm.add(leftHand);
-
+  // 5. Short-Sleeve Linen Shirt Arms with Rolled Cuffs & Connected Block Hands
+  const leftArm = createRobloxCharacterArm(false, babanraoSkinMat, babanraoShirtMat, true, babanraoShirtMat);
   group.add(leftArm);
 
-  // Right Arm (Rigged for card throw animation)
-  const rightArm = new THREE.Group();
-  rightArm.position.set(0.25, 1.02, 0);
-
-  const rightUpper = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.16, 0.14), babanraoShirtMat);
-  rightUpper.position.set(0, -0.06, 0.03);
-  rightUpper.rotation.x = 0.38;
-  rightUpper.rotation.z = 0.12;
-  rightUpper.castShadow = true;
-  rightArm.add(rightUpper);
-
-  const rightCuff = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.035, 0.15), babanraoShirtMat);
-  rightCuff.position.set(0, -0.14, 0.06);
-  rightCuff.rotation.x = 0.38;
-  rightCuff.rotation.z = 0.12;
-  rightArm.add(rightCuff);
-
-  const rightForearm = new THREE.Mesh(new THREE.BoxGeometry(0.125, 0.20, 0.125), babanraoSkinMat);
-  rightForearm.position.set(-0.03, -0.22, 0.19);
-  rightForearm.rotation.x = 1.08;
-  rightForearm.rotation.y = -0.22;
-  rightForearm.castShadow = true;
-  rightArm.add(rightForearm);
-
-  const rightHand = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.04, 0.10), babanraoSkinMat);
-  rightHand.position.set(-0.05, -0.28, 0.32);
-  rightHand.rotation.y = -0.15;
-  rightHand.castShadow = true;
-  rightHand.receiveShadow = true;
-  rightArm.add(rightHand);
-
+  const rightArm = createRobloxCharacterArm(true, babanraoSkinMat, babanraoShirtMat, true, babanraoShirtMat);
   group.add(rightArm);
 
   group.userData = {
@@ -687,8 +737,8 @@ export function createDinkar() {
 
   // Materials sampled directly from user's provided Roblox reference image
   const robloxSkinMat = new THREE.MeshStandardMaterial({
-    color: 0xF2B988,
-    roughness: 0.55,
+    color: 0xF5BA8E,
+    roughness: 0.48,
     metalness: 0.04
   });
 
@@ -699,9 +749,9 @@ export function createDinkar() {
   });
 
   const robloxHoodieMat = new THREE.MeshStandardMaterial({
-    color: 0x1F1F1E,
-    roughness: 0.85,
-    metalness: 0.02
+    color: 0x2A2A2B,
+    roughness: 0.62,
+    metalness: 0.04
   });
 
   const robloxPantsMat = new THREE.MeshStandardMaterial({
@@ -902,71 +952,11 @@ export function createDinkar() {
 
   group.add(head);
 
-  // 5. Roblox Blocky Arms
-  // Left Arm (Resting on table near player cards)
-  const leftArm = new THREE.Group();
-  leftArm.position.set(-0.25, 1.02, 0);
-
-  // Upper sleeve
-  const leftUpperGeo = new THREE.BoxGeometry(0.14, 0.20, 0.14);
-  const leftUpper = new THREE.Mesh(leftUpperGeo, robloxHoodieMat);
-  leftUpper.position.set(0, -0.08, 0.04);
-  leftUpper.rotation.x = 0.38;
-  leftUpper.rotation.z = -0.12;
-  leftUpper.castShadow = true;
-  leftArm.add(leftUpper);
-
-  // Forearm sleeve reaching forward onto table
-  const leftForearmGeo = new THREE.BoxGeometry(0.13, 0.22, 0.13);
-  const leftForearm = new THREE.Mesh(leftForearmGeo, robloxHoodieMat);
-  leftForearm.position.set(0.03, -0.21, 0.19);
-  leftForearm.rotation.x = 1.08;
-  leftForearm.rotation.y = 0.22;
-  leftForearm.castShadow = true;
-  leftArm.add(leftForearm);
-
-  // Roblox Peach Block Hand resting flat on felt
-  const leftHandGeo = new THREE.BoxGeometry(0.12, 0.04, 0.10);
-  const leftHand = new THREE.Mesh(leftHandGeo, robloxSkinMat);
-  leftHand.position.set(0.05, -0.28, 0.32);
-  leftHand.rotation.y = 0.15;
-  leftHand.castShadow = true;
-  leftHand.receiveShadow = true;
-  leftArm.add(leftHand);
-
+  // 5. Roblox Blocky Arms & Connected Block Hands resting on table felt
+  const leftArm = createRobloxCharacterArm(false, robloxSkinMat, robloxHoodieMat, false);
   group.add(leftArm);
 
-  // Right Arm (Rigged at shoulder for throw card animation)
-  const rightArm = new THREE.Group();
-  rightArm.position.set(0.25, 1.02, 0);
-
-  // Upper sleeve
-  const rightUpperGeo = new THREE.BoxGeometry(0.14, 0.20, 0.14);
-  const rightUpper = new THREE.Mesh(rightUpperGeo, robloxHoodieMat);
-  rightUpper.position.set(0, -0.08, 0.04);
-  rightUpper.rotation.x = 0.38;
-  rightUpper.rotation.z = 0.12;
-  rightUpper.castShadow = true;
-  rightArm.add(rightUpper);
-
-  // Forearm sleeve reaching forward toward table
-  const rightForearmGeo = new THREE.BoxGeometry(0.13, 0.22, 0.13);
-  const rightForearm = new THREE.Mesh(rightForearmGeo, robloxHoodieMat);
-  rightForearm.position.set(-0.03, -0.21, 0.19);
-  rightForearm.rotation.x = 1.08;
-  rightForearm.rotation.y = -0.22;
-  rightForearm.castShadow = true;
-  rightArm.add(rightForearm);
-
-  // Roblox Peach Block Hand resting on felt in ready position
-  const rightHandGeo = new THREE.BoxGeometry(0.12, 0.04, 0.10);
-  const rightHand = new THREE.Mesh(rightHandGeo, robloxSkinMat);
-  rightHand.position.set(-0.05, -0.28, 0.32);
-  rightHand.rotation.y = -0.15;
-  rightHand.castShadow = true;
-  rightHand.receiveShadow = true;
-  rightArm.add(rightHand);
-
+  const rightArm = createRobloxCharacterArm(true, robloxSkinMat, robloxHoodieMat, false);
   group.add(rightArm);
 
   group.userData = {
@@ -998,8 +988,8 @@ export function createAnandi() {
   group.name = 'Anandi';
 
   const robloxSkinMat = new THREE.MeshStandardMaterial({
-    color: 0xF2B988,
-    roughness: 0.55,
+    color: 0xF5BA8E,
+    roughness: 0.48,
     metalness: 0.04
   });
 
@@ -1010,9 +1000,9 @@ export function createAnandi() {
   });
 
   const robloxHoodieMat = new THREE.MeshStandardMaterial({
-    color: 0x1F1F1E,
-    roughness: 0.85,
-    metalness: 0.02
+    color: 0x2A2A2B,
+    roughness: 0.62,
+    metalness: 0.04
   });
 
   const robloxPantsMat = new THREE.MeshStandardMaterial({
@@ -1195,57 +1185,11 @@ export function createAnandi() {
 
   group.add(head);
 
-  // 5. Roblox Blocky Arms resting on table felt
-  const leftArm = new THREE.Group();
-  leftArm.position.set(-0.25, 1.02, 0);
-
-  const leftUpper = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.20, 0.14), robloxHoodieMat);
-  leftUpper.position.set(0, -0.08, 0.04);
-  leftUpper.rotation.x = 0.38;
-  leftUpper.rotation.z = -0.12;
-  leftUpper.castShadow = true;
-  leftArm.add(leftUpper);
-
-  const leftForearm = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.22, 0.13), robloxHoodieMat);
-  leftForearm.position.set(0.03, -0.21, 0.19);
-  leftForearm.rotation.x = 1.08;
-  leftForearm.rotation.y = 0.22;
-  leftForearm.castShadow = true;
-  leftArm.add(leftForearm);
-
-  const leftHand = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.04, 0.10), robloxSkinMat);
-  leftHand.position.set(0.05, -0.28, 0.32);
-  leftHand.rotation.y = 0.15;
-  leftHand.castShadow = true;
-  leftHand.receiveShadow = true;
-  leftArm.add(leftHand);
-
+  // 5. Roblox Blocky Arms & Connected Block Hands resting on table felt
+  const leftArm = createRobloxCharacterArm(false, robloxSkinMat, robloxHoodieMat, false);
   group.add(leftArm);
 
-  const rightArm = new THREE.Group();
-  rightArm.position.set(0.25, 1.02, 0);
-
-  const rightUpper = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.20, 0.14), robloxHoodieMat);
-  rightUpper.position.set(0, -0.08, 0.04);
-  rightUpper.rotation.x = 0.38;
-  rightUpper.rotation.z = 0.12;
-  rightUpper.castShadow = true;
-  rightArm.add(rightUpper);
-
-  const rightForearm = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.22, 0.13), robloxHoodieMat);
-  rightForearm.position.set(-0.03, -0.21, 0.19);
-  rightForearm.rotation.x = 1.08;
-  rightForearm.rotation.y = -0.22;
-  rightForearm.castShadow = true;
-  rightArm.add(rightForearm);
-
-  const rightHand = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.04, 0.10), robloxSkinMat);
-  rightHand.position.set(-0.05, -0.28, 0.32);
-  rightHand.rotation.y = -0.15;
-  rightHand.castShadow = true;
-  rightHand.receiveShadow = true;
-  rightArm.add(rightHand);
-
+  const rightArm = createRobloxCharacterArm(true, robloxSkinMat, robloxHoodieMat, false);
   group.add(rightArm);
 
   group.userData = {

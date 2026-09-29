@@ -30,15 +30,15 @@ const victoryLeaderboard = document.getElementById('victory-leaderboard');
 const winnerNameEl = document.getElementById('winner-name');
 const winnerSubEl = document.getElementById('winner-sub');
 
-// Seat Mapping
+// Seat Mapping (Aligned with 3D models: Babanrao at top, Dinkar at left, Anandi at right)
 function getSeatMap(playerCount) {
   if (playerCount === 2) {
     return ['bottom', 'top'];
   }
   if (playerCount === 3) {
-    return ['bottom', 'left', 'top'];
+    return ['bottom', 'top', 'left'];
   }
-  return ['bottom', 'left', 'top', 'right'];
+  return ['bottom', 'top', 'left', 'right'];
 }
 
 // Initialize 3D First-Person Scene
