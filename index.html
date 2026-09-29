@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Bhikar Sawkar (भिकार सावकार) - Midnight Table Card Game</title>
+  <meta name="description" content="A moody, tactile tabletop card game of Bhikar Sawkar (भिकार सावकार) from Maharashtra. Flip cards, hit the rank match, capture the pot, and become the Sawkar!">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Outfit:wght@400;500;600;700&family=Rozha+One&family=Yatra+One&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Overhead Swinging Warm Spotlight -->
+    <div class="overhead-lamp-rig" aria-hidden="true">
+      <div class="lamp-cone"></div>
+    </div>
+
+    <!-- Top Navigation Bar -->
+    <header class="top-bar">
+      <div class="brand-section">
+        <h1 class="brand-title">
+          <span>BHIKAR SAWKAR</span>
+          <span class="brand-marathi">भिकार सावकार</span>
+        </h1>
+      </div>
+
+      <div class="table-stats-bar">
+        <div class="stat-chip" title="Current Cards in the Center Pile">
+          <span>Pot:</span>
+          <span class="stat-val" id="stat-pot">0</span>
+        </div>
+        <div class="stat-chip" title="Total Flips This Match">
+          <span>Flips:</span>
+          <span class="stat-val" id="stat-flips">0</span>
+        </div>
+        <div class="stat-chip" title="Matches Won">
+          <span>Matches:</span>
+          <span class="stat-val" id="stat-matches">0</span>
+        </div>
+      </div>
+
+      <div class="action-buttons">
+        <button id="btn-audio" class="btn-icon" title="Toggle Sound (Mute/Unmute)" aria-label="Toggle Sound">
+          🔊
+        </button>
+        <button id="btn-speed" class="btn-icon" title="Change Game Speed" aria-label="Change Game Speed">
+          ⚡
+        </button>
+        <button id="btn-rules" class="btn-icon" title="Game Rules & Lore" aria-label="Game Rules">
+          📜
+        </button>
+        <button id="btn-settings" class="btn-icon" title="Table Settings" aria-label="Table Settings">
+          ⚙️
+        </button>
+        <button id="btn-new-match" class="btn-icon" title="Re-deal Deck / New Match" aria-label="New Match">
+          🔄
+        </button>
+      </div>
+    </header>
+
+    <!-- Table Viewport -->
+    <main class="table-viewport" id="table-viewport">
+      <div class="midnight-table" id="table-surface">
+        <div class="table-felt-grain"></div>
+        <div class="table-center-mark">
+          <div class="table-brand-watermark">भिकार सावकार</div>
+        </div>
+
+        <!-- Central Pot (Capturable Pile) -->
+        <div class="central-pot-area" id="central-pot" title="The Central Table Pot">
+          <div class="pot-cards-container" id="pot-cards-stack">
+            <!-- Cards rendered dynamically -->
+          </div>
+          <div class="pot-badge" id="pot-count-badge">
+            <span>POT</span>
+            <span id="pot-badge-num">0</span>
+          </div>
+        </div>
+
+        <!-- 4 Seats around the Table -->
+        <!-- Seat Top (Opponent 2) -->
+        <div class="player-seat seat-top" id="seat-top" data-seat="top">
+          <div class="chat-bubble" id="chat-top"></div>
+          <div class="card-stack" id="stack-top" title="Opponent's Deck"></div>
+          <div class="player-meta-box">
+            <div class="player-avatar" id="avatar-top">👴🏽</div>
+            <div class="player-info-text">
+              <div class="player-name" id="name-top">Babanrao</div>
+              <div class="player-role-tag" id="role-top">Opponent</div>
+            </div>
+            <div class="player-card-count" id="count-top">🎴 13</div>
+          </div>
+        </div>
+
+        <!-- Seat Left (Opponent 1) -->
+        <div class="player-seat seat-left" id="seat-left" data-seat="left">
+          <div class="chat-bubble" id="chat-left"></div>
+          <div class="card-stack" id="stack-left" title="Opponent's Deck"></div>
+          <div class="player-meta-box">
+            <div class="player-avatar" id="avatar-left">😎</div>
+            <div class="player-info-text">
+              <div class="player-name" id="name-left">Dinkar</div>
+              <div class="player-role-tag" id="role-left">Opponent</div>
+            </div>
+            <div class="player-card-count" id="count-left">🎴 13</div>
+          </div>
+        </div>
+
+        <!-- Seat Right (Opponent 3) -->
+        <div class="player-seat seat-right" id="seat-right" data-seat="right">
+          <div class="chat-bubble" id="chat-right"></div>
+          <div class="card-stack" id="stack-right" title="Opponent's Deck"></div>
+          <div class="player-meta-box">
+            <div class="player-avatar" id="avatar-right">👑</div>
+            <div class="player-info-text">
+              <div class="player-name" id="name-right">Anandi</div>
+              <div class="player-role-tag" id="role-right">Opponent</div>
+            </div>
+            <div class="player-card-count" id="count-right">🎴 13</div>
+          </div>
+        </div>
+
+        <!-- Seat Bottom (You / Active Contender) -->
+        <div class="player-seat seat-bottom" id="seat-bottom" data-seat="bottom">
+          <div class="chat-bubble" id="chat-bottom"></div>
+          <div class="card-stack" id="stack-bottom" title="Your Deck (Click to flip)"></div>
+          <div class="player-meta-box">
+            <div class="player-avatar" id="avatar-bottom">🤠</div>
+            <div class="player-info-text">
+              <div class="player-name" id="name-bottom">Bhau (भाऊ)</div>
+              <div class="player-role-tag" id="role-bottom">You</div>
+            </div>
+            <div class="player-card-count" id="count-bottom">🎴 13</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Bar for Human Play -->
+      <div class="turn-action-bar" id="turn-action-bar">
+        <button id="btn-flip" class="btn-flip-card" disabled>
+          <span>FLIP CARD</span>
+          <span class="kbd-shortcut">SPACE</span>
+        </button>
+      </div>
+
+      <!-- Match / Sawkar Alert Banner -->
+      <div class="match-announcement" id="match-announcement">
+        <h2 class="match-title">SAWKAR MATCH!</h2>
+        <div class="match-subtext" id="match-subtext">सावकार मॅच! सगळा ढीग जिंकला!</div>
+      </div>
+    </main>
+
+    <!-- Rules Modal -->
+    <div class="modal-overlay" id="modal-rules">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2 class="modal-title">📜 Rules of Bhikar Sawkar (भिकार सावकार)</h2>
+          <button class="modal-close-btn" data-close="modal-rules">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p><strong>Bhikar Sawkar (भिकार सावकार)</strong>, meaning <em>Beggar–Moneylender</em>, is a beloved traditional card game from Maharashtra played with friends and family during late-night hangouts and get-togethers.</p>
+          
+          <h3>🎯 Core Objective</h3>
+          <p>Win every single card in the 52-card deck to become the <strong>Sawkar (सावकार)</strong>. Players who run out of cards go bankrupt and are eliminated as <strong>Bhikar (भिकारी)</strong>!</p>
+
+          <h3>🎴 Dealing & Hands</h3>
+          <ul>
+            <li>Standard 52-card deck (Jokers removed).</li>
+            <li>Cards are shuffled and dealt out evenly among all players face-down.</li>
+            <li>Players keep their cards face-down in their personal stack and are <strong>not allowed to look ahead</strong>.</li>
+          </ul>
+
+          <h3>⚡ Playing a Turn</h3>
+          <ul>
+            <li>Players take turns in clockwise order flipping the top card of their personal stack into the central pot.</li>
+          </ul>
+
+          <h3>🏆 Capturing the Central Pile (The Match Rule)</h3>
+          <ul>
+            <li>Whenever a player lays down a card that matches the <strong>same rank</strong> as the card immediately beneath it (e.g., a 7 on a 7, a King on a King, or an Ace on an Ace), that player <strong>wins the entire central pile</strong>!</li>
+            <li>The winner collects all cards, adds them to the bottom of their personal deck, and leads the next card to start the new pot.</li>
+          </ul>
+
+          <h3>🚫 Elimination & Crowning the Sawkar</h3>
+          <ul>
+            <li>When a player runs out of cards, they become <strong>Bhikar (भिकारी)</strong> and are knocked out.</li>
+            <li>The last player holding all 52 cards is crowned the undisputed <strong>Maha Sawkar (महा सावकार)</strong>!</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="modal-settings">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2 class="modal-title">⚙️ Table Settings</h2>
+          <button class="modal-close-btn" data-close="modal-settings">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="setting-row">
+            <div class="setting-label">
+              <span class="setting-name">Number of Players</span>
+              <span class="setting-desc">2 Players (Heads Up), 3 Players, or 4 Players</span>
+            </div>
+            <div class="btn-group" id="group-players">
+              <button class="btn-choice" data-players="2">2</button>
+              <button class="btn-choice" data-players="3">3</button>
+              <button class="btn-choice active" data-players="4">4</button>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-label">
+              <span class="setting-name">Game Speed</span>
+              <span class="setting-desc">Turn pacing delay</span>
+            </div>
+            <div class="btn-group" id="group-speed">
+              <button class="btn-choice active" data-speed="normal">Normal</button>
+              <button class="btn-choice" data-speed="fast">Fast</button>
+              <button class="btn-choice" data-speed="turbo">Turbo</button>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-label">
+              <span class="setting-name">Match Rule Variation</span>
+              <span class="setting-desc">Classic same-rank match or variations</span>
+            </div>
+            <div class="btn-group" id="group-rule">
+              <button class="btn-choice active" data-rule="rank">Rank (7 on 7)</button>
+              <button class="btn-choice" data-rule="suit">Suit Match</button>
+              <button class="btn-choice" data-rule="color_rank">Rank + Color</button>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-label">
+              <span class="setting-name">Table Mode</span>
+              <span class="setting-desc">Play vs AI Bots or Local Pass & Play</span>
+            </div>
+            <div class="btn-group" id="group-mode">
+              <button class="btn-choice active" data-playmode="ai">Vs Bots</button>
+              <button class="btn-choice" data-playmode="pass_and_play">Pass & Play</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Victory Modal -->
+    <div class="modal-overlay" id="modal-victory">
+      <div class="modal-card victory-card">
+        <div class="sawkar-crown-icon">👑</div>
+        <h2 class="sawkar-title" id="winner-name">BHIKAR SAWKAR</h2>
+        <div class="sawkar-subtitle" id="winner-sub">सावकार झाला रे!</div>
+        
+        <div class="leaderboard-list" id="victory-leaderboard">
+          <!-- Dynamically populated -->
+        </div>
+
+        <button id="btn-play-again" class="btn-primary-action">
+          खेळा पुन्हा (Play Another Match)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
