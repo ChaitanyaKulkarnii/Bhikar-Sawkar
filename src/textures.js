@@ -206,27 +206,40 @@ export function getFeltTexture() {
   ctx.arc(cx, cy, 380, 0, Math.PI * 2);
   ctx.stroke();
 
-  // Central Devanagari Watermark
+  // Central Art Deco Medallion (Clean luxury baize without text)
   ctx.save();
   ctx.translate(cx, cy);
-  ctx.fillStyle = 'rgba(201, 162, 75, 0.32)';
-  ctx.font = 'bold 72px "Yatra One", serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('भिकार सावकार', 0, 0);
 
-  // Inner Ornate Rosette around Center
-  ctx.strokeStyle = 'rgba(201, 162, 75, 0.25)';
-  ctx.lineWidth = 4;
+  // Subtle central glow ring
+  ctx.strokeStyle = 'rgba(201, 162, 75, 0.35)';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(0, 0, 120, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Inner Ornate Geometric Rosette
+  ctx.strokeStyle = 'rgba(201, 162, 75, 0.28)';
+  ctx.lineWidth = 3;
   for (let a = 0; a < 8; a++) {
     ctx.rotate(Math.PI / 4);
-    ctx.strokeRect(-90, -90, 180, 180);
+    ctx.strokeRect(-75, -75, 150, 150);
   }
+
+  // Polished gold center diamond
+  ctx.fillStyle = 'rgba(201, 162, 75, 0.4)';
+  ctx.beginPath();
+  ctx.moveTo(0, -32);
+  ctx.lineTo(24, 0);
+  ctx.lineTo(0, 32);
+  ctx.lineTo(-24, 0);
+  ctx.closePath();
+  ctx.fill();
+
   ctx.restore();
 
   // 5. Four Player Deck Placement Wells (Gold Frames on Felt)
   const deckPositions = [
-    { x: cx, y: cy + 620, label: 'YOU (भाऊ)' },       // Bottom (Player)
+    { x: cx, y: cy + 620, label: 'YOU' },             // Bottom (Player)
     { x: cx, y: cy - 620, label: 'BABANRAO' },        // Top
     { x: cx - 620, y: cy, label: 'DINKAR' },          // Left
     { x: cx + 620, y: cy, label: 'ANANDI' }           // Right

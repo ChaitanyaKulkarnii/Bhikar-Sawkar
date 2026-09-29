@@ -23,9 +23,9 @@ export class TableScene3D {
     this.scene.background = new THREE.Color(0x0A0D12);
     this.scene.fog = new THREE.FogExp2(0x0A0D12, 0.20);
 
-    this.camera = new THREE.PerspectiveCamera(54, this.width / this.height, 0.1, 50);
-    // Eye level sitting at the table
-    this.camera.position.set(0, 1.15, 0.95);
+    this.camera = new THREE.PerspectiveCamera(60, this.width / this.height, 0.1, 50);
+    // Eye level sitting comfortably at table with slightly wider view for full character framing
+    this.camera.position.set(0, 1.16, 1.02);
     this.cameraBasePos = this.camera.position.clone();
     this.camera.rotation.order = 'YXZ';
 
@@ -40,14 +40,14 @@ export class TableScene3D {
     this.container.appendChild(this.renderer.domElement);
 
     // ==========================================================
-    // 220° TO 270° FIRST-PERSON FREE-LOOK CONTROLLER
+    // 230° TO 240° FIRST-PERSON FREE-LOOK CONTROLLER
     // ==========================================================
-    // Total Horizontal Range: -135° to +135° (270° field of view)
-    // Pitch: -38° (down at cards/pot) to +22° (up at characters/lamp)
+    // Total Horizontal Range: -117.5° to +117.5° (235° total field of view)
+    // Pitch: -37° (down at cards/pot) to +58° (up at ceiling/lamp)
     this.targetYaw = 0;
     this.currentYaw = 0;
-    this.targetPitch = -0.22;
-    this.currentPitch = -0.22;
+    this.targetPitch = -0.20;
+    this.currentPitch = -0.20;
     this.hoverYawOffset = 0;
     this.hoverPitchOffset = 0;
 
@@ -123,19 +123,20 @@ export class TableScene3D {
         this.lastPointerX = e.clientX;
         this.lastPointerY = e.clientY;
 
-        // Smooth 270° horizontal and vertical pitch sensitivity
-        this.targetYaw -= dx * 0.0048;
-        this.targetPitch -= dy * 0.0036;
+        // Smooth, comfortable sensitivity
+        this.targetYaw -= dx * 0.0026;
+        this.targetPitch -= dy * 0.0020;
 
-        // Clamping to 270° total sweep (-135° to +135°) and -38° to +22° pitch
-        this.targetYaw = Math.max(-2.36, Math.min(2.36, this.targetYaw));
-        this.targetPitch = Math.max(-0.66, Math.min(0.38, this.targetPitch));
+        // Clamping to 235° total sweep (-117.5° to +117.5° = -2.05 to +2.05 rad)
+        // and -0.65 (down at cards) to +1.02 (up at ceiling/lamp) pitch
+        this.targetYaw = Math.max(-2.05, Math.min(2.05, this.targetYaw));
+        this.targetPitch = Math.max(-0.65, Math.min(1.02, this.targetPitch));
       } else {
-        // Natural subtle parallax look when hovering mouse
+        // Natural subtle parallax look when hovering mouse (subtle, non-intrusive)
         const normX = (e.clientX / window.innerWidth) * 2 - 1;
         const normY = -(e.clientY / window.innerHeight) * 2 + 1;
-        this.hoverYawOffset = -normX * 0.18;
-        this.hoverPitchOffset = normY * 0.10;
+        this.hoverYawOffset = -normX * 0.04;
+        this.hoverPitchOffset = normY * 0.025;
       }
     });
 
@@ -165,6 +166,8 @@ export class TableScene3D {
         this.lookAtSeat('top');
       } else if (e.code === 'KeyS' || e.code === 'ArrowDown') {
         this.lookAtSeat('bottom');
+      } else if (e.code === 'KeyC') {
+        this.lookAtSeat('ceiling');
       } else if (e.code === 'KeyR') {
         this.lookAtSeat('reset');
       }
@@ -174,10 +177,10 @@ export class TableScene3D {
   // Smooth POV quick-look target switcher
   lookAtSeat(seat) {
     if (seat === 'left') {
-      this.targetYaw = -0.82;  // Look directly at Dinkar
+      this.targetYaw = -0.78;  // Look directly at Dinkar (full upper body framing)
       this.targetPitch = -0.06;
     } else if (seat === 'right') {
-      this.targetYaw = 0.82;   // Look directly at Anandi
+      this.targetYaw = 0.78;   // Look directly at Anandi (full upper body framing)
       this.targetPitch = -0.06;
     } else if (seat === 'top') {
       this.targetYaw = 0;      // Look across at Babanrao
@@ -185,6 +188,9 @@ export class TableScene3D {
     } else if (seat === 'bottom') {
       this.targetYaw = 0;      // Look down at cards and pot
       this.targetPitch = -0.60;
+    } else if (seat === 'ceiling') {
+      this.targetYaw = 0;      // Look straight up at the ceiling and lamp
+      this.targetPitch = 0.88;
     } else if (seat === 'reset') {
       this.targetYaw = 0;
       this.targetPitch = -0.18;
@@ -229,10 +235,11 @@ export class TableScene3D {
     brass.position.y = 0.16;
     this.lampRig.add(brass);
 
-    // Hanging Wire
-    const wireGeo = new THREE.CylinderGeometry(0.005, 0.005, 1.5, 8);
+    // Hanging Wire reaching ceiling mount flange at y = 3.55
+    const wireLength = 1.40;
+    const wireGeo = new THREE.CylinderGeometry(0.005, 0.005, wireLength, 8);
     const wire = new THREE.Mesh(wireGeo, new THREE.MeshBasicMaterial({ color: 0x111111 }));
-    wire.position.y = 0.9;
+    wire.position.y = 0.20 + wireLength / 2;
     this.lampRig.add(wire);
 
     // Warm Incandescent Spotlight on Table Pot
@@ -346,7 +353,7 @@ export class TableScene3D {
     wall.position.set(0, 2.5, -3.2);
     this.scene.add(wall);
 
-    // Left and Right Side Walls for complete 270° room enclosure
+    // Left and Right Side Walls for complete room enclosure
     const sideWallGeo = new THREE.PlaneGeometry(12, 6);
     const leftWall = new THREE.Mesh(sideWallGeo, wallMat);
     leftWall.position.set(-4.5, 2.5, 0);
@@ -357,6 +364,40 @@ export class TableScene3D {
     rightWall.position.set(4.5, 2.5, 0);
     rightWall.rotation.y = -Math.PI / 2;
     this.scene.add(rightWall);
+
+    // Realistic Cellar Wooden Ceiling
+    const ceilingGeo = new THREE.PlaneGeometry(14, 14);
+    const ceilingMat = new THREE.MeshStandardMaterial({
+      color: 0x121722, // Dark cellar wood/plaster
+      roughness: 0.88,
+      metalness: 0.05
+    });
+    const ceiling = new THREE.Mesh(ceilingGeo, ceilingMat);
+    ceiling.position.set(0, 3.65, 0);
+    ceiling.rotation.x = Math.PI / 2; // Facing down
+    ceiling.receiveShadow = true;
+    this.scene.add(ceiling);
+
+    // Heavy Timber Cross Beams / Rafters across Ceiling
+    const beamMat = new THREE.MeshStandardMaterial({
+      color: 0x24160E, // Dark aged walnut timber
+      roughness: 0.72,
+      metalness: 0.08
+    });
+    [-3.0, -1.5, 0, 1.5, 3.0].forEach((x) => {
+      const beamGeo = new THREE.BoxGeometry(0.20, 0.22, 14);
+      const beam = new THREE.Mesh(beamGeo, beamMat);
+      beam.position.set(x, 3.55, 0);
+      beam.receiveShadow = true;
+      this.scene.add(beam);
+    });
+
+    // Hanging Lamp Ceiling Mount Flange
+    const flangeGeo = new THREE.CylinderGeometry(0.14, 0.16, 0.05, 16);
+    const flangeMat = new THREE.MeshStandardMaterial({ color: 0xC9A24B, metalness: 0.88, roughness: 0.22 });
+    const flange = new THREE.Mesh(flangeGeo, flangeMat);
+    flange.position.set(0, 3.50, -0.15);
+    this.scene.add(flange);
 
     // ========================================================
     // RICH DETAILED TABLE
@@ -435,41 +476,7 @@ export class TableScene3D {
     base.position.y = 0.34;
     this.tableGroup.add(base);
 
-    // 6. 3D Stacks of Brass Betting Coins around each player station
-    const createCoinStack = (count, x, z) => {
-      const stack = new THREE.Group();
-      stack.position.set(x, 0.74, z);
-      const coinGeo = new THREE.CylinderGeometry(0.036, 0.036, 0.0075, 20);
-      const coinMat = new THREE.MeshStandardMaterial({
-        color: 0xD4AF37,
-        metalness: 0.92,
-        roughness: 0.22
-      });
-
-      for (let c = 0; c < count; c++) {
-        const coin = new THREE.Mesh(coinGeo, coinMat);
-        const jx = (Math.sin(c * 2.3) - 0.5) * 0.003;
-        const jz = (Math.cos(c * 1.7) - 0.5) * 0.003;
-        coin.position.set(jx, 0.004 + c * 0.0075, jz);
-        coin.rotation.y = c * 0.45;
-        coin.castShadow = true;
-        coin.receiveShadow = true;
-        stack.add(coin);
-      }
-      return stack;
-    };
-
-    // Stacks near player stations
-    this.tableGroup.add(createCoinStack(6, -0.38, 0.55));
-    this.tableGroup.add(createCoinStack(4, -0.46, 0.48));
-    this.tableGroup.add(createCoinStack(8, -0.65, -0.08));
-    this.tableGroup.add(createCoinStack(5, -0.58, -0.16));
-    this.tableGroup.add(createCoinStack(7, -0.48, -0.65));
-    this.tableGroup.add(createCoinStack(4, -0.55, -0.58));
-    this.tableGroup.add(createCoinStack(9, 0.58, -0.10));
-    this.tableGroup.add(createCoinStack(6, 0.52, -0.18));
-
-    // 7. Authentic Mumbai Cutting Chai Glass on Brass Saucer
+    // 6. Authentic Mumbai Cutting Chai Glass on Brass Saucer
     const chaiGroup = new THREE.Group();
     chaiGroup.position.set(-0.54, 0.74, -0.48);
 
