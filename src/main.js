@@ -1,12 +1,12 @@
-// Bhikar Sawkar - Main Orchestrator and Table Renderer
+// Bhikar Sawkar - 3D First-Person Perspective Orchestrator
 import confetti from 'canvas-confetti';
 import { sounds } from './audio.js';
-import { renderCardFace, renderCardBack } from './cards.js';
 import { BhikarSawkarEngine } from './engine.js';
+import { TableScene3D } from './scene3d.js';
 
 // DOM References
-const potContainer = document.getElementById('pot-cards-stack');
-const potBadgeNum = document.getElementById('pot-badge-num');
+const webglContainer = document.getElementById('webgl-container');
+const tensionVignette = document.getElementById('tension-vignette');
 const statPot = document.getElementById('stat-pot');
 const statFlips = document.getElementById('stat-flips');
 const statMatches = document.getElementById('stat-matches');
@@ -18,7 +18,7 @@ const btnSettings = document.getElementById('btn-settings');
 const btnNewMatch = document.getElementById('btn-new-match');
 const matchAnnouncement = document.getElementById('match-announcement');
 const matchSubtext = document.getElementById('match-subtext');
-const tableSurface = document.getElementById('table-surface');
+const hudCardDisplay = document.getElementById('hud-card-display');
 
 const modalRules = document.getElementById('modal-rules');
 const modalSettings = document.getElementById('modal-settings');
@@ -29,16 +29,18 @@ const winnerNameEl = document.getElementById('winner-name');
 const winnerSubEl = document.getElementById('winner-sub');
 
 // Seat Mapping
-// In 4 players: 0: bottom, 1: left, 2: top, 3: right
-// In 3 players: 0: bottom, 1: left, 2: top (right hidden)
-// In 2 players: 0: bottom, 1: top (left & right hidden)
-const SEATS_CONFIG = {
-  4: ['seat-bottom', 'seat-left', 'seat-top', 'seat-right'],
-  3: ['seat-bottom', 'seat-left', 'seat-top'],
-  2: ['seat-bottom', 'seat-top']
-};
+function getSeatMap(playerCount) {
+  if (playerCount === 2) {
+    return ['bottom', 'top'];
+  }
+  if (playerCount === 3) {
+    return ['bottom', 'left', 'top'];
+  }
+  return ['bottom', 'left', 'top', 'right'];
+}
 
-const ALL_SEAT_IDS = ['seat-bottom', 'seat-left', 'seat-top', 'seat-right'];
+// Initialize 3D First-Person Scene
+const scene3d = new TableScene3D(webglContainer);
 
 // Initialize Game Engine
 let engine = new BhikarSawkarEngine({
@@ -48,142 +50,118 @@ let engine = new BhikarSawkarEngine({
   playMode: 'ai'
 });
 
-// Sound toggle state
+scene3d.setPlayerCount(4);
+
+// Sound State
 let isMuted = false;
 
-// Helpers: Render 3D Deck Stack Height
-function renderDeckStack(stackEl, count) {
-  if (!stackEl) return;
-  stackEl.innerHTML = '';
-  if (count <= 0) return;
-
-  const visualLayers = Math.min(Math.ceil(count / 4), 9);
-  for (let i = 0; i < visualLayers; i++) {
-    const layer = document.createElement('div');
-    layer.className = 'stack-layer';
-    layer.style.transform = `translate(${i * -0.8}px, ${i * -1.2}px)`;
-    stackEl.appendChild(layer);
-  }
-
-  // Top of stack is ornate card back
-  const topCard = document.createElement('div');
-  topCard.style.position = 'absolute';
-  topCard.style.inset = '0';
-  topCard.style.transform = `translate(${visualLayers * -0.8}px, ${visualLayers * -1.2}px)`;
-  topCard.innerHTML = renderCardBack();
-  stackEl.appendChild(topCard);
-}
-
-// Seat Element Resolver
-function getSeatElements(seatId) {
-  const seatEl = document.getElementById(seatId);
+// Helpers: Resolve HUD Elements
+function getHudElements(seatKey) {
+  const hudEl = document.getElementById(`seat-${seatKey}`);
+  if (!hudEl) return null;
   return {
-    seatEl,
-    avatar: seatEl.querySelector('.player-avatar'),
-    name: seatEl.querySelector('.player-name'),
-    role: seatEl.querySelector('.player-role-tag'),
-    count: seatEl.querySelector('.player-card-count'),
-    stack: seatEl.querySelector('.card-stack'),
-    chat: seatEl.querySelector('.chat-bubble')
+    hudEl,
+    avatar: document.getElementById(`avatar-${seatKey}`),
+    name: document.getElementById(`name-${seatKey}`),
+    role: document.getElementById(`role-${seatKey}`),
+    count: document.getElementById(`count-${seatKey}`),
+    chat: document.getElementById(`chat-${seatKey}`)
   };
 }
 
-// Update View based on Engine State
-function updateTableView(state) {
+// Update HUD View
+function updateHud(state) {
   statPot.textContent = state.centralPileCount;
-  potBadgeNum.textContent = state.centralPileCount;
   statFlips.textContent = state.stats.roundFlips;
   statMatches.textContent = state.stats.matchesCount;
 
-  const currentSeats = SEATS_CONFIG[engine.playerCount] || SEATS_CONFIG[4];
+  // Tension Vignette & Heartbeat
+  if (state.centralPileCount >= 18) {
+    tensionVignette.className = 'tension-vignette active super-high';
+    sounds.playHeartbeat(2);
+  } else if (state.centralPileCount >= 8) {
+    tensionVignette.className = 'tension-vignette active';
+    sounds.playHeartbeat(1.2);
+  } else {
+    tensionVignette.className = 'tension-vignette';
+  }
 
-  // Show/Hide seats according to player count
-  ALL_SEAT_IDS.forEach(id => {
-    const el = document.getElementById(id);
+  const seatKeys = getSeatMap(engine.playerCount);
+
+  // Show/Hide HUD cards
+  ['bottom', 'left', 'top', 'right'].forEach(seat => {
+    const el = document.getElementById(`seat-${seat}`);
     if (el) {
-      if (currentSeats.includes(id)) {
-        el.style.display = 'flex';
-      } else {
-        el.style.display = 'none';
-      }
+      el.style.display = seatKeys.includes(seat) ? 'flex' : 'none';
     }
   });
 
-  // Update each active player's seat
-  state.players.forEach((player, idx) => {
-    const seatId = currentSeats[idx];
-    if (!seatId) return;
+  // Update physical 3D card deck counts
+  const deckCounts = {};
+  state.players.forEach((p, idx) => {
+    const seat = seatKeys[idx];
+    if (seat) deckCounts[seat] = p.cardCount;
+  });
+  scene3d.updateDeckCounts(deckCounts);
 
-    const els = getSeatElements(seatId);
-    if (!els.seatEl) return;
+  // Update HUD text & turn highlights
+  state.players.forEach((player, idx) => {
+    const seatKey = seatKeys[idx];
+    if (!seatKey) return;
+
+    const els = getHudElements(seatKey);
+    if (!els) return;
 
     els.name.textContent = player.name;
     els.avatar.textContent = player.avatar;
     els.role.textContent = player.role;
-    els.count.textContent = `🎴 ${player.cardCount}`;
+    els.count.textContent = `${player.cardCount} 🎴`;
 
-    renderDeckStack(els.stack, player.cardCount);
-
-    // Turn highlight
     if (idx === state.turnIndex && !player.eliminated && state.isPlaying) {
-      els.seatEl.classList.add('active');
+      els.hudEl.classList.add('active');
     } else {
-      els.seatEl.classList.remove('active');
+      els.hudEl.classList.remove('active');
     }
 
-    // Elimination state
     if (player.eliminated) {
-      els.seatEl.classList.add('eliminated');
-      if (!els.seatEl.querySelector('.eliminated-stamp')) {
+      els.hudEl.classList.add('eliminated');
+      if (!els.hudEl.querySelector('.eliminated-stamp')) {
         const stamp = document.createElement('div');
         stamp.className = 'eliminated-stamp';
         stamp.textContent = 'भिकारी (BHIKAR)';
-        els.seatEl.appendChild(stamp);
+        els.hudEl.appendChild(stamp);
       }
     } else {
-      els.seatEl.classList.remove('eliminated');
-      const stamp = els.seatEl.querySelector('.eliminated-stamp');
+      els.hudEl.classList.remove('eliminated');
+      const stamp = els.hudEl.querySelector('.eliminated-stamp');
       if (stamp) stamp.remove();
     }
   });
 
-  // Enable/Disable Flip Button for human player
-  const humanPlayer = state.players[0];
-  const isHumanTurn = state.turnIndex === 0 && !humanPlayer.eliminated && state.isPlaying && !state.isPaused;
+  // Last card HUD preview
+  if (state.topCard) {
+    const suitSymbol = state.topCard.suitSymbol || '♠';
+    const color = (state.topCard.suit === 'hearts' || state.topCard.suit === 'diamonds') ? '#D4463B' : '#FFFFFF';
+    hudCardDisplay.innerHTML = `
+      <div class="hud-card-mini" style="color: ${color};">
+        <span>${state.topCard.rank}</span>
+        <span>${suitSymbol}</span>
+      </div>
+    `;
+  } else {
+    hudCardDisplay.innerHTML = `<span class="hud-empty-pot">EMPTY POT</span>`;
+  }
+
+  // Turn button state
+  const isHumanTurn = state.turnIndex === 0 && !state.players[0].eliminated && state.isPlaying && !state.isPaused;
   btnFlip.disabled = !isHumanTurn;
-  btnFlip.style.opacity = isHumanTurn ? '1' : '0.4';
-}
-
-// Render Central Pot Cards
-function renderPot(centralPile) {
-  potContainer.innerHTML = '';
-  if (!centralPile || centralPile.length === 0) return;
-
-  // Show last up to 6 overlapping cards for tactile table feel
-  const startIdx = Math.max(0, centralPile.length - 6);
-  const visibleCards = centralPile.slice(startIdx);
-
-  visibleCards.forEach((card, idx) => {
-    const cardEl = document.createElement('div');
-    cardEl.className = 'pot-card-item';
-    
-    // Deterministic pleasant random rotation based on card id
-    const seed = card.id.charCodeAt(card.id.length - 1) + idx * 7;
-    const rot = ((seed % 25) - 12);
-    const offsetX = ((seed % 14) - 7);
-    const offsetY = ((seed % 10) - 5);
-
-    cardEl.style.transform = `translate(${offsetX}px, ${offsetY}px) rotate(${rot}deg)`;
-    cardEl.style.zIndex = idx + 1;
-    cardEl.innerHTML = renderCardFace(card);
-    potContainer.appendChild(cardEl);
-  });
+  btnFlip.style.opacity = isHumanTurn ? '1' : '0.35';
 }
 
 // Show Dialogue Chat Bubble
-function showChat(seatId, text) {
-  const els = getSeatElements(seatId);
-  if (!els.chat) return;
+function showChat(seatKey, text) {
+  const els = getHudElements(seatKey);
+  if (!els || !els.chat) return;
 
   els.chat.textContent = text;
   els.chat.classList.add('visible');
@@ -193,41 +171,23 @@ function showChat(seatId, text) {
   }, 3200);
 }
 
-// Table Camera Shake on Match or Defeat
-function shakeTable() {
-  tableSurface.style.transform = 'translate(-4px, 3px) scale(0.99)';
-  setTimeout(() => {
-    tableSurface.style.transform = 'translate(4px, -3px) scale(1.01)';
-    setTimeout(() => {
-      tableSurface.style.transform = 'translate(-2px, 1px)';
-      setTimeout(() => {
-        tableSurface.style.transform = 'none';
-      }, 70);
-    }, 70);
-  }, 70);
-}
-
-// Confetti Cannon for Match & Victory
+// Confetti effects
 function fireMatchConfetti() {
   try {
     confetti({
-      particleCount: 50,
-      spread: 70,
-      origin: { y: 0.55 },
+      particleCount: 55,
+      spread: 75,
+      origin: { y: 0.58 },
       colors: ['#C9A24B', '#E5BF65', '#D4463B', '#F5F0E6']
     });
-  } catch (e) {
-    // Canvas confetti fallback
-  }
+  } catch (e) {}
 }
 
 function fireSawkarVictoryConfetti() {
   try {
     const end = Date.now() + 2500;
     const interval = setInterval(() => {
-      if (Date.now() > end) {
-        return clearInterval(interval);
-      }
+      if (Date.now() > end) return clearInterval(interval);
       confetti({
         startVelocity: 35,
         spread: 360,
@@ -236,49 +196,57 @@ function fireSawkarVictoryConfetti() {
         colors: ['#C9A24B', '#FFD700', '#F5F0E6', '#D4463B']
       });
     }, 200);
-  } catch (e) {
-    // Ignore
-  }
+  } catch (e) {}
 }
 
-// Wire Engine Events
+// Wire Engine Events to 3D Scene
 engine.on('onStateChange', (state) => {
-  updateTableView(state);
-  renderPot(engine.centralPile);
+  updateHud(state);
 });
 
 engine.on('onCardPlayed', ({ player, card, potSize }) => {
+  const seatKeys = getSeatMap(engine.playerCount);
+  const pIdx = engine.players.findIndex(p => p.id === player.id);
+  const seatKey = seatKeys[pIdx] || 'bottom';
+
   sounds.playCardFlip();
-  setTimeout(() => {
+
+  // Play 3D card throw motion from the character's hands
+  scene3d.playCardThrow(seatKey, card, () => {
     sounds.playTableThud();
-  }, 100);
-  renderPot(engine.centralPile);
-  updateTableView(engine.getState());
+    updateHud(engine.getState());
+  });
 });
 
 engine.on('onMatch', ({ player, matchedCard, underneathCard, capturedCount, newDeckCount }) => {
-  shakeTable();
+  const seatKeys = getSeatMap(engine.playerCount);
+  const pIdx = engine.players.findIndex(p => p.id === player.id);
+  const seatKey = seatKeys[pIdx] || 'bottom';
+
   sounds.playSawkarMatch();
+  sounds.playTableSlam();
+  scene3d.triggerCameraShake(0.035);
   fireMatchConfetti();
 
-  // Show announcement
+  // Banner
   matchAnnouncement.classList.add('show');
   matchSubtext.textContent = `${player.name} ने जिंकला ${capturedCount} पानांचा ढीग!`;
 
   setTimeout(() => {
     sounds.playCardSweep();
-  }, 400);
+    scene3d.sweepPotToWinner(seatKey, () => {
+      updateHud(engine.getState());
+    });
+  }, 350);
 
   setTimeout(() => {
     matchAnnouncement.classList.remove('show');
-    renderPot(engine.centralPile);
-    updateTableView(engine.getState());
   }, 1400);
 });
 
 engine.on('onElimination', ({ player, rank }) => {
   sounds.playBhikarElimination();
-  updateTableView(engine.getState());
+  updateHud(engine.getState());
 });
 
 engine.on('onVictory', ({ sawkar, stats, eliminated }) => {
@@ -307,10 +275,11 @@ engine.on('onVictory', ({ sawkar, stats, eliminated }) => {
 });
 
 engine.on('onBanter', ({ player, text }) => {
-  const currentSeats = SEATS_CONFIG[engine.playerCount] || SEATS_CONFIG[4];
+  const seatKeys = getSeatMap(engine.playerCount);
   const pIdx = engine.players.findIndex(p => p.id === player.id);
-  if (pIdx !== -1 && currentSeats[pIdx]) {
-    showChat(currentSeats[pIdx], text);
+  const seatKey = seatKeys[pIdx];
+  if (seatKey) {
+    showChat(seatKey, text);
   }
 });
 
@@ -324,10 +293,15 @@ function handleFlip() {
 
 btnFlip.addEventListener('click', handleFlip);
 
-// User Deck Click
-document.getElementById('stack-bottom').addEventListener('click', handleFlip);
+// Click anywhere on table to flip on human turn
+webglContainer.addEventListener('click', () => {
+  sounds.ensureContext();
+  if (engine.turnIndex === 0 && !engine.players[0].eliminated && engine.isPlaying) {
+    handleFlip();
+  }
+});
 
-// Keyboard Spacebar trigger
+// Keyboard Shortcut: Spacebar
 window.addEventListener('keydown', (e) => {
   if (e.code === 'Space' && !e.repeat) {
     const isModalOpen = document.querySelector('.modal-overlay.open');
@@ -411,6 +385,7 @@ document.getElementById('group-players').addEventListener('click', (e) => {
   btn.classList.add('active');
   const count = parseInt(btn.dataset.players, 10);
   engine.playerCount = count;
+  scene3d.setPlayerCount(count);
   sounds.playCoin();
   engine.initMatch();
 });

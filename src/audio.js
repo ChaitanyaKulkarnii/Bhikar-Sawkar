@@ -317,6 +317,63 @@ class SoundEngine {
     osc.start(t);
     osc.stop(t + 0.09);
   }
+
+  // 9. Tension Heartbeat (Buckshot style high-stakes pot building)
+  playHeartbeat(intensity = 1) {
+    if (this.muted) return;
+    this.ensureContext();
+    if (!this.ctx) return;
+
+    const t = this.ctx.currentTime;
+    const vol = Math.min(0.4, 0.12 * intensity);
+
+    // First beat: Lub
+    const osc1 = this.ctx.createOscillator();
+    const gain1 = this.ctx.createGain();
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(68, t);
+    osc1.frequency.exponentialRampToValueAtTime(32, t + 0.12);
+    gain1.gain.setValueAtTime(vol, t);
+    gain1.gain.exponentialRampToValueAtTime(0.001, t + 0.13);
+    osc1.connect(gain1);
+    gain1.connect(this.ctx.destination);
+    osc1.start(t);
+    osc1.stop(t + 0.14);
+
+    // Second beat: Dub (slightly higher & punchier, 120ms later)
+    const t2 = t + 0.13;
+    const osc2 = this.ctx.createOscillator();
+    const gain2 = this.ctx.createGain();
+    osc2.type = 'sine';
+    osc2.frequency.setValueAtTime(74, t2);
+    osc2.frequency.exponentialRampToValueAtTime(35, t2 + 0.14);
+    gain2.gain.setValueAtTime(vol * 1.25, t2);
+    gain2.gain.exponentialRampToValueAtTime(0.001, t2 + 0.15);
+    osc2.connect(gain2);
+    gain2.connect(this.ctx.destination);
+    osc2.start(t2);
+    osc2.stop(t2 + 0.16);
+  }
+
+  // 10. Table Fist Slam (Character excitement / anger)
+  playTableSlam() {
+    if (this.muted) return;
+    this.ensureContext();
+    if (!this.ctx) return;
+
+    const t = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(110, t);
+    osc.frequency.exponentialRampToValueAtTime(25, t + 0.28);
+    gain.gain.setValueAtTime(0.45, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(t);
+    osc.stop(t + 0.32);
+  }
 }
 
 export const sounds = new SoundEngine();

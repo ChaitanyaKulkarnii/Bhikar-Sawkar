@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Bhikar Sawkar (भिकार सावकार) - Midnight Table Card Game</title>
-  <meta name="description" content="A moody, tactile tabletop card game of Bhikar Sawkar (भिकार सावकार) from Maharashtra. Flip cards, hit the rank match, capture the pot, and become the Sawkar!">
+  <title>Bhikar Sawkar (भिकार सावकार) - 3D FPP Tabletop Card Game</title>
+  <meta name="description" content="A tense First-Person Perspective (FPP) tabletop card game of Bhikar Sawkar (भिकार सावकार) from Maharashtra. Sit at the table across real animated opponents, flip cards, and become the Sawkar!">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Outfit:wght@400;500;600;700&family=Rozha+One&family=Yatra+One&display=swap" rel="stylesheet">
@@ -12,10 +12,8 @@
 </head>
 <body>
   <div id="app">
-    <!-- Overhead Swinging Warm Spotlight -->
-    <div class="overhead-lamp-rig" aria-hidden="true">
-      <div class="lamp-cone"></div>
-    </div>
+    <!-- Heartbeat Tension Vignette (Pulses when pot gets large) -->
+    <div id="tension-vignette" class="tension-vignette" aria-hidden="true"></div>
 
     <!-- Top Navigation Bar -->
     <header class="top-bar">
@@ -24,14 +22,15 @@
           <span>BHIKAR SAWKAR</span>
           <span class="brand-marathi">भिकार सावकार</span>
         </h1>
+        <div class="fpp-badge" title="First-Person Perspective Tabletop">FPP 3D TABLE</div>
       </div>
 
       <div class="table-stats-bar">
-        <div class="stat-chip" title="Current Cards in the Center Pile">
-          <span>Pot:</span>
-          <span class="stat-val" id="stat-pot">0</span>
+        <div class="stat-chip" id="chip-pot" title="Cards in Central Pot">
+          <span>POT:</span>
+          <span class="stat-val highlight-gold" id="stat-pot">0</span>
         </div>
-        <div class="stat-chip" title="Total Flips This Match">
+        <div class="stat-chip" title="Total Flips">
           <span>Flips:</span>
           <span class="stat-val" id="stat-flips">0</span>
         </div>
@@ -60,88 +59,78 @@
       </div>
     </header>
 
-    <!-- Table Viewport -->
+    <!-- 3D Table Viewport -->
     <main class="table-viewport" id="table-viewport">
-      <div class="midnight-table" id="table-surface">
-        <div class="table-felt-grain"></div>
-        <div class="table-center-mark">
-          <div class="table-brand-watermark">भिकार सावकार</div>
-        </div>
+      <!-- Three.js Canvas Container -->
+      <div id="webgl-container" class="webgl-container"></div>
 
-        <!-- Central Pot (Capturable Pile) -->
-        <div class="central-pot-area" id="central-pot" title="The Central Table Pot">
-          <div class="pot-cards-container" id="pot-cards-stack">
-            <!-- Cards rendered dynamically -->
-          </div>
-          <div class="pot-badge" id="pot-count-badge">
-            <span>POT</span>
-            <span id="pot-badge-num">0</span>
-          </div>
-        </div>
-
-        <!-- 4 Seats around the Table -->
-        <!-- Seat Top (Opponent 2) -->
-        <div class="player-seat seat-top" id="seat-top" data-seat="top">
-          <div class="chat-bubble" id="chat-top"></div>
-          <div class="card-stack" id="stack-top" title="Opponent's Deck"></div>
-          <div class="player-meta-box">
-            <div class="player-avatar" id="avatar-top">👴🏽</div>
-            <div class="player-info-text">
-              <div class="player-name" id="name-top">Babanrao</div>
-              <div class="player-role-tag" id="role-top">Opponent</div>
-            </div>
-            <div class="player-card-count" id="count-top">🎴 13</div>
-          </div>
-        </div>
-
-        <!-- Seat Left (Opponent 1) -->
-        <div class="player-seat seat-left" id="seat-left" data-seat="left">
-          <div class="chat-bubble" id="chat-left"></div>
-          <div class="card-stack" id="stack-left" title="Opponent's Deck"></div>
-          <div class="player-meta-box">
-            <div class="player-avatar" id="avatar-left">😎</div>
-            <div class="player-info-text">
-              <div class="player-name" id="name-left">Dinkar</div>
-              <div class="player-role-tag" id="role-left">Opponent</div>
-            </div>
-            <div class="player-card-count" id="count-left">🎴 13</div>
-          </div>
-        </div>
-
-        <!-- Seat Right (Opponent 3) -->
-        <div class="player-seat seat-right" id="seat-right" data-seat="right">
-          <div class="chat-bubble" id="chat-right"></div>
-          <div class="card-stack" id="stack-right" title="Opponent's Deck"></div>
-          <div class="player-meta-box">
-            <div class="player-avatar" id="avatar-right">👑</div>
-            <div class="player-info-text">
-              <div class="player-name" id="name-right">Anandi</div>
-              <div class="player-role-tag" id="role-right">Opponent</div>
-            </div>
-            <div class="player-card-count" id="count-right">🎴 13</div>
-          </div>
-        </div>
-
-        <!-- Seat Bottom (You / Active Contender) -->
-        <div class="player-seat seat-bottom" id="seat-bottom" data-seat="bottom">
-          <div class="chat-bubble" id="chat-bottom"></div>
-          <div class="card-stack" id="stack-bottom" title="Your Deck (Click to flip)"></div>
-          <div class="player-meta-box">
-            <div class="player-avatar" id="avatar-bottom">🤠</div>
-            <div class="player-info-text">
-              <div class="player-name" id="name-bottom">Bhau (भाऊ)</div>
-              <div class="player-role-tag" id="role-bottom">You</div>
-            </div>
-            <div class="player-card-count" id="count-bottom">🎴 13</div>
-          </div>
+      <!-- Current Top Card HUD Preview (Crisp high-contrast inspection) -->
+      <div class="current-card-hud" id="current-card-hud" title="Last Played Card on Table">
+        <div class="hud-label">LAST CARD</div>
+        <div class="hud-card-display" id="hud-card-display">
+          <span class="hud-empty-pot">EMPTY POT</span>
         </div>
       </div>
 
-      <!-- Action Bar for Human Play -->
+      <!-- 4 Character HUD Stations (Hovering over 3D seats) -->
+      <!-- Seat Top: Babanrao (The Veteran Uncle sitting directly across) -->
+      <div class="player-hud hud-top" id="seat-top" data-seat="top">
+        <div class="chat-bubble" id="chat-top"></div>
+        <div class="hud-meta-card">
+          <div class="hud-avatar" id="avatar-top">👴🏽</div>
+          <div class="hud-details">
+            <div class="hud-name" id="name-top">Babanrao</div>
+            <div class="hud-role" id="role-top">The Suspicious Veteran</div>
+          </div>
+          <div class="hud-card-badge" id="count-top">13 🎴</div>
+        </div>
+      </div>
+
+      <!-- Seat Left: Dinkar (The Hype Guy sitting to your left) -->
+      <div class="player-hud hud-left" id="seat-left" data-seat="left">
+        <div class="chat-bubble" id="chat-left"></div>
+        <div class="hud-meta-card">
+          <div class="hud-avatar" id="avatar-left">😎</div>
+          <div class="hud-details">
+            <div class="hud-name" id="name-left">Dinkar</div>
+            <div class="hud-role" id="role-left">The Hype Guy</div>
+          </div>
+          <div class="hud-card-badge" id="count-left">13 🎴</div>
+        </div>
+      </div>
+
+      <!-- Seat Right: Anandi (The Mastermind sitting to your right) -->
+      <div class="player-hud hud-right" id="seat-right" data-seat="right">
+        <div class="chat-bubble" id="chat-right"></div>
+        <div class="hud-meta-card">
+          <div class="hud-avatar" id="avatar-right">👑</div>
+          <div class="hud-details">
+            <div class="hud-name" id="name-right">Anandi</div>
+            <div class="hud-role" id="role-right">The Mastermind</div>
+          </div>
+          <div class="hud-card-badge" id="count-right">13 🎴</div>
+        </div>
+      </div>
+
+      <!-- Seat Bottom: You / Foreground Player -->
+      <div class="player-hud hud-bottom" id="seat-bottom" data-seat="bottom">
+        <div class="chat-bubble" id="chat-bottom"></div>
+        <div class="hud-meta-card">
+          <div class="hud-avatar" id="avatar-bottom">🤠</div>
+          <div class="hud-details">
+            <div class="hud-name" id="name-bottom">Bhau (भाऊ)</div>
+            <div class="hud-role" id="role-bottom">You (Contender)</div>
+          </div>
+          <div class="hud-card-badge" id="count-bottom">13 🎴</div>
+        </div>
+      </div>
+
+      <!-- Turn Action Bar (Centered at bottom above your hands) -->
       <div class="turn-action-bar" id="turn-action-bar">
         <button id="btn-flip" class="btn-flip-card" disabled>
-          <span>FLIP CARD</span>
-          <span class="kbd-shortcut">SPACE</span>
+          <span class="flip-icon">🎴</span>
+          <span class="flip-text">FLIP CARD</span>
+          <span class="kbd-shortcut">SPACE / CLICK</span>
         </button>
       </div>
 
@@ -203,7 +192,7 @@
           <div class="setting-row">
             <div class="setting-label">
               <span class="setting-name">Number of Players</span>
-              <span class="setting-desc">2 Players (Heads Up), 3 Players, or 4 Players</span>
+              <span class="setting-desc">2 Players (Heads Up 1v1), 3 Players, or 4 Players</span>
             </div>
             <div class="btn-group" id="group-players">
               <button class="btn-choice" data-players="2">2</button>

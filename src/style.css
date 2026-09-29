@@ -1,37 +1,32 @@
 /* ==========================================================================
-   BHIKAR SAWKAR (भिकार सावकार) - Midnight Table Design System
-   Inspired by Buckshot Roulette tabletop tension & Maharashtrian card sessions
+   BHIKAR SAWKAR (भिकार सावकार) - 3D FPP Tabletop Design System
+   Inspired by Buckshot Roulette First-Person tabletop tension
    ========================================================================== */
 
 :root {
-  --bg-ink: #0E1116;
-  --surface-panel: #171B22;
-  --surface-elevated: #232936;
-  --surface-border: #2C3444;
+  --bg-ink: #0A0D12;
+  --surface-panel: #141820;
+  --surface-elevated: #1F2532;
+  --surface-border: #2C3545;
   
   --table-felt: #12372F;
   --table-felt-dark: #0B201B;
-  --table-rim: #382417;
-  --table-rim-highlight: #523522;
+  --table-rim: #342214;
   
   --card-face: #F5F0E6;
   --card-border: #D6CEBE;
   --card-back: #8B1E1E;
-  --card-back-dark: #631212;
   
   --gold-sawkar: #C9A24B;
   --gold-glow: #E5BF65;
   --gold-dark: #8C6F2A;
   
   --red-bhikar: #D4463B;
-  --red-bhikar-glow: #FF6659;
-  
-  --suit-red: #D4463B;
-  --suit-black: #1F242D;
+  --red-bhikar-glow: #FF5A4D;
   
   --text-main: #E8E4DA;
-  --text-muted: #8A8F98;
-  --text-faint: #5A606D;
+  --text-muted: #8A92A0;
+  --text-faint: #555D6C;
   
   --font-display: 'Cinzel', 'Yatra One', serif;
   --font-marathi: 'Yatra One', 'Rozha One', cursive, sans-serif;
@@ -41,7 +36,7 @@
   --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Base Reset & Typography */
+/* Base Reset */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -85,54 +80,58 @@ html, body {
   width: 100vw;
   height: 100vh;
   position: relative;
-  background: radial-gradient(circle at 50% 45%, #18202A 0%, var(--bg-ink) 80%);
+  background-color: var(--bg-ink);
   overflow: hidden;
 }
 
-/* Atmospheric Overhead Lamp Effect */
-.overhead-lamp-rig {
+/* Heartbeat Tension Vignette (Buckshot style high stakes) */
+.tension-vignette {
   position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  height: 100%;
+  inset: 0;
   pointer-events: none;
-  z-index: 10;
+  z-index: 8;
+  opacity: 0;
+  background: radial-gradient(circle at 50% 50%, transparent 45%, rgba(212, 70, 59, 0.45) 85%, rgba(10, 13, 18, 0.95) 100%);
+  transition: opacity 0.5s ease;
 }
 
-.lamp-cone {
-  position: absolute;
-  top: 15%;
-  left: 50%;
-  transform: translate(-50%, -10%);
-  width: min(850px, 92vw);
-  height: min(650px, 78vh);
-  background: radial-gradient(ellipse 65% 55% at 50% 50%, 
-    rgba(229, 191, 101, 0.14) 0%, 
-    rgba(201, 162, 75, 0.06) 42%, 
-    rgba(0, 0, 0, 0) 70%);
-  filter: blur(28px);
-  border-radius: 50%;
-  animation: lampSway 14s ease-in-out infinite alternate;
+.tension-vignette.active {
+  opacity: 0.85;
+  animation: heartbeatPulse 1.2s infinite ease-in-out;
 }
 
-@keyframes lampSway {
-  0% { transform: translate(-51%, -11%) rotate(-0.5deg); opacity: 0.88; }
-  100% { transform: translate(-49%, -9%) rotate(0.5deg); opacity: 1; }
+.tension-vignette.super-high {
+  opacity: 1;
+  animation: heartbeatPulseFast 0.65s infinite ease-in-out;
 }
 
-/* Header & Top Bar */
+@keyframes heartbeatPulse {
+  0% { transform: scale(1); opacity: 0.5; }
+  15% { transform: scale(1.02); opacity: 0.85; }
+  30% { transform: scale(1); opacity: 0.6; }
+  45% { transform: scale(1.03); opacity: 0.95; }
+  100% { transform: scale(1); opacity: 0.5; }
+}
+
+@keyframes heartbeatPulseFast {
+  0% { transform: scale(1); opacity: 0.7; }
+  25% { transform: scale(1.04); opacity: 1; }
+  50% { transform: scale(1); opacity: 0.75; }
+  75% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.7; }
+}
+
+/* Top Bar Navigation */
 .top-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 24px;
-  background: rgba(14, 17, 22, 0.85);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(44, 52, 68, 0.6);
+  padding: 12px 24px;
+  background: rgba(10, 13, 18, 0.88);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(44, 53, 69, 0.5);
   z-index: 20;
-  height: 64px;
+  height: 60px;
 }
 
 .brand-section {
@@ -143,7 +142,7 @@ html, body {
 
 .brand-title {
   font-family: var(--font-display);
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   letter-spacing: 0.05em;
   font-weight: 700;
   color: var(--gold-sawkar);
@@ -154,16 +153,27 @@ html, body {
 
 .brand-marathi {
   font-family: var(--font-marathi);
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   color: var(--text-main);
   opacity: 0.9;
   font-weight: normal;
 }
 
+.fpp-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  background: rgba(201, 162, 75, 0.15);
+  color: var(--gold-sawkar);
+  border: 1px solid var(--gold-sawkar);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
 .table-stats-bar {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
 }
 
 .stat-chip {
@@ -173,15 +183,21 @@ html, body {
   font-size: 0.85rem;
   color: var(--text-muted);
   background: var(--surface-panel);
-  padding: 5px 12px;
+  padding: 4px 12px;
   border-radius: 6px;
   border: 1px solid var(--surface-border);
 }
 
 .stat-val {
-  color: var(--gold-sawkar);
+  color: var(--text-main);
   font-weight: 600;
   font-family: monospace;
+}
+
+.stat-val.highlight-gold {
+  color: var(--gold-sawkar);
+  font-size: 0.95rem;
+  font-weight: 700;
 }
 
 .action-buttons {
@@ -195,14 +211,14 @@ html, body {
   color: var(--text-main);
   border: 1px solid var(--surface-border);
   border-radius: 8px;
-  width: 38px;
-  height: 38px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 
 .btn-icon:hover {
@@ -213,306 +229,139 @@ html, body {
 }
 
 /* ==========================================================================
-   THE MIDNIGHT TABLE
+   3D TABLE VIEWPORT & THREE.JS CANVAS
    ========================================================================== */
 .table-viewport {
   flex: 1;
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  perspective: 1200px;
-  padding: 20px;
+  width: 100%;
+  height: calc(100vh - 60px);
   overflow: hidden;
 }
 
-.midnight-table {
-  width: min(1000px, 92vw);
-  height: min(620px, 78vh);
-  background: radial-gradient(ellipse at 50% 48%, #16463B 0%, var(--table-felt) 60%, var(--table-felt-dark) 100%);
-  border-radius: min(280px, 38vh);
-  position: relative;
-  box-shadow: 
-    0 0 0 16px var(--table-rim),
-    0 0 0 20px var(--table-rim-highlight),
-    0 35px 80px rgba(0, 0, 0, 0.85),
-    inset 0 0 70px rgba(0, 0, 0, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transform-style: preserve-3d;
-  transition: transform 0.4s var(--ease-smooth);
-}
-
-.table-felt-grain {
+.webgl-container {
   position: absolute;
   inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  background-image: radial-gradient(rgba(201, 162, 75, 0.03) 1px, transparent 0);
-  background-size: 16px 16px;
-  opacity: 0.6;
-}
-
-.table-center-mark {
-  position: absolute;
-  width: 220px;
-  height: 220px;
-  border: 1px dashed rgba(201, 162, 75, 0.2);
-  border-radius: 50%;
-  pointer-events: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.table-brand-watermark {
-  font-family: var(--font-marathi);
-  font-size: 1.4rem;
-  color: rgba(201, 162, 75, 0.12);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-/* ==========================================================================
-   CENTRAL POT (The Pile to Capture)
-   ========================================================================== */
-.central-pot-area {
-  position: absolute;
-  width: 170px;
-  height: 230px;
-  z-index: 15;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
-.pot-cards-container {
-  position: relative;
-  width: 110px;
-  height: 160px;
-  transform-style: preserve-3d;
-}
-
-.pot-card-item {
-  position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100%;
-  transition: all 0.3s var(--ease-spring);
-  pointer-events: none;
+  z-index: 1;
+  cursor: grab;
 }
 
-.pot-badge {
+.webgl-container:active {
+  cursor: grabbing;
+}
+
+/* Current Top Card HUD Display (Top Left corner) */
+.current-card-hud {
   position: absolute;
-  bottom: -28px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(14, 17, 22, 0.88);
-  border: 1px solid var(--gold-sawkar);
-  color: var(--gold-sawkar);
-  padding: 3px 12px;
+  top: 18px;
+  left: 20px;
+  background: rgba(14, 18, 24, 0.92);
+  border: 1px solid var(--surface-border);
   border-radius: 12px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  white-space: nowrap;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-/* ==========================================================================
-   CARDS (Tactile Ivory Finish & Ornate Crimson Back)
-   ========================================================================== */
-.card {
-  width: 110px;
-  height: 160px;
-  border-radius: 10px;
-  position: relative;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45);
-  backface-visibility: hidden;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-/* Face side */
-.card-face {
-  background-color: var(--card-face);
-  border: 1px solid var(--card-border);
-  color: var(--suit-color);
-  box-sizing: border-box;
-}
-
-.card-inner {
-  width: 100%;
-  height: 100%;
-  padding: 6px 8px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 8px;
-}
-
-.card-corner {
+  padding: 10px 14px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  line-height: 1;
-  font-weight: 700;
-  font-size: 1.15rem;
+  z-index: 15;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+  min-width: 90px;
 }
 
-.card-corner.bottom-right {
-  transform: rotate(180deg);
-}
-
-.corner-rank {
-  font-family: var(--font-body);
-  font-weight: 700;
-}
-
-.suit-icon {
-  margin-top: 2px;
-  display: inline-block;
-  vertical-align: middle;
-}
-
-.card-center {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-}
-
-.court-graphic {
-  font-family: var(--font-display);
-  font-size: 2.8rem;
-  font-weight: 900;
-  opacity: 0.9;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
-}
-
-.center-pip {
-  font-size: 2.4rem;
-}
-
-/* Back side */
-.card-back {
-  background: var(--card-back);
-  border: 2px solid var(--gold-sawkar);
-  padding: 6px;
-}
-
-.card-back-pattern {
-  width: 100%;
-  height: 100%;
-  border: 1px solid rgba(201, 162, 75, 0.6);
-  border-radius: 6px;
-  background: repeating-linear-gradient(
-    45deg,
-    var(--card-back-dark),
-    var(--card-back-dark) 4px,
-    var(--card-back) 4px,
-    var(--card-back) 8px
-  );
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.back-frame {
-  width: 80%;
-  height: 80%;
-  border: 1px solid var(--gold-sawkar);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: rgba(14, 17, 22, 0.4);
-}
-
-.back-rosette {
-  width: 24px;
-  height: 24px;
-  border: 2px solid var(--gold-sawkar);
-  transform: rotate(45deg);
-  margin-bottom: 6px;
-}
-
-.back-text {
-  font-family: var(--font-marathi);
+.hud-label {
   font-size: 0.65rem;
+  letter-spacing: 0.08em;
   color: var(--gold-sawkar);
-  text-align: center;
-  font-weight: 600;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.hud-card-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+}
+
+.hud-empty-pot {
+  font-size: 0.75rem;
+  color: var(--text-faint);
+  font-weight: 500;
+}
+
+.hud-card-mini {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 1.4rem;
+  font-weight: 700;
+  font-family: var(--font-body);
 }
 
 /* ==========================================================================
-   PLAYERS AROUND THE TABLE (2 to 4 Players)
+   CHARACTER HUD OVERLAYS (Floating in 3D Table Perspective)
    ========================================================================== */
-.player-seat {
+.player-hud {
   position: absolute;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
   z-index: 12;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
+  pointer-events: none;
 }
 
-/* Seat Positions */
-.seat-bottom {
-  bottom: 12px;
+/* Top Seat (Babanrao) */
+.hud-top {
+  top: 14px;
   left: 50%;
   transform: translateX(-50%);
 }
 
-.seat-top {
-  top: 12px;
-  left: 50%;
-  transform: translateX(-50%);
+/* Left Seat (Dinkar) */
+.hud-left {
+  top: 36%;
+  left: 24px;
 }
 
-.seat-left {
-  left: 18px;
-  top: 50%;
-  transform: translateY(-50%);
+/* Right Seat (Anandi) */
+.hud-right {
+  top: 36%;
+  right: 24px;
 }
 
-.seat-right {
-  right: 18px;
-  top: 50%;
-  transform: translateY(-50%);
+/* Bottom Seat (You / Bhau) */
+.hud-bottom {
+  bottom: 18px;
+  left: 24px;
 }
 
-/* Player Meta Card */
-.player-meta-box {
+.hud-meta-card {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: rgba(23, 27, 34, 0.9);
+  background: rgba(16, 20, 28, 0.92);
+  border: 1px solid var(--surface-border);
   padding: 6px 14px;
   border-radius: 20px;
-  border: 1px solid var(--surface-border);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7);
   transition: all 0.25s ease;
-  min-width: 140px;
+  backdrop-filter: blur(8px);
 }
 
-.player-seat.active .player-meta-box {
+.player-hud.active .hud-meta-card {
   border-color: var(--gold-sawkar);
-  box-shadow: 0 0 16px rgba(201, 162, 75, 0.45);
-  background: #1e2430;
+  box-shadow: 0 0 20px rgba(201, 162, 75, 0.5), inset 0 0 10px rgba(201, 162, 75, 0.2);
+  background: rgba(26, 32, 45, 0.96);
+  transform: scale(1.04);
 }
 
-.player-avatar {
-  font-size: 1.6rem;
-  width: 38px;
-  height: 38px;
+.hud-avatar {
+  font-size: 1.5rem;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -521,50 +370,52 @@ html, body {
   border: 1px solid var(--surface-border);
 }
 
-.player-info-text {
+.hud-details {
   display: flex;
   flex-direction: column;
 }
 
-.player-name {
+.hud-name {
   font-weight: 600;
   font-size: 0.9rem;
   color: var(--text-main);
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  white-space: nowrap;
 }
 
-.player-role-tag {
+.hud-role {
   font-size: 0.7rem;
   color: var(--text-muted);
+  white-space: nowrap;
 }
 
-.player-card-count {
+.hud-card-badge {
   font-size: 0.85rem;
-  color: var(--gold-sawkar);
   font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 4px;
+  color: var(--gold-sawkar);
+  background: rgba(201, 162, 75, 0.12);
+  padding: 3px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(201, 162, 75, 0.3);
+  margin-left: 4px;
 }
 
-/* Chat Speech Bubble */
+/* Chat Speech Bubbles */
 .chat-bubble {
   position: absolute;
   top: -46px;
-  background: rgba(14, 17, 22, 0.95);
+  background: rgba(10, 13, 18, 0.96);
   border: 1px solid var(--gold-sawkar);
   color: var(--text-main);
-  padding: 5px 12px;
+  padding: 6px 14px;
   border-radius: 12px;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
+  font-family: var(--font-body);
   white-space: nowrap;
   pointer-events: none;
   opacity: 0;
   transform: translateY(6px);
   transition: all 0.25s var(--ease-spring);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.8);
   z-index: 25;
 }
 
@@ -573,97 +424,64 @@ html, body {
   transform: translateY(0);
 }
 
-/* 3D Physical Card Stacks */
-.card-stack {
-  width: 90px;
-  height: 130px;
-  position: relative;
-  cursor: pointer;
-  transform-style: preserve-3d;
-  transition: transform 0.2s ease;
-}
-
-.card-stack:hover {
-  transform: translateY(-4px) scale(1.02);
-}
-
-.stack-layer {
-  position: absolute;
-  inset: 0;
-  border-radius: 8px;
-  background: var(--card-back);
-  border: 1px solid var(--gold-dark);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
-}
-
-/* Active turn indicator glow on user deck */
-.player-seat.seat-bottom.active .card-stack {
-  animation: deckPulse 1.8s infinite alternate;
-}
-
-@keyframes deckPulse {
-  0% { filter: drop-shadow(0 0 8px rgba(201, 162, 75, 0.4)); }
-  100% { filter: drop-shadow(0 0 20px rgba(201, 162, 75, 0.9)); }
-}
-
 /* Eliminated State (Bhikar) */
-.player-seat.eliminated {
-  opacity: 0.4;
-  filter: grayscale(0.8);
+.player-hud.eliminated {
+  opacity: 0.45;
+  filter: grayscale(0.7);
 }
 
 .eliminated-stamp {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%) rotate(-12deg);
+  transform: translate(-50%, -50%) rotate(-10deg);
   border: 2px solid var(--red-bhikar);
   color: var(--red-bhikar);
   font-family: var(--font-marathi);
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   padding: 3px 10px;
   border-radius: 6px;
-  background: rgba(14, 17, 22, 0.9);
+  background: rgba(10, 13, 18, 0.94);
   letter-spacing: 0.05em;
-  pointer-events: none;
-  z-index: 18;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(212, 70, 59, 0.4);
 }
 
 /* ==========================================================================
-   TURN ACTION BAR (Bottom Control for Human Turn)
+   TURN ACTION BAR (Bottom Controls)
    ========================================================================== */
 .turn-action-bar {
   position: absolute;
   bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
   z-index: 30;
-  pointer-events: auto;
 }
 
 .btn-flip-card {
-  background: linear-gradient(135deg, var(--gold-sawkar), #9A7625);
+  background: linear-gradient(135deg, var(--gold-sawkar), #8F6D22);
   color: #0E1116;
   border: none;
   padding: 12px 28px;
   border-radius: 30px;
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 10px;
-  box-shadow: 0 6px 20px rgba(201, 162, 75, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 24px rgba(201, 162, 75, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.4);
   transition: all 0.2s var(--ease-spring);
 }
 
 .btn-flip-card:hover {
   transform: translateY(-2px) scale(1.03);
-  box-shadow: 0 10px 25px rgba(201, 162, 75, 0.6);
+  box-shadow: 0 12px 30px rgba(201, 162, 75, 0.65);
 }
 
 .btn-flip-card:active {
@@ -671,26 +489,32 @@ html, body {
 }
 
 .btn-flip-card:disabled {
-  opacity: 0.4;
+  opacity: 0.35;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
 }
 
+.flip-icon {
+  font-size: 1.2rem;
+}
+
 .kbd-shortcut {
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.35);
+  color: #FFFFFF;
   padding: 2px 8px;
   border-radius: 4px;
   font-size: 0.75rem;
-  border: 1px solid rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  font-weight: 600;
 }
 
 /* ==========================================================================
-   MATCH / SAWKAR / VICTORY OVERLAYS
+   SAWKAR MATCH / VICTORY OVERLAYS
    ========================================================================== */
 .match-announcement {
   position: absolute;
-  top: 45%;
+  top: 42%;
   left: 50%;
   transform: translate(-50%, -50%) scale(0.6);
   opacity: 0;
@@ -709,31 +533,32 @@ html, body {
 
 .match-title {
   font-family: var(--font-display);
-  font-size: 2.8rem;
+  font-size: 3rem;
   font-weight: 900;
   color: var(--gold-sawkar);
-  text-shadow: 0 0 24px rgba(201, 162, 75, 0.9), 0 4px 10px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 0 28px rgba(201, 162, 75, 0.95), 0 4px 12px rgba(0, 0, 0, 0.9);
   letter-spacing: 0.08em;
   text-align: center;
 }
 
 .match-subtext {
   font-family: var(--font-marathi);
-  font-size: 1.4rem;
+  font-size: 1.35rem;
   color: var(--text-main);
-  background: rgba(14, 17, 22, 0.92);
-  padding: 4px 20px;
+  background: rgba(10, 13, 18, 0.94);
+  padding: 4px 22px;
   border-radius: 20px;
   border: 1px solid var(--gold-sawkar);
   margin-top: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8);
 }
 
-/* Full Screen Modals (Rules, Settings, Victory) */
+/* Full Screen Modals */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(10, 13, 17, 0.88);
-  backdrop-filter: blur(10px);
+  background: rgba(8, 10, 14, 0.88);
+  backdrop-filter: blur(12px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -757,7 +582,7 @@ html, body {
   max-height: 85vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.95);
   overflow: hidden;
   transform: scale(0.95);
   transition: transform 0.25s var(--ease-spring);
@@ -777,7 +602,7 @@ html, body {
 
 .modal-title {
   font-family: var(--font-display);
-  font-size: 1.3rem;
+  font-size: 1.25rem;
   color: var(--gold-sawkar);
   display: flex;
   align-items: center;
@@ -830,13 +655,13 @@ html, body {
   margin-bottom: 6px;
 }
 
-/* Settings Form Controls */
+/* Settings Controls */
 .setting-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 12px 0;
-  border-bottom: 1px solid rgba(44, 52, 68, 0.4);
+  border-bottom: 1px solid rgba(44, 53, 69, 0.4);
 }
 
 .setting-label {
@@ -873,10 +698,10 @@ html, body {
 .btn-choice.active, .btn-choice:hover {
   border-color: var(--gold-sawkar);
   color: var(--gold-sawkar);
-  background: rgba(201, 162, 75, 0.1);
+  background: rgba(201, 162, 75, 0.12);
 }
 
-/* Victory Modal Special */
+/* Victory Modal */
 .victory-card {
   text-align: center;
   padding: 24px;
@@ -895,14 +720,14 @@ html, body {
 
 .sawkar-title {
   font-family: var(--font-display);
-  font-size: 2.4rem;
+  font-size: 2.2rem;
   color: var(--gold-sawkar);
   margin-bottom: 4px;
 }
 
 .sawkar-subtitle {
   font-family: var(--font-marathi);
-  font-size: 1.3rem;
+  font-size: 1.25rem;
   color: var(--text-main);
   margin-bottom: 24px;
 }
@@ -920,7 +745,7 @@ html, body {
   justify-content: space-between;
   align-items: center;
   padding: 8px 12px;
-  border-bottom: 1px solid rgba(44, 52, 68, 0.3);
+  border-bottom: 1px solid rgba(44, 53, 69, 0.3);
 }
 
 .leaderboard-item:last-child {
@@ -944,14 +769,14 @@ html, body {
   transform: translateY(-2px);
 }
 
-/* Mobile & Tablet Responsiveness */
+/* Mobile & Tablet */
 @media (max-width: 768px) {
   .top-bar {
     padding: 10px 14px;
-    height: 56px;
+    height: 54px;
   }
   .brand-title {
-    font-size: 1rem;
+    font-size: 0.95rem;
   }
   .brand-marathi {
     display: none;
@@ -959,46 +784,30 @@ html, body {
   .table-stats-bar {
     display: none;
   }
-  .midnight-table {
-    width: 96vw;
-    height: 82vh;
-    border-radius: 40px;
+  .current-card-hud {
+    top: 10px;
+    left: 10px;
+    padding: 6px 10px;
   }
-  .card {
-    width: 80px;
-    height: 115px;
+  .hud-left {
+    left: 10px;
   }
-  .card-stack {
-    width: 70px;
-    height: 100px;
+  .hud-right {
+    right: 10px;
   }
-  .pot-cards-container {
-    width: 80px;
-    height: 115px;
-  }
-  .player-meta-box {
+  .hud-meta-card {
     padding: 4px 10px;
-    min-width: 110px;
   }
-  .player-avatar {
-    width: 30px;
-    height: 30px;
+  .hud-avatar {
+    width: 28px;
+    height: 28px;
     font-size: 1.2rem;
   }
-  .player-name {
-    font-size: 0.8rem;
-  }
-  .seat-left {
-    left: 8px;
-  }
-  .seat-right {
-    right: 8px;
-  }
   .turn-action-bar {
-    bottom: 14px;
+    bottom: 16px;
   }
   .btn-flip-card {
     padding: 10px 20px;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
   }
 }
