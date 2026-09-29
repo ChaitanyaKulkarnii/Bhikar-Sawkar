@@ -19,6 +19,8 @@ const btnNewMatch = document.getElementById('btn-new-match');
 const matchAnnouncement = document.getElementById('match-announcement');
 const matchSubtext = document.getElementById('match-subtext');
 const hudCardDisplay = document.getElementById('hud-card-display');
+const stakesIndicator = document.getElementById('stakes-indicator');
+const stakesText = document.getElementById('stakes-text');
 
 const modalRules = document.getElementById('modal-rules');
 const modalSettings = document.getElementById('modal-settings');
@@ -75,15 +77,36 @@ function updateHud(state) {
   statFlips.textContent = state.stats.roundFlips;
   statMatches.textContent = state.stats.matchesCount;
 
-  // Tension Vignette & Heartbeat (Only on genuinely large high-stakes pots)
-  if (state.centralPileCount >= 24) {
-    tensionVignette.className = 'tension-vignette super-high';
-    sounds.playHeartbeat(1.2);
-  } else if (state.centralPileCount >= 14) {
-    tensionVignette.className = 'tension-vignette active';
-    sounds.playHeartbeat(0.8);
+  // Progressive Cinematic Tension Stages based on Pot Stakes
+  const pot = state.centralPileCount;
+  if (pot >= 20) {
+    tensionVignette.className = 'tension-vignette stage-4';
+    scene3d.setTensionStage(4);
+    stakesIndicator.classList.add('visible');
+    stakesText.textContent = `👑 ALL-IN SAWKAR POT (${pot} CARDS)!`;
+    sounds.playHeartbeat(2.2);
+  } else if (pot >= 14) {
+    tensionVignette.className = 'tension-vignette stage-3';
+    scene3d.setTensionStage(3);
+    stakesIndicator.classList.add('visible');
+    stakesText.textContent = `⚠️ CRITICAL STAKES (${pot} CARDS)`;
+    sounds.playHeartbeat(1.6);
+  } else if (pot >= 8) {
+    tensionVignette.className = 'tension-vignette stage-2';
+    scene3d.setTensionStage(2);
+    stakesIndicator.classList.add('visible');
+    stakesText.textContent = `🔥 HEATED POT (${pot} CARDS)`;
+    sounds.playHeartbeat(1.1);
+  } else if (pot >= 4) {
+    tensionVignette.className = 'tension-vignette stage-1';
+    scene3d.setTensionStage(1);
+    stakesIndicator.classList.add('visible');
+    stakesText.textContent = `⚡ STAKES RISING (${pot} CARDS)`;
+    sounds.playHeartbeat(0.7);
   } else {
     tensionVignette.className = 'tension-vignette';
+    scene3d.setTensionStage(0);
+    stakesIndicator.classList.remove('visible');
   }
 
   const seatKeys = getSeatMap(engine.playerCount);
@@ -233,6 +256,11 @@ engine.on('onMatch', ({ player, matchedCard, underneathCard, capturedCount, newD
   sounds.playTableSlam();
   scene3d.triggerCameraShake(0.045);
   fireMatchConfetti();
+
+  // Reset tension upon match release
+  tensionVignette.className = 'tension-vignette';
+  scene3d.setTensionStage(0);
+  stakesIndicator.classList.remove('visible');
 
   // Banner
   matchAnnouncement.classList.add('show');

@@ -84,35 +84,115 @@ html, body {
   overflow: hidden;
 }
 
-/* Cinematic Table Tension Vignette (Subtle & Non-Intrusive) */
+/* ==========================================================================
+   CINEMATIC TENSION SYSTEM (Progressive Screen Effects for High Stakes)
+   ========================================================================== */
 .tension-vignette {
   position: absolute;
   inset: 0;
   pointer-events: none;
   z-index: 8;
   opacity: 0;
-  box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.7);
-  transition: opacity 0.8s ease;
+  transition: opacity 0.5s var(--ease-smooth);
 }
 
-.tension-vignette.active {
-  opacity: 0.35;
-  animation: subtleTensionBreath 2.4s infinite ease-in-out;
+/* Stage 1: Stakes Rising (4-7 cards) */
+.tension-vignette.stage-1 {
+  opacity: 0.45;
+  background: radial-gradient(ellipse at center, transparent 65%, rgba(139, 30, 30, 0.18) 86%, rgba(10, 13, 18, 0.75) 100%);
+  box-shadow: inset 0 0 70px rgba(139, 30, 30, 0.25);
+  animation: tensionPulseGentle 2.2s infinite ease-in-out;
 }
 
-.tension-vignette.super-high {
-  opacity: 0.55;
-  box-shadow: inset 0 0 140px rgba(0, 0, 0, 0.85), inset 0 0 30px rgba(201, 162, 75, 0.12);
-  animation: subtleTensionBreath 1.6s infinite ease-in-out;
+/* Stage 2: Heated Pot (8-13 cards) */
+.tension-vignette.stage-2 {
+  opacity: 0.65;
+  background: radial-gradient(ellipse at center, transparent 58%, rgba(180, 35, 35, 0.28) 82%, rgba(12, 10, 14, 0.85) 100%);
+  box-shadow: inset 0 0 100px rgba(180, 35, 35, 0.4), inset 0 0 25px rgba(201, 162, 75, 0.2);
+  animation: tensionPulseMedium 1.5s infinite ease-in-out;
 }
 
-@keyframes subtleTensionBreath {
-  0%, 100% {
-    opacity: 0.25;
-  }
-  50% {
-    opacity: 0.48;
-  }
+/* Stage 3: Critical Stakes (14-19 cards) */
+.tension-vignette.stage-3 {
+  opacity: 0.85;
+  background: radial-gradient(ellipse at center, transparent 52%, rgba(212, 45, 45, 0.35) 78%, rgba(14, 8, 10, 0.92) 100%);
+  box-shadow: inset 0 0 130px rgba(212, 45, 45, 0.55), inset 0 0 45px rgba(201, 162, 75, 0.35);
+  animation: tensionHeartbeatThrob 1.1s infinite ease-in-out;
+}
+
+/* Stage 4: Extreme Climax / All-In Sawkar Pot (20+ cards) */
+.tension-vignette.stage-4 {
+  opacity: 0.95;
+  background: radial-gradient(ellipse at center, transparent 48%, rgba(230, 40, 40, 0.45) 74%, rgba(16, 6, 8, 0.96) 100%);
+  box-shadow: inset 0 0 160px rgba(230, 40, 40, 0.7), inset 0 0 60px rgba(229, 191, 101, 0.5);
+  animation: tensionHeartbeatFast 0.75s infinite ease-in-out;
+}
+
+@keyframes tensionPulseGentle {
+  0%, 100% { transform: scale(1); opacity: 0.35; }
+  50% { transform: scale(1.01); opacity: 0.55; }
+}
+
+@keyframes tensionPulseMedium {
+  0%, 100% { transform: scale(1); opacity: 0.55; }
+  25% { transform: scale(1.015); opacity: 0.75; }
+  50% { transform: scale(1); opacity: 0.6; }
+  75% { transform: scale(1.02); opacity: 0.82; }
+}
+
+@keyframes tensionHeartbeatThrob {
+  0% { transform: scale(1); opacity: 0.7; }
+  14% { transform: scale(1.02); opacity: 0.95; }
+  28% { transform: scale(1); opacity: 0.75; }
+  42% { transform: scale(1.03); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.7; }
+}
+
+@keyframes tensionHeartbeatFast {
+  0% { transform: scale(1); opacity: 0.8; }
+  20% { transform: scale(1.03); opacity: 1; filter: contrast(1.08); }
+  40% { transform: scale(1); opacity: 0.85; }
+  60% { transform: scale(1.035); opacity: 1; filter: contrast(1.12); }
+  100% { transform: scale(1); opacity: 0.8; }
+}
+
+/* Stakes Status Banner Floating Under Top Bar */
+.stakes-indicator-banner {
+  position: absolute;
+  top: 72px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-10px);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(14, 17, 24, 0.94);
+  border: 1px solid var(--gold-sawkar);
+  padding: 5px 18px;
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8), 0 0 16px rgba(201, 162, 75, 0.4);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--gold-sawkar);
+  transition: all 0.3s var(--ease-spring);
+}
+
+.stakes-indicator-banner.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.stakes-flame {
+  font-size: 1.1rem;
+  animation: flameFlicker 1.2s infinite alternate ease-in-out;
+}
+
+@keyframes flameFlicker {
+  0% { transform: scale(0.95) rotate(-3deg); }
+  100% { transform: scale(1.15) rotate(3deg); }
 }
 
 /* Top Bar Navigation */

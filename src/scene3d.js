@@ -71,6 +71,7 @@ export class TableScene3D {
 
     // Shake & Impact
     this.shakeAmount = 0;
+    this.tensionStage = 0;
     this.startTime = performance.now();
     this.lastTime = performance.now();
 
@@ -462,6 +463,10 @@ export class TableScene3D {
     this.renderer.setSize(this.width, this.height);
   }
 
+  setTensionStage(stage) {
+    this.tensionStage = Math.max(0, Math.min(4, stage));
+  }
+
   animate() {
     requestAnimationFrame(this.animate);
     const now = performance.now();
@@ -477,8 +482,23 @@ export class TableScene3D {
     const lookY = this.cameraTarget.y + this.mouse.y * 0.12;
     const lookZ = this.cameraTarget.z;
 
+    // Heartbeat Camera Recoil & Spotlight Pulse
+    let tensionPunch = 0;
+    if (this.tensionStage >= 2) {
+      const beatFreq = this.tensionStage === 4 ? 7.2 : (this.tensionStage === 3 ? 5.2 : 3.8);
+      const beat = Math.pow(Math.max(0, Math.sin(time * beatFreq)), 14);
+      tensionPunch = beat * (this.tensionStage * 0.009);
+
+      if (this.spotLight) {
+        this.spotLight.intensity = 2.4 + beat * (this.tensionStage * 0.35);
+      }
+    } else if (this.spotLight) {
+      this.spotLight.intensity = 2.4;
+    }
+
     this.camera.position.x = this.cameraBasePos.x + this.mouse.x * 0.08;
     this.camera.position.y = this.cameraBasePos.y + this.mouse.y * 0.05;
+    this.camera.position.z = this.cameraBasePos.z - tensionPunch;
 
     // Apply Camera Shake
     if (this.shakeAmount > 0.0005) {
