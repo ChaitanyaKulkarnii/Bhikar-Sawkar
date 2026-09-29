@@ -277,37 +277,37 @@ export function createBabanrao() {
 function createRobloxHair(hairMat) {
   const hairGroup = new THREE.Group();
 
-  // 1. Base hair crown/volume sitting on top of head box
-  const capGeo = new THREE.BoxGeometry(0.27, 0.12, 0.25);
+  // 1. Base hair crown/volume sitting cleanly on top of head box (top of head is at y = 0.11)
+  const capGeo = new THREE.BoxGeometry(0.255, 0.07, 0.24);
   const cap = new THREE.Mesh(capGeo, hairMat);
-  cap.position.set(0, 0.08, -0.01);
+  cap.position.set(0, 0.10, -0.01);
   cap.castShadow = true;
   hairGroup.add(cap);
 
-  // 2. Front bangs (messy layered anime fringe framing face)
+  // 2. Front bangs (delicate stylish anime fringe resting HIGH on forehead, well above eyebrows)
   const bangsDef = [
-    { pos: [-0.08, 0.02, 0.12], rot: [0.2, 0.1, -0.25], scale: [0.038, 0.09, 0.03] },
-    { pos: [-0.04, 0.01, 0.125], rot: [0.25, -0.05, -0.08], scale: [0.042, 0.10, 0.032] },
-    { pos: [0.01, 0.03, 0.126], rot: [0.22, 0.08, 0.12], scale: [0.040, 0.095, 0.03] },
-    { pos: [0.06, 0.015, 0.123], rot: [0.18, 0.05, 0.22], scale: [0.042, 0.105, 0.032] },
-    { pos: [0.095, 0.03, 0.118], rot: [0.15, -0.1, 0.35], scale: [0.035, 0.085, 0.028] }
+    { pos: [-0.075, 0.085, 0.114], rot: [0.15, 0.1, -0.2], scale: [0.022, 0.042, 0.018] },
+    { pos: [-0.038, 0.088, 0.116], rot: [0.18, -0.05, -0.06], scale: [0.024, 0.045, 0.020] },
+    { pos: [0.005, 0.090, 0.117], rot: [0.16, 0.06, 0.08], scale: [0.023, 0.044, 0.019] },
+    { pos: [0.045, 0.087, 0.115], rot: [0.14, 0.04, 0.18], scale: [0.024, 0.046, 0.020] },
+    { pos: [0.080, 0.084, 0.113], rot: [0.12, -0.08, 0.25], scale: [0.020, 0.038, 0.016] }
   ];
 
   bangsDef.forEach(b => {
     const spikeGeo = new THREE.ConeGeometry(b.scale[0], b.scale[1], 4);
     const spike = new THREE.Mesh(spikeGeo, hairMat);
     spike.position.set(b.pos[0], b.pos[1], b.pos[2]);
-    spike.rotation.set(b.rot[0] + Math.PI, b.rot[1], b.rot[2]);
+    spike.rotation.set(b.rot[0] + Math.PI, b.rot[1], b.rot[2]); // points down to hairline
     spike.castShadow = true;
     hairGroup.add(spike);
   });
 
-  // 3. Sideburns / Side locks hugging ears
+  // 3. Sideburns / Side locks hugging ears (outside the face at x = +/- 0.125)
   const sideTufts = [
-    { pos: [-0.13, -0.02, 0.04], rot: [0.1, 0.2, -0.3], scale: [0.035, 0.11, 0.04] },
-    { pos: [0.13, -0.02, 0.04], rot: [0.1, -0.2, 0.3], scale: [0.035, 0.11, 0.04] },
-    { pos: [-0.135, -0.01, -0.04], rot: [-0.1, 0.2, -0.25], scale: [0.035, 0.10, 0.04] },
-    { pos: [0.135, -0.01, -0.04], rot: [-0.1, -0.2, 0.25], scale: [0.035, 0.10, 0.04] }
+    { pos: [-0.125, 0.02, 0.04], rot: [0.1, 0.2, -0.25], scale: [0.028, 0.08, 0.03] },
+    { pos: [0.125, 0.02, 0.04], rot: [0.1, -0.2, 0.25], scale: [0.028, 0.08, 0.03] },
+    { pos: [-0.128, 0.03, -0.04], rot: [-0.1, 0.2, -0.22], scale: [0.028, 0.08, 0.03] },
+    { pos: [0.128, 0.03, -0.04], rot: [-0.1, -0.2, 0.22], scale: [0.028, 0.08, 0.03] }
   ];
   sideTufts.forEach(s => {
     const spikeGeo = new THREE.ConeGeometry(s.scale[0], s.scale[1], 4);
@@ -318,14 +318,14 @@ function createRobloxHair(hairMat) {
     hairGroup.add(spike);
   });
 
-  // 4. Crown and silhouette spikes (spiky messy anime locks pointing up and outward)
+  // 4. Crown and silhouette spikes (messy layered anime spikes pointing up & outward)
   const crownSpikes = [
-    { pos: [-0.07, 0.15, 0.03], rot: [0.2, 0.1, -0.45], scale: [0.042, 0.11, 0.038] },
-    { pos: [0.06, 0.155, 0.02], rot: [0.15, -0.1, 0.42], scale: [0.044, 0.12, 0.04] },
-    { pos: [-0.02, 0.165, -0.04], rot: [-0.25, 0.05, 0.1], scale: [0.046, 0.125, 0.042] },
-    { pos: [-0.08, 0.13, -0.08], rot: [-0.4, 0.2, -0.35], scale: [0.04, 0.105, 0.038] },
-    { pos: [0.08, 0.13, -0.08], rot: [-0.4, -0.2, 0.35], scale: [0.04, 0.105, 0.038] },
-    { pos: [0.0, 0.14, 0.08], rot: [0.35, 0.0, 0.0], scale: [0.04, 0.10, 0.036] }
+    { pos: [-0.07, 0.145, 0.02], rot: [0.2, 0.1, -0.45], scale: [0.035, 0.09, 0.032] },
+    { pos: [0.06, 0.148, 0.01], rot: [0.15, -0.1, 0.42], scale: [0.036, 0.095, 0.032] },
+    { pos: [-0.01, 0.155, -0.04], rot: [-0.25, 0.05, 0.1], scale: [0.038, 0.10, 0.034] },
+    { pos: [-0.08, 0.125, -0.07], rot: [-0.4, 0.2, -0.35], scale: [0.032, 0.085, 0.030] },
+    { pos: [0.08, 0.125, -0.07], rot: [-0.4, -0.2, 0.35], scale: [0.032, 0.085, 0.030] },
+    { pos: [0.0, 0.135, 0.07], rot: [0.35, 0.0, 0.0], scale: [0.032, 0.08, 0.028] }
   ];
   crownSpikes.forEach(c => {
     const spikeGeo = new THREE.ConeGeometry(c.scale[0], c.scale[1], 4);
@@ -338,9 +338,9 @@ function createRobloxHair(hairMat) {
 
   // 5. Back layered hair covering nape/neck (Matching Back View)
   const backTufts = [
-    { pos: [-0.07, -0.02, -0.12], rot: [-0.3, 0.1, -0.15], scale: [0.04, 0.11, 0.035] },
-    { pos: [0.0, -0.03, -0.125], rot: [-0.35, 0.0, 0.0], scale: [0.045, 0.12, 0.038] },
-    { pos: [0.07, -0.02, -0.12], rot: [-0.3, -0.1, 0.15], scale: [0.04, 0.11, 0.035] }
+    { pos: [-0.065, 0.02, -0.118], rot: [-0.25, 0.1, -0.15], scale: [0.032, 0.08, 0.028] },
+    { pos: [0.0, 0.015, -0.122], rot: [-0.3, 0.0, 0.0], scale: [0.035, 0.085, 0.030] },
+    { pos: [0.065, 0.02, -0.118], rot: [-0.25, -0.1, 0.15], scale: [0.032, 0.08, 0.028] }
   ];
   backTufts.forEach(bt => {
     const spikeGeo = new THREE.ConeGeometry(bt.scale[0], bt.scale[1], 4);
@@ -362,7 +362,7 @@ let cachedRobloxBack = null;
 
 function getRobloxFaceTexture() {
   if (!cachedRobloxFace) {
-    cachedRobloxFace = characterTextureLoader.load('/roblox_face_texture.png');
+    cachedRobloxFace = characterTextureLoader.load('/roblox_face_clean.png');
     cachedRobloxFace.colorSpace = THREE.SRGBColorSpace;
     cachedRobloxFace.anisotropy = 8;
   }
@@ -575,22 +575,28 @@ export function createDinkar() {
   neck.position.y = 1.13;
   group.add(neck);
 
-  // 4. Head (Classic Roblox Blocky Head with High-Res Anime Face Texture)
-  const headMaterials = [
-    robloxSkinMat, // +X
-    robloxSkinMat, // -X
-    robloxHairMat, // +Y
-    robloxSkinMat, // -Y
-    robloxFaceMat, // +Z (Front Face with anime eyes and smile)
-    robloxHairMat  // -Z
-  ];
+  // 4. Head (Classic Roblox Blocky Head in seamless uniform skin tone)
   const headGeo = new THREE.BoxGeometry(0.24, 0.22, 0.22);
-  const head = new THREE.Mesh(headGeo, headMaterials);
+  const head = new THREE.Mesh(headGeo, robloxSkinMat);
   head.position.y = 1.28;
   head.castShadow = true;
   head.receiveShadow = true;
 
-  // Add 3D Spiky Anime Hair directly attached to Head
+  // Face Decal (Antialiased anime eyes, eyebrows, and smile on transparent background)
+  const faceDecalGeo = new THREE.PlaneGeometry(0.20, 0.18);
+  const faceDecalMat = new THREE.MeshStandardMaterial({
+    map: getRobloxFaceTexture(),
+    transparent: true,
+    alphaTest: 0.02,
+    roughness: 0.55,
+    metalness: 0.04
+  });
+  const faceDecal = new THREE.Mesh(faceDecalGeo, faceDecalMat);
+  faceDecal.position.set(0, -0.005, 0.111);
+  faceDecal.castShadow = false;
+  head.add(faceDecal);
+
+  // Add 3D Spiky Anime Hair resting naturally on top of head
   const hair = createRobloxHair(robloxHairMat);
   head.add(hair);
 
