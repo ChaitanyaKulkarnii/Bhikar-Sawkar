@@ -10,7 +10,13 @@ import {
   animateCardThrow,
   animatePlayerThrow
 } from './characters.js';
-import { getCardFaceTexture, getCardBackTexture, getFeltTexture } from './textures.js';
+import {
+  getCardFaceTexture,
+  getCardBackTexture,
+  getDeckRimTexture,
+  getDeckRimBumpMap,
+  getFeltTexture
+} from './textures.js';
 import {
   createSamosaPlatter,
   createVadaPavPlatter,
@@ -84,6 +90,46 @@ export class TableScene3D {
       roughness: 0.75,
       metalness: 0.05
     });
+
+    // Realistic stacked paper edge rim material with bump relief for deck sides
+    this.deckRimMaterial = new THREE.MeshStandardMaterial({
+      map: getDeckRimTexture(),
+      bumpMap: getDeckRimBumpMap(),
+      bumpScale: 0.04,
+      roughness: 0.88,
+      metalness: 0.02
+    });
+
+    this.deckBottomMaterial = new THREE.MeshStandardMaterial({
+      color: 0x1E1912,
+      roughness: 0.95,
+      metalness: 0.0
+    });
+
+    // Box multi-materials: [+X, -X, +Y, -Y, +Z, -Z]
+    this.deckMaterials = [
+      this.deckRimMaterial,    // +X (right rim)
+      this.deckRimMaterial,    // -X (left rim)
+      this.cardBackMaterial,   // +Y (top card back face)
+      this.deckBottomMaterial, // -Y (bottom card facing table)
+      this.deckRimMaterial,    // +Z (front rim)
+      this.deckRimMaterial     // -Z (back rim)
+    ];
+
+    // Single card materials (for realistic separated top cards)
+    this.singleCardEdgeMaterial = new THREE.MeshStandardMaterial({
+      color: 0xF5F2EB,
+      roughness: 0.85,
+      metalness: 0.02
+    });
+    this.singleCardMaterials = [
+      this.singleCardEdgeMaterial, // +X
+      this.singleCardEdgeMaterial, // -X
+      this.cardBackMaterial,       // +Y (top)
+      this.cardBackMaterial,       // -Y (bottom)
+      this.singleCardEdgeMaterial, // +Z
+      this.singleCardEdgeMaterial  // -Z
+    ];
 
     this.deckStacks = {};
     this.potCards = [];
@@ -616,7 +662,7 @@ export class TableScene3D {
   }
 
   initDeckStacks() {
-    // 4 Player Decks on table with the luxury Art Deco card back
+    // 4 Player Decks on table with layered paper edges and loose individual top cards
     const stackDefs = {
       bottom: { pos: new THREE.Vector3(0.24, 0.74, 0.50), rot: 0.05 },
       top: { pos: new THREE.Vector3(0.22, 0.74, -0.88), rot: -0.05 },
@@ -624,23 +670,49 @@ export class TableScene3D {
       right: { pos: new THREE.Vector3(0.74, 0.74, -0.34), rot: -0.75 }
     };
 
+    // Realistic organic micro-offsets for individual loose top cards
+    const topCardOffsets = [
+      { dx: 0.0012, dz: -0.0010, drot: 0.015 },
+      { dx: -0.0015, dz: 0.0012, drot: -0.018 },
+      { dx: 0.0008, dz: -0.0006, drot: 0.009 }
+    ];
+
     for (const [seat, def] of Object.entries(stackDefs)) {
       const group = new THREE.Group();
       group.position.copy(def.pos);
       group.rotation.y = def.rot;
 
-      // 3D physical deck mesh
+      // 1. Base 3D physical deck mesh with realistic paper edge separation lines on all 4 sides
       const deckMesh = new THREE.Mesh(
         new THREE.BoxGeometry(0.22, 0.04, 0.31),
-        this.cardBackMaterial
+        this.deckMaterials
       );
       deckMesh.position.y = 0.02;
       deckMesh.castShadow = true;
       deckMesh.receiveShadow = true;
       group.add(deckMesh);
 
+      // 2. Physical individual loose cards on top of deck (vibes of separate real cards, not a solid box)
+      const topCards = [];
+      for (let i = 0; i < topCardOffsets.length; i++) {
+        const offset = topCardOffsets[i];
+        const topCardMesh = new THREE.Mesh(this.cardGeometry, this.singleCardMaterials);
+        topCardMesh.position.set(offset.dx, 0.04 + (i + 1) * 0.0013, offset.dz);
+        topCardMesh.rotation.y = offset.drot;
+        topCardMesh.castShadow = true;
+        topCardMesh.receiveShadow = true;
+        group.add(topCardMesh);
+        topCards.push(topCardMesh);
+      }
+
       this.scene.add(group);
-      this.deckStacks[seat] = { group, mesh: deckMesh, basePos: def.pos.clone() };
+      this.deckStacks[seat] = {
+        group,
+        mesh: deckMesh,
+        topCards,
+        topCardOffsets,
+        basePos: def.pos.clone()
+      };
     }
   }
 
@@ -654,9 +726,23 @@ export class TableScene3D {
         stack.group.visible = false;
       } else {
         stack.group.visible = true;
-        const height = Math.max(0.005, (count / 52) * 0.08);
+        const height = Math.max(0.006, (count / 52) * 0.065);
         stack.mesh.scale.set(1, height / 0.04, 1);
         stack.mesh.position.y = height / 2;
+
+        // Position individual loose cards dynamically on top of stack
+        if (stack.topCards) {
+          for (let i = 0; i < stack.topCards.length; i++) {
+            const cardMesh = stack.topCards[i];
+            const offset = stack.topCardOffsets[i];
+            if (count > i + 1) {
+              cardMesh.visible = true;
+              cardMesh.position.set(offset.dx, height + (i + 1) * 0.0013, offset.dz);
+            } else {
+              cardMesh.visible = false;
+            }
+          }
+        }
       }
     }
   }

@@ -19,6 +19,122 @@ export function getCardBackTexture() {
   return cachedCardBack;
 }
 
+// 1b. Procedural Stacked Card Deck Rim Texture (Real Paper Edge Separation Lines)
+let cachedDeckRim = null;
+export function getDeckRimTexture() {
+  if (cachedDeckRim) return cachedDeckRim;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 1024;
+  const ctx = canvas.getContext('2d');
+
+  // Base off-white card core stock
+  ctx.fillStyle = '#F5F2EB';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const totalCards = 48;
+  const cardH = canvas.height / totalCards;
+
+  for (let i = 0; i < totalCards; i++) {
+    const y = i * cardH;
+
+    // Organic ivory / linen card paper core with subtle per-card variation
+    const v = (Math.sin(i * 7.7) * 0.5 + 0.5) * 14 - 7;
+    const r = Math.round(Math.min(255, Math.max(220, 246 + v)));
+    const g = Math.round(Math.min(255, Math.max(215, 242 + v)));
+    const b = Math.round(Math.min(255, Math.max(205, 233 + v)));
+
+    ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+    ctx.fillRect(0, y, canvas.width, cardH);
+
+    // Specular highlight on upper paper rim of card
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+    ctx.fillRect(0, y, canvas.width, 2.4);
+
+    // Ambient micro-shadow above the cut
+    ctx.fillStyle = 'rgba(60, 48, 35, 0.50)';
+    ctx.fillRect(0, y + cardH - 5.5, canvas.width, 2.5);
+
+    // Deep shadow groove between stacked individual cards (crisp high-contrast separation line!)
+    ctx.fillStyle = 'rgba(18, 12, 6, 0.95)';
+    ctx.fillRect(0, y + cardH - 3.2, canvas.width, 3.2);
+
+    // Micro paper fibers
+    for (let f = 0; f < 3; f++) {
+      const fx = Math.random() * canvas.width;
+      const fw = 14 + Math.random() * 36;
+      ctx.fillStyle = Math.random() > 0.5 ? 'rgba(255,255,255,0.22)' : 'rgba(0,0,0,0.10)';
+      ctx.fillRect(fx, y + 1 + Math.random() * (cardH - 3), fw, 1);
+    }
+  }
+
+  // Top card features the royal blue card back lip
+  ctx.fillStyle = '#1D3B68';
+  ctx.fillRect(0, 0, canvas.width, 3.5);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.ClampToEdgeWrapping;
+  texture.repeat.set(1, 1);
+  texture.anisotropy = 16;
+  texture.generateMipmaps = true;
+  texture.minFilter = THREE.LinearMipmapLinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+
+  cachedDeckRim = texture;
+  return cachedDeckRim;
+}
+
+// 1c. Bump Map for Card Deck Rim (Normal map / relief calculation under spotlight)
+let cachedDeckRimBump = null;
+export function getDeckRimBumpMap() {
+  if (cachedDeckRimBump) return cachedDeckRimBump;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 1024;
+  const ctx = canvas.getContext('2d');
+
+  ctx.fillStyle = '#808080';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const totalCards = 48;
+  const cardH = canvas.height / totalCards;
+
+  for (let i = 0; i < totalCards; i++) {
+    const y = i * cardH;
+
+    // Card face surface height (slightly raised)
+    ctx.fillStyle = '#C8C8C8';
+    ctx.fillRect(0, y, canvas.width, cardH);
+
+    // Card top edge bevel highlight (raised ridge)
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, y, canvas.width, 2.5);
+
+    // Deep grooved cut between cards (low indented slot)
+    ctx.fillStyle = '#080808';
+    ctx.fillRect(0, y + cardH - 3.5, canvas.width, 3.5);
+
+    // Gradient leading into groove
+    ctx.fillStyle = '#404040';
+    ctx.fillRect(0, y + cardH - 5.5, canvas.width, 2.0);
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.ClampToEdgeWrapping;
+  texture.repeat.set(1, 1);
+  texture.anisotropy = 16;
+  texture.generateMipmaps = true;
+  texture.minFilter = THREE.LinearMipmapLinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+
+  cachedDeckRimBump = texture;
+  return cachedDeckRimBump;
+}
+
 // 2. High-Resolution (1024x1456) Crisp Card Face Texture
 export function getCardFaceTexture(card) {
   const cacheKey = `card_${card.suit}_${card.rank}`;
