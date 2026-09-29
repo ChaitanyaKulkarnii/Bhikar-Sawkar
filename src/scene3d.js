@@ -711,9 +711,9 @@ export class TableScene3D {
     // 4 Player Decks on table with layered paper edges and loose individual top cards
     const stackDefs = {
       bottom: { pos: new THREE.Vector3(0.24, 0.74, 0.50), rot: 0.05 },
-      top: { pos: new THREE.Vector3(0.22, 0.74, -0.88), rot: -0.05 },
-      left: { pos: new THREE.Vector3(-0.74, 0.74, -0.34), rot: 0.75 },
-      right: { pos: new THREE.Vector3(0.74, 0.74, -0.34), rot: -0.75 }
+      top: { pos: new THREE.Vector3(0.38, 0.74, -0.82), rot: -0.12 },
+      left: { pos: new THREE.Vector3(-0.80, 0.74, -0.44), rot: 0.72 },
+      right: { pos: new THREE.Vector3(0.80, 0.74, -0.44), rot: -0.72 }
     };
 
     // Realistic organic micro-offsets for individual loose top cards
@@ -837,6 +837,19 @@ export class TableScene3D {
     } else {
       onDrop();
     }
+  }
+
+  setCharacterExpression(seat, expression) {
+    const char = this.characters[seat];
+    if (char && char.userData && typeof char.userData.setExpression === 'function') {
+      char.userData.setExpression(expression);
+    }
+  }
+
+  setAllCharactersExpression(expression) {
+    ['top', 'left', 'right'].forEach(seat => {
+      this.setCharacterExpression(seat, expression);
+    });
   }
 
   // Flying Card Animation Curve

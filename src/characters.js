@@ -1,6 +1,8 @@
 // 3D Stylized Tabletop Character Rigs & Animation Controller for Bhikar Sawkar
 import * as THREE from 'three';
 
+const characterTextureLoader = new THREE.TextureLoader();
+
 // Materials for characters with warm specular highlights
 const babanraoSkinMaterial = new THREE.MeshStandardMaterial({
   color: 0xC48956,
@@ -232,18 +234,33 @@ function createBabanraoHair(hairMat) {
 }
 
 // 1. Build Opponent 1: Babanrao (Roblox Veteran Uncle with Mustache & Linen Shirt from Image 2)
-let cachedBabanraoFace = null;
+// Cache for Dynamic Facial Expressions
+const expressionTextures = {
+  babanrao: {},
+  dinkar: {},
+  anandi: {}
+};
+
+export function getCharacterFaceTexture(charName, expression = 'neutral') {
+  const char = charName.toLowerCase();
+  const expr = expression.toLowerCase();
+  if (!expressionTextures[char]) expressionTextures[char] = {};
+  if (!expressionTextures[char][expr]) {
+    const filename = `/${char}_face_${expr}.png`;
+    const tex = characterTextureLoader.load(filename);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = 8;
+    expressionTextures[char][expr] = tex;
+  }
+  return expressionTextures[char][expr];
+}
+
+function getBabanraoFaceTexture(expr = 'neutral') {
+  return getCharacterFaceTexture('babanrao', expr);
+}
+
 let cachedBabanraoShirtFront = null;
 let cachedBabanraoShirtBack = null;
-
-function getBabanraoFaceTexture() {
-  if (!cachedBabanraoFace) {
-    cachedBabanraoFace = characterTextureLoader.load('/babanrao_face_clean.png');
-    cachedBabanraoFace.colorSpace = THREE.SRGBColorSpace;
-    cachedBabanraoFace.anisotropy = 8;
-  }
-  return cachedBabanraoFace;
-}
 
 function getBabanraoShirtFrontTexture() {
   if (!cachedBabanraoShirtFront) {
@@ -270,12 +287,12 @@ function createRobloxCharacterArm(isRight, skinMat, sleeveMat, isShortSleeve = f
   const shoulder = new THREE.Group();
   const sideSign = isRight ? 1 : -1;
   shoulder.name = (isRight ? 'Right' : 'Left') + 'Arm';
-  // Shoulder pivot at x = +/- 0.24, y = 1.04, z = 0
-  shoulder.position.set(sideSign * 0.24, 1.04, 0);
+  // Shoulder pivot at x = +/- 0.23, y = 1.04, z = 0
+  shoulder.position.set(sideSign * 0.23, 1.04, 0);
 
   // 1. Upper Arm Group (angles down, slightly forward, and inward towards body center)
   const upper = new THREE.Group();
-  upper.rotation.set(-0.38, sideSign * -0.45, sideSign * 0.12);
+  upper.rotation.set(-0.38, sideSign * -0.52, sideSign * 0.12);
   shoulder.add(upper);
 
   const L1 = 0.21; // Upper arm length
@@ -591,9 +608,19 @@ export function createBabanrao() {
     torso,
     rightArm,
     leftArm,
+    faceDecalMat: babanraoFaceMat,
     headBaseY: 1.28,
     torsoBaseY: 0.88,
-    animTime: 0
+    animTime: 0,
+    currentExpression: 'neutral',
+    setExpression: (expr) => {
+      const tex = getCharacterFaceTexture('babanrao', expr);
+      if (tex && babanraoFaceMat) {
+        babanraoFaceMat.map = tex;
+        babanraoFaceMat.needsUpdate = true;
+        group.userData.currentExpression = expr;
+      }
+    }
   };
 
   return group;
@@ -699,18 +726,11 @@ function createRobloxHair(hairMat) {
 }
 
 // 2. Build Opponent 2: Dinkar (Roblox Black Hoodie Avatar from Image 1)
-const characterTextureLoader = new THREE.TextureLoader();
-let cachedRobloxFace = null;
 let cachedRobloxHoodie = null;
 let cachedRobloxBack = null;
 
-function getRobloxFaceTexture() {
-  if (!cachedRobloxFace) {
-    cachedRobloxFace = characterTextureLoader.load('/roblox_face_clean.png');
-    cachedRobloxFace.colorSpace = THREE.SRGBColorSpace;
-    cachedRobloxFace.anisotropy = 8;
-  }
-  return cachedRobloxFace;
+function getRobloxFaceTexture(expr = 'neutral') {
+  return getCharacterFaceTexture('dinkar', expr);
 }
 
 function getRobloxHoodieTexture() {
@@ -964,23 +984,27 @@ export function createDinkar() {
     torso,
     rightArm,
     leftArm,
+    faceDecalMat,
     headBaseY: 1.28,
     torsoBaseY: 0.88,
-    animTime: 0
+    animTime: 0,
+    currentExpression: 'neutral',
+    setExpression: (expr) => {
+      const tex = getCharacterFaceTexture('dinkar', expr);
+      if (tex && faceDecalMat) {
+        faceDecalMat.map = tex;
+        faceDecalMat.needsUpdate = true;
+        group.userData.currentExpression = expr;
+      }
+    }
   };
 
   return group;
 }
 
 // 3. Build Opponent 3: Anandi (Roblox Streetwear Avatar with Bindi from Image 1)
-let cachedAnandiFace = null;
-function getAnandiFaceTexture() {
-  if (!cachedAnandiFace) {
-    cachedAnandiFace = characterTextureLoader.load('/anandi_face_clean.png');
-    cachedAnandiFace.colorSpace = THREE.SRGBColorSpace;
-    cachedAnandiFace.anisotropy = 8;
-  }
-  return cachedAnandiFace;
+function getAnandiFaceTexture(expr = 'neutral') {
+  return getCharacterFaceTexture('anandi', expr);
 }
 
 export function createAnandi() {
@@ -1197,9 +1221,19 @@ export function createAnandi() {
     torso,
     rightArm,
     leftArm,
+    faceDecalMat: anandiFaceMat,
     headBaseY: 1.28,
     torsoBaseY: 0.88,
-    animTime: 0
+    animTime: 0,
+    currentExpression: 'neutral',
+    setExpression: (expr) => {
+      const tex = getCharacterFaceTexture('anandi', expr);
+      if (tex && anandiFaceMat) {
+        anandiFaceMat.map = tex;
+        anandiFaceMat.needsUpdate = true;
+        group.userData.currentExpression = expr;
+      }
+    }
   };
 
   return group;

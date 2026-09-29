@@ -53,9 +53,12 @@ let engine = new BhikarSawkarEngine({
 });
 
 scene3d.setPlayerCount(4);
+window.scene3d = scene3d;
+window.engine = engine;
 
 // Sound State
 let isMuted = false;
+let celebrationTimeout = null;
 
 // Helpers: Resolve HUD Elements
 function getHudElements(seatKey) {
@@ -134,6 +137,22 @@ function updateHud(state) {
     if (seat) deckCounts[seat] = p.cardCount;
   });
   scene3d.updateDeckCounts(deckCounts);
+
+  // Dynamic Facial Expressions based on Tension ("when game gets tensed")
+  if (!celebrationTimeout) {
+    const isTensed = pot >= 4;
+    ['top', 'left', 'right'].forEach(seat => {
+      const pIdx = seatKeys.indexOf(seat);
+      const pObj = state.players[pIdx];
+      if (pObj && pObj.eliminated) {
+        scene3d.setCharacterExpression(seat, 'sad');
+      } else if (isTensed) {
+        scene3d.setCharacterExpression(seat, 'tensed');
+      } else {
+        scene3d.setCharacterExpression(seat, 'neutral');
+      }
+    });
+  }
 
   // Update HUD text & turn highlights
   state.players.forEach((player, idx) => {
@@ -275,6 +294,36 @@ engine.on('onMatch', ({ player, matchedCard, underneathCard, capturedCount, newD
   scene3d.setTensionStage(0);
   if (stakesIndicator) stakesIndicator.classList.remove('visible');
 
+  // Facial Expressions for Match: Winner is HAPPY, losers are SAD
+  if (celebrationTimeout && typeof celebrationTimeout === 'number') clearTimeout(celebrationTimeout);
+  const opponentSeats = ['top', 'left', 'right'];
+  opponentSeats.forEach(seat => {
+    if (seat === seatKey) {
+      scene3d.setCharacterExpression(seat, 'happy');
+    } else {
+      scene3d.setCharacterExpression(seat, 'sad');
+    }
+  });
+
+  // Hold expression for celebration duration, then return to neutral/tensed
+  celebrationTimeout = setTimeout(() => {
+    celebrationTimeout = null;
+    const currentState = engine.getState();
+    const currentPot = currentState.centralPileCount;
+    const isTensed = currentPot >= 4;
+    opponentSeats.forEach(seat => {
+      const pIdx = seatKeys.indexOf(seat);
+      const pObj = currentState.players[pIdx];
+      if (pObj && pObj.eliminated) {
+        scene3d.setCharacterExpression(seat, 'sad');
+      } else if (isTensed) {
+        scene3d.setCharacterExpression(seat, 'tensed');
+      } else {
+        scene3d.setCharacterExpression(seat, 'neutral');
+      }
+    });
+  }, 2600);
+
   // Banner
   matchAnnouncement.classList.add('show');
   matchSubtext.textContent = `${player.name} ने जिंकला ${capturedCount} पानांचा ढीग!`;
@@ -291,10 +340,30 @@ engine.on('onMatch', ({ player, matchedCard, underneathCard, capturedCount, newD
 
 engine.on('onElimination', ({ player, rank }) => {
   sounds.playBhikarElimination();
+  const seatKeys = getSeatMap(engine.playerCount);
+  const pIdx = engine.players.findIndex(p => p.id === player.id);
+  const seatKey = seatKeys[pIdx];
+  if (seatKey && seatKey !== 'bottom') {
+    scene3d.setCharacterExpression(seatKey, 'sad');
+  }
   updateHud(engine.getState());
 });
 
 engine.on('onVictory', ({ sawkar, stats, eliminated }) => {
+  if (celebrationTimeout && typeof celebrationTimeout === 'number') clearTimeout(celebrationTimeout);
+  celebrationTimeout = true;
+
+  const seatKeys = getSeatMap(engine.playerCount);
+  const winnerIdx = engine.players.findIndex(p => p.id === sawkar.id);
+  const winnerSeat = seatKeys[winnerIdx];
+  ['top', 'left', 'right'].forEach(seat => {
+    if (seat === winnerSeat) {
+      scene3d.setCharacterExpression(seat, 'happy');
+    } else {
+      scene3d.setCharacterExpression(seat, 'sad');
+    }
+  });
+
   sounds.playVictoryFanfare();
   fireSawkarVictoryConfetti();
 
