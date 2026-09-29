@@ -547,13 +547,13 @@ export class TableScene3D {
     vadaPavPlatter.rotation.y = -0.45;
     this.tableGroup.add(vadaPavPlatter);
 
-    // 8. Dynamic Steam / Smoke System (Rising from hot samosas, vada pav, and hot cutting chai)
+    // 8. Delicate Heat Shimmer Steam (Gentle, faint wisps from hot snacks and chai)
     // In world coordinates (accounting for tableGroup z-offset of -0.15)
     this.steamSystem = new SteamParticleSystem(this.scene, [
-      { pos: new THREE.Vector3(-0.48, 0.79, 0.14 - 0.15), particleCount: 16, maxRadius: 0.035 }, // Samosa plate
-      { pos: new THREE.Vector3(0.50, 0.79, 0.12 - 0.15), particleCount: 16, maxRadius: 0.035 },  // Vada pav plate
-      { pos: new THREE.Vector3(-0.54, 0.83, -0.48 - 0.15), particleCount: 12, maxRadius: 0.02 }, // Chai 1
-      { pos: new THREE.Vector3(-0.38, 0.83, 0.40 - 0.15), particleCount: 12, maxRadius: 0.02 }   // Chai 2
+      { pos: new THREE.Vector3(-0.48, 0.765, 0.14 - 0.15), particleCount: 5, maxRadius: 0.025 }, // Samosa plate
+      { pos: new THREE.Vector3(0.50, 0.765, 0.12 - 0.15), particleCount: 5, maxRadius: 0.025 },  // Vada pav plate
+      { pos: new THREE.Vector3(-0.54, 0.81, -0.48 - 0.15), particleCount: 4, maxRadius: 0.015 }, // Chai 1
+      { pos: new THREE.Vector3(-0.38, 0.81, 0.40 - 0.15), particleCount: 4, maxRadius: 0.015 }   // Chai 2
     ]);
 
     // 8. Vintage Heritage Brass Call Bell
