@@ -29,19 +29,13 @@
         </div>
       </div>
 
-      <!-- Left Vertical Action Controls (Sound, Settings, Speed, Rules, New Match) -->
+      <!-- Left Vertical Action Controls (Sound, Settings, New Match) -->
       <aside class="action-buttons-vertical" id="action-buttons-vertical" aria-label="Game Controls">
         <button id="btn-audio" class="btn-icon" title="Toggle Sound (Mute/Unmute)" aria-label="Toggle Sound">
           🔊
         </button>
         <button id="btn-settings" class="btn-icon" title="Table Settings" aria-label="Table Settings">
           ⚙️
-        </button>
-        <button id="btn-speed" class="btn-icon" title="Change Game Speed" aria-label="Change Game Speed">
-          ⚡
-        </button>
-        <button id="btn-rules" class="btn-icon" title="Game Rules & Lore" aria-label="Game Rules">
-          📜
         </button>
         <button id="btn-new-match" class="btn-icon" title="Re-deal Deck / New Match" aria-label="New Match">
           🔄
@@ -210,6 +204,12 @@
               <button class="btn-choice active" data-playmode="ai">Vs Bots</button>
               <button class="btn-choice" data-playmode="pass_and_play">Pass & Play</button>
             </div>
+          </div>
+
+          <div class="setting-row" style="margin-top: 10px; padding-top: 14px; border-top: 1px solid var(--surface-border);">
+            <button class="btn-choice" id="btn-open-rules-from-settings" style="width: 100%; padding: 10px; font-weight: 600;">
+              📜 View Game Rules & Lore
+            </button>
           </div>
         </div>
       </div>

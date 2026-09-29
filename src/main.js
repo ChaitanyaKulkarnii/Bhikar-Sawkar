@@ -362,16 +362,18 @@ btnAudio.addEventListener('click', () => {
   btnAudio.textContent = isMuted ? '🔇' : '🔊';
 });
 
-// Speed Toggle Cycle
+// Speed Toggle Cycle (if present)
 const speeds = ['normal', 'fast', 'turbo'];
-btnSpeed.addEventListener('click', () => {
-  const curIdx = speeds.indexOf(engine.gameSpeed);
-  const nextSpeed = speeds[(curIdx + 1) % speeds.length];
-  engine.gameSpeed = nextSpeed;
-  btnSpeed.title = `Game Speed: ${nextSpeed.toUpperCase()}`;
-  updateSpeedButtonGroup(nextSpeed);
-  sounds.playCoin();
-});
+if (btnSpeed) {
+  btnSpeed.addEventListener('click', () => {
+    const curIdx = speeds.indexOf(engine.gameSpeed);
+    const nextSpeed = speeds[(curIdx + 1) % speeds.length];
+    engine.gameSpeed = nextSpeed;
+    btnSpeed.title = `Game Speed: ${nextSpeed.toUpperCase()}`;
+    updateSpeedButtonGroup(nextSpeed);
+    sounds.playCoin();
+  });
+}
 
 function updateSpeedButtonGroup(speed) {
   document.querySelectorAll('#group-speed .btn-choice').forEach(b => {
@@ -380,15 +382,28 @@ function updateSpeedButtonGroup(speed) {
 }
 
 // Modal Triggers
-btnRules.addEventListener('click', () => {
-  sounds.playCoin();
-  modalRules.classList.add('open');
-});
+if (btnRules) {
+  btnRules.addEventListener('click', () => {
+    sounds.playCoin();
+    modalRules.classList.add('open');
+  });
+}
 
-btnSettings.addEventListener('click', () => {
-  sounds.playCoin();
-  modalSettings.classList.add('open');
-});
+const btnOpenRulesFromSettings = document.getElementById('btn-open-rules-from-settings');
+if (btnOpenRulesFromSettings) {
+  btnOpenRulesFromSettings.addEventListener('click', () => {
+    sounds.playCoin();
+    modalSettings.classList.remove('open');
+    modalRules.classList.add('open');
+  });
+}
+
+if (btnSettings) {
+  btnSettings.addEventListener('click', () => {
+    sounds.playCoin();
+    modalSettings.classList.add('open');
+  });
+}
 
 btnNewMatch.addEventListener('click', () => {
   sounds.playCardSweep();
