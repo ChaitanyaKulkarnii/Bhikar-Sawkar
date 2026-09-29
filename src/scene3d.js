@@ -72,16 +72,17 @@ export class TableScene3D {
     this.scene.add(this.playerArms);
     this.scene.add(this.camera);
 
-    // 3D Card Meshes & Stacks
-    this.cardGeometry = new THREE.BoxGeometry(0.22, 0.003, 0.31);
+    // 3D Card Meshes & Stacks (Ultra-slim 1.2mm realistic playing card geometry)
+    this.cardGeometry = new THREE.BoxGeometry(0.22, 0.0012, 0.31);
     this.cardBackMaterial = new THREE.MeshStandardMaterial({
       map: getCardBackTexture(),
-      roughness: 0.35,
-      metalness: 0.1
+      roughness: 0.75,
+      metalness: 0.05
     });
 
     this.deckStacks = {};
     this.potCards = [];
+    this.potCardCounter = 0;
     this.flyingCards = [];
     this.initDeckStacks();
 
@@ -254,7 +255,8 @@ export class TableScene3D {
     this.spotLight.shadow.mapSize.height = 1024;
     this.spotLight.shadow.camera.near = 0.5;
     this.spotLight.shadow.camera.far = 4;
-    this.spotLight.shadow.bias = -0.0004;
+    this.spotLight.shadow.bias = -0.00005;
+    this.spotLight.shadow.normalBias = 0.02;
 
     this.spotTarget = new THREE.Object3D();
     this.spotTarget.position.set(0, 0.72, -0.15);
@@ -632,13 +634,17 @@ export class TableScene3D {
       if (cardMesh.geometry) cardMesh.geometry.dispose();
     }
     this.potCards = [];
+    this.potCardCounter = 0;
   }
 
   // Animate a player or opponent tossing card onto central pot
   playCardThrow(seat, card, onLanded) {
-    // Height increments cleanly with each card in pot (6mm step) to completely prevent z-fighting
-    const stackHeight = 0.744 + (this.potCards.length * 0.006);
-    
+    this.potCardCounter = (this.potCardCounter || 0) + 1;
+    const cardLayer = this.potCardCounter;
+
+    // Strict vertical elevation per card thrown: guarantees zero coplanar z-fighting
+    const stackHeight = 0.742 + (cardLayer * 0.0035);
+
     // Natural organic card scatter on felt
     const potTargetPos = new THREE.Vector3(
       (Math.random() - 0.5) * 0.28,
@@ -647,7 +653,7 @@ export class TableScene3D {
     );
 
     const onDrop = () => {
-      this.spawnFlyingCard(seat, card, potTargetPos, onLanded);
+      this.spawnFlyingCard(seat, card, potTargetPos, cardLayer, onLanded);
     };
 
     if (seat === 'bottom') {
@@ -660,27 +666,34 @@ export class TableScene3D {
   }
 
   // Flying Card Animation Curve
-  spawnFlyingCard(seat, card, targetPos, onLanded) {
+  spawnFlyingCard(seat, card, targetPos, cardLayer = 1, onLanded) {
     const startPos = this.deckStacks[seat]?.basePos.clone() || new THREE.Vector3(0, 0.74, 0.5);
     startPos.y += 0.06;
 
-    // Crisp materials with polygonOffset to prevent depth-buffer tearing
+    // High-quality matte finish (prevents specular glitter / glare under overhead spotlight)
     const faceMaterial = new THREE.MeshStandardMaterial({
       map: getCardFaceTexture(card),
-      roughness: 0.5,
-      metalness: 0.02,
-      polygonOffset: true,
-      polygonOffsetFactor: -1 * (this.potCards.length + 1),
-      polygonOffsetUnits: -1
+      roughness: 0.85,
+      metalness: 0.0
     });
 
-    const edgeMaterial = new THREE.MeshStandardMaterial({ color: 0xFAF8F5, roughness: 0.6 });
+    const edgeMaterial = new THREE.MeshStandardMaterial({
+      color: 0xFAF8F5,
+      roughness: 0.85,
+      metalness: 0.0
+    });
+
+    const backMaterial = new THREE.MeshStandardMaterial({
+      map: getCardBackTexture(),
+      roughness: 0.85,
+      metalness: 0.0
+    });
 
     const materials = [
       edgeMaterial,          // +X
       edgeMaterial,          // -X
       faceMaterial,          // +Y (Card Face)
-      this.cardBackMaterial, // -Y (Card Back)
+      backMaterial,          // -Y (Card Back)
       edgeMaterial,          // +Z
       edgeMaterial           // -Z
     ];
@@ -688,7 +701,8 @@ export class TableScene3D {
     const cardMesh = new THREE.Mesh(this.cardGeometry, materials);
     cardMesh.position.copy(startPos);
     cardMesh.castShadow = true;
-    cardMesh.receiveShadow = true;
+    cardMesh.receiveShadow = false; // Prevents shadow acne and flickering noise on card surfaces!
+    cardMesh.renderOrder = cardLayer; // Guarantees proper draw order
     this.scene.add(cardMesh);
 
     const startTime = performance.now();
@@ -700,7 +714,7 @@ export class TableScene3D {
       cardMesh,
       update: (now) => {
         const p = Math.min(1, (now - startTime) / duration);
-        
+
         // Parabolic trajectory
         cardMesh.position.lerpVectors(startPos, targetPos, p);
         cardMesh.position.y += Math.sin(p * Math.PI) * 0.18;
@@ -732,6 +746,7 @@ export class TableScene3D {
     // Grab all cards currently in the pot and any currently in mid-air
     const cardsToSweep = [...this.potCards];
     this.potCards = [];
+    this.potCardCounter = 0;
 
     const startTime = performance.now();
     const duration = 380;
