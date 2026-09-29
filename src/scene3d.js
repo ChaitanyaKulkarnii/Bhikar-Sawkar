@@ -11,6 +11,11 @@ import {
   animatePlayerThrow
 } from './characters.js';
 import { getCardFaceTexture, getCardBackTexture, getFeltTexture } from './textures.js';
+import {
+  createSamosaPlatter,
+  createVadaPavPlatter,
+  SteamParticleSystem
+} from './foodProps.js';
 
 export class TableScene3D {
   constructor(container) {
@@ -478,18 +483,19 @@ export class TableScene3D {
     base.position.y = 0.34;
     this.tableGroup.add(base);
 
-    // 6. Authentic Mumbai Cutting Chai Glass on Brass Saucer
-    const chaiGroup = new THREE.Group();
-    chaiGroup.position.set(-0.54, 0.74, -0.48);
+    // 6. Authentic Mumbai Cutting Chai Glasses
+    // Chai 1: Near Dinkar & Babanrao
+    const chaiGroup1 = new THREE.Group();
+    chaiGroup1.position.set(-0.54, 0.74, -0.48);
 
     const saucerGeo = new THREE.CylinderGeometry(0.056, 0.046, 0.012, 20);
     const saucerMat = new THREE.MeshStandardMaterial({ color: 0xC9A24B, metalness: 0.88, roughness: 0.25 });
-    const saucer = new THREE.Mesh(saucerGeo, saucerMat);
-    saucer.position.y = 0.006;
-    saucer.castShadow = true;
-    chaiGroup.add(saucer);
+    const saucer1 = new THREE.Mesh(saucerGeo, saucerMat);
+    saucer1.position.y = 0.006;
+    saucer1.castShadow = true;
+    chaiGroup1.add(saucer1);
 
-    const glassGeo = new THREE.CylinderGeometry(0.034, 0.024, 0.076, 8);
+    const glassGeo = new THREE.CylinderGeometry(0.034, 0.024, 0.076, 10);
     const glassMat = new THREE.MeshPhysicalMaterial({
       color: 0xE8F5F8,
       transmission: 0.82,
@@ -498,21 +504,57 @@ export class TableScene3D {
       roughness: 0.08,
       ior: 1.48
     });
-    const glass = new THREE.Mesh(glassGeo, glassMat);
-    glass.position.y = 0.046;
-    glass.castShadow = true;
-    chaiGroup.add(glass);
+    const glass1 = new THREE.Mesh(glassGeo, glassMat);
+    glass1.position.y = 0.046;
+    glass1.castShadow = true;
+    chaiGroup1.add(glass1);
 
-    const teaGeo = new THREE.CylinderGeometry(0.031, 0.023, 0.052, 8);
+    const teaGeo = new THREE.CylinderGeometry(0.031, 0.023, 0.052, 10);
     const teaMat = new THREE.MeshStandardMaterial({
       color: 0xBA6B34, // Rich milky ginger chai
       roughness: 0.25
     });
-    const tea = new THREE.Mesh(teaGeo, teaMat);
-    tea.position.y = 0.036;
-    chaiGroup.add(tea);
+    const tea1 = new THREE.Mesh(teaGeo, teaMat);
+    tea1.position.y = 0.036;
+    chaiGroup1.add(tea1);
 
-    this.tableGroup.add(chaiGroup);
+    this.tableGroup.add(chaiGroup1);
+
+    // Chai 2: Near Player
+    const chaiGroup2 = new THREE.Group();
+    chaiGroup2.position.set(-0.38, 0.74, 0.40);
+    const saucer2 = new THREE.Mesh(saucerGeo, saucerMat);
+    saucer2.position.y = 0.006;
+    chaiGroup2.add(saucer2);
+    const glass2 = new THREE.Mesh(glassGeo, glassMat);
+    glass2.position.y = 0.046;
+    chaiGroup2.add(glass2);
+    const tea2 = new THREE.Mesh(teaGeo, teaMat);
+    tea2.position.y = 0.036;
+    chaiGroup2.add(tea2);
+    this.tableGroup.add(chaiGroup2);
+
+    // 7. Authentic Indian Snack Platters Served on Stainless Steel Plates (Thali) with Fried Mirchi
+    // Platter A: Crispy Golden Samosas & Fried Salted Mirchi on Steel Plate
+    const samosaPlatter = createSamosaPlatter();
+    samosaPlatter.position.set(-0.48, 0.74, 0.14);
+    samosaPlatter.rotation.y = 0.45;
+    this.tableGroup.add(samosaPlatter);
+
+    // Platter B: Mumbai Vada Pav with Red Garlic Chutney & Fried Mirchi on Steel Plate
+    const vadaPavPlatter = createVadaPavPlatter();
+    vadaPavPlatter.position.set(0.50, 0.74, 0.12);
+    vadaPavPlatter.rotation.y = -0.45;
+    this.tableGroup.add(vadaPavPlatter);
+
+    // 8. Dynamic Steam / Smoke System (Rising from hot samosas, vada pav, and hot cutting chai)
+    // In world coordinates (accounting for tableGroup z-offset of -0.15)
+    this.steamSystem = new SteamParticleSystem(this.scene, [
+      { pos: new THREE.Vector3(-0.48, 0.79, 0.14 - 0.15), particleCount: 16, maxRadius: 0.035 }, // Samosa plate
+      { pos: new THREE.Vector3(0.50, 0.79, 0.12 - 0.15), particleCount: 16, maxRadius: 0.035 },  // Vada pav plate
+      { pos: new THREE.Vector3(-0.54, 0.83, -0.48 - 0.15), particleCount: 12, maxRadius: 0.02 }, // Chai 1
+      { pos: new THREE.Vector3(-0.38, 0.83, 0.40 - 0.15), particleCount: 12, maxRadius: 0.02 }   // Chai 2
+    ]);
 
     // 8. Vintage Heritage Brass Call Bell
     const bellGroup = new THREE.Group();
@@ -844,6 +886,11 @@ export class TableScene3D {
     if (this.lampRig) {
       this.lampRig.rotation.z = Math.sin(time * 0.8) * 0.015;
       this.lampRig.rotation.x = Math.cos(time * 0.7) * 0.012;
+    }
+
+    // 2.5 Update Food Steam / Smoke Particle Systems
+    if (this.steamSystem) {
+      this.steamSystem.update(delta, time);
     }
 
     // 3. Update Character Idles (breathing, eye glances)
