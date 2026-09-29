@@ -174,10 +174,10 @@ export class TableScene3D {
   // Smooth POV quick-look target switcher
   lookAtSeat(seat) {
     if (seat === 'left') {
-      this.targetYaw = -1.25;  // Look at Dinkar
+      this.targetYaw = -0.82;  // Look directly at Dinkar
       this.targetPitch = -0.06;
     } else if (seat === 'right') {
-      this.targetYaw = 1.25;   // Look at Anandi
+      this.targetYaw = 0.82;   // Look directly at Anandi
       this.targetPitch = -0.06;
     } else if (seat === 'top') {
       this.targetYaw = 0;      // Look across at Babanrao
@@ -267,7 +267,7 @@ export class TableScene3D {
     // ========================================================
     // Babanrao Key Light (Directly illuminates face, mustache, glasses, and kurta across table)
     const babanraoTarget = new THREE.Object3D();
-    babanraoTarget.position.set(0, 1.25, -1.60);
+    babanraoTarget.position.set(0, 1.25, -1.54);
     this.scene.add(babanraoTarget);
 
     const babanraoLight = new THREE.SpotLight(0xFFE5C4, 3.4);
@@ -281,7 +281,7 @@ export class TableScene3D {
 
     // Dinkar Key Light (Directly illuminates face, sunglasses, varsity jacket, and arms on left)
     const dinkarTarget = new THREE.Object3D();
-    dinkarTarget.position.set(-1.42, 1.22, -0.46);
+    dinkarTarget.position.set(-1.32, 1.22, -0.42);
     this.scene.add(dinkarTarget);
 
     const dinkarLight = new THREE.SpotLight(0xFFDEB0, 3.4);
@@ -295,7 +295,7 @@ export class TableScene3D {
 
     // Anandi Key Light (Directly illuminates face, bindi, earrings, and emerald silk on right)
     const anandiTarget = new THREE.Object3D();
-    anandiTarget.position.set(1.42, 1.22, -0.46);
+    anandiTarget.position.set(1.32, 1.22, -0.42);
     this.scene.add(anandiTarget);
 
     const anandiLight = new THREE.SpotLight(0xFFE8D6, 3.4);
@@ -390,7 +390,7 @@ export class TableScene3D {
     this.tableGroup.add(feltSurface);
 
     // 3. Luxurious Padded Leather Armrest Rail with Brass Rivets
-    const railGeo = new THREE.TorusGeometry(1.16, 0.052, 16, 64);
+    const railGeo = new THREE.TorusGeometry(1.155, 0.024, 16, 64);
     const railMat = new THREE.MeshStandardMaterial({
       color: 0x1A100B, // Rich dark oxblood leather
       roughness: 0.42,
@@ -398,12 +398,12 @@ export class TableScene3D {
     });
     const rail = new THREE.Mesh(railGeo, railMat);
     rail.rotation.x = Math.PI / 2;
-    rail.position.y = 0.745;
+    rail.position.y = 0.738;
     rail.receiveShadow = true;
     this.tableGroup.add(rail);
 
     // 48 Golden Brass Upholstery Studs / Rivets
-    const rivetGeo = new THREE.SphereGeometry(0.012, 8, 8);
+    const rivetGeo = new THREE.SphereGeometry(0.008, 8, 8);
     const rivetMat = new THREE.MeshStandardMaterial({
       color: 0xDAA520,
       metalness: 0.95,
@@ -413,18 +413,18 @@ export class TableScene3D {
       const theta = (r / 48) * Math.PI * 2;
       const rivet = new THREE.Mesh(rivetGeo, rivetMat);
       rivet.position.set(
-        Math.cos(theta) * 1.155,
-        0.772,
-        Math.sin(theta) * 1.155
+        Math.cos(theta) * 1.162,
+        0.758,
+        Math.sin(theta) * 1.162
       );
       this.tableGroup.add(rivet);
     }
 
     // 4. Inlaid Inner Brass Ring between felt and leather
-    const brassTrimGeo = new THREE.TorusGeometry(1.138, 0.007, 8, 64);
+    const brassTrimGeo = new THREE.TorusGeometry(1.135, 0.005, 8, 64);
     const brassTrimMat = new THREE.MeshStandardMaterial({ color: 0xC9A24B, metalness: 0.9, roughness: 0.22 });
     const brassTrim = new THREE.Mesh(brassTrimGeo, brassTrimMat);
-    brassTrim.position.y = 0.742;
+    brassTrim.position.y = 0.740;
     brassTrim.rotation.x = Math.PI / 2;
     this.tableGroup.add(brassTrim);
 
@@ -534,30 +534,32 @@ export class TableScene3D {
     // 1. Across table: Babanrao (The Veteran Uncle)
     // Seated comfortably behind the leather rail with hands resting on felt
     const babanrao = createBabanrao();
-    babanrao.position.set(0, 0, -1.60);
+    babanrao.position.set(0, 0, -1.54);
     babanrao.rotation.y = 0;
     const chairTop = createChair();
-    chairTop.position.set(0, 0, -1.62);
+    chairTop.position.set(0, 0, -1.56);
     this.scene.add(chairTop, babanrao);
     this.characters['top'] = babanrao;
 
     // 2. Left seat: Dinkar (The Hype Guy)
+    // Directed squarely toward table center (0, 0, -0.15)
     const dinkar = createDinkar();
-    dinkar.position.set(-1.42, 0, -0.46);
-    dinkar.rotation.y = Math.PI / 3.0;
+    dinkar.position.set(-1.32, 0, -0.42);
+    dinkar.rotation.y = 1.369; // 78.4 degrees facing center of table
     const chairLeft = createChair();
-    chairLeft.position.set(-1.44, 0, -0.48);
-    chairLeft.rotation.y = Math.PI / 3.0;
+    chairLeft.position.set(-1.35, 0, -0.43);
+    chairLeft.rotation.y = 1.369;
     this.scene.add(chairLeft, dinkar);
     this.characters['left'] = dinkar;
 
     // 3. Right seat: Anandi (The Mastermind)
+    // Directed squarely toward table center (0, 0, -0.15)
     const anandi = createAnandi();
-    anandi.position.set(1.42, 0, -0.46);
-    anandi.rotation.y = -Math.PI / 3.0;
+    anandi.position.set(1.32, 0, -0.42);
+    anandi.rotation.y = -1.369; // -78.4 degrees facing center of table
     const chairRight = createChair();
-    chairRight.position.set(1.44, 0, -0.48);
-    chairRight.rotation.y = -Math.PI / 3.0;
+    chairRight.position.set(1.35, 0, -0.43);
+    chairRight.rotation.y = -1.369;
     this.scene.add(chairRight, anandi);
     this.characters['right'] = anandi;
   }

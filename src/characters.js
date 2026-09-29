@@ -250,12 +250,12 @@ export function createBabanrao() {
   group.add(glassesGroup);
 
   // Left Arm (Resting on table)
-  const leftArm = createArm(babanraoShirtMaterial, babanraoSkinMaterial, false);
+  const leftArm = createArm(babanraoShirtMaterial, babanraoSkinMaterial, false, false, 'babanrao');
   leftArm.position.set(-0.25, 1.06, 0);
   group.add(leftArm);
 
   // Right Arm (Resting on table / animated for card play)
-  const rightArm = createArm(babanraoShirtMaterial, babanraoSkinMaterial, true);
+  const rightArm = createArm(babanraoShirtMaterial, babanraoSkinMaterial, true, false, 'babanrao');
   rightArm.position.set(0.25, 1.06, 0);
   group.add(rightArm);
 
@@ -368,11 +368,11 @@ export function createDinkar() {
   group.add(smile);
 
   // Cream Sleeves on Arms resting on table
-  const leftArm = createArm(dinkarSleeveMaterial, dinkarSkinMaterial, false);
+  const leftArm = createArm(dinkarSleeveMaterial, dinkarSkinMaterial, false, false, 'dinkar');
   leftArm.position.set(-0.25, 1.06, 0);
   group.add(leftArm);
 
-  const rightArm = createArm(dinkarSleeveMaterial, dinkarSkinMaterial, true);
+  const rightArm = createArm(dinkarSleeveMaterial, dinkarSkinMaterial, true, false, 'dinkar');
   rightArm.position.set(0.25, 1.06, 0);
   group.add(rightArm);
 
@@ -554,60 +554,135 @@ export function createPlayerArms() {
   return group;
 }
 
-// Helper: Articulated Arm resting naturally on the table baize
-function createArm(sleeveMat, handSkinMat, isRight = false, addBangle = false) {
+// Helper: Create an anatomically connected limb segment between two 3D points
+function createLimbSegment(pA, pB, rTop, rBottom, material, castShadow = true) {
+  const dir = new THREE.Vector3().subVectors(pB, pA);
+  const len = dir.length();
+  const center = new THREE.Vector3().addVectors(pA, pB).multiplyScalar(0.5);
+
+  // In Three.js, CylinderGeometry has top cap at +Y and bottom cap at -Y
+  // Since unitDir points from pA to pB, +Y will be at pB (rTop) and -Y at pA (rBottom)
+  const geo = new THREE.CylinderGeometry(rTop, rBottom, len, 14);
+  const mesh = new THREE.Mesh(geo, material);
+  mesh.position.copy(center);
+
+  const up = new THREE.Vector3(0, 1, 0);
+  const unitDir = dir.clone().normalize();
+  mesh.quaternion.setFromUnitVectors(up, unitDir);
+  mesh.castShadow = castShadow;
+  return { mesh, dir: unitDir, length: len, center };
+}
+
+// Helper: Articulated Arm resting naturally and cleanly on the table baize
+function createArm(sleeveMat, handSkinMat, isRight = false, addBangle = false, characterType = 'anandi') {
   const arm = new THREE.Group();
   const sideSign = isRight ? 1 : -1;
 
-  // Upper arm: reaches down & forward from shoulder toward table edge
-  const upperArmGroup = new THREE.Group();
+  // Key Anatomical Reference Points in arm local space (shoulder socket = 0, 0, 0):
+  // 1. Shoulder socket: (0, 0, 0)
+  const pShoulder = new THREE.Vector3(0, 0, 0);
 
-  const upperGeo = new THREE.CylinderGeometry(0.052, 0.046, 0.28, 12);
-  const upper = new THREE.Mesh(upperGeo, sleeveMat);
-  upper.position.set(sideSign * -0.015, -0.13, 0.10);
-  upper.rotation.x = 0.65;
-  upper.rotation.z = sideSign * -0.10;
-  upper.castShadow = true;
-  upperArmGroup.add(upper);
+  // 2. Elbow joint: hangs down beside torso, slightly forward
+  const pElbow = new THREE.Vector3(sideSign * 0.035, -0.22, 0.12);
 
-  // Forearm: extends horizontally forward resting directly on the table
-  const forearmGroup = new THREE.Group();
-  forearmGroup.position.set(sideSign * -0.03, -0.25, 0.20);
+  // 3. Wrist joint: reaches forward & inward, clearing the rail cushion and resting near table felt
+  const pWrist = new THREE.Vector3(sideSign * -0.065, -0.312, 0.38);
 
-  const foreGeo = new THREE.CylinderGeometry(0.044, 0.038, 0.26, 12);
-  const fore = new THREE.Mesh(foreGeo, handSkinMat);
-  fore.position.set(sideSign * -0.02, -0.02, 0.13);
-  fore.rotation.x = 1.48; // flat forward on felt
-  fore.rotation.y = sideSign * -0.16;
-  fore.castShadow = true;
-  forearmGroup.add(fore);
+  // Upper Arm Segment (Shoulder to Elbow)
+  // rBottom is at shoulder (0.052), rTop is at elbow (0.046)
+  const upperLimb = createLimbSegment(pShoulder, pElbow, 0.046, 0.052, sleeveMat);
+  arm.add(upperLimb.mesh);
 
-  // Hand: rests flat on table felt
-  const handGeo = new THREE.BoxGeometry(0.082, 0.024, 0.11);
-  const hand = new THREE.Mesh(handGeo, handSkinMat);
-  hand.position.set(sideSign * -0.04, -0.032, 0.28);
-  hand.rotation.x = -0.04;
-  hand.rotation.y = sideSign * -0.22;
-  hand.castShadow = true;
-  hand.receiveShadow = true;
-  forearmGroup.add(hand);
+  // Smooth Anatomical Elbow Joint
+  const elbowGeo = new THREE.SphereGeometry(0.046, 14, 14);
+  const elbow = new THREE.Mesh(elbowGeo, sleeveMat);
+  elbow.position.copy(pElbow);
+  elbow.castShadow = true;
+  arm.add(elbow);
 
-  // Gold Bangles for Anandi
+  // Forearm Segment (Elbow to Wrist)
+  // For Babanrao: full sleeve kurta; For Dinkar: cream sleeve with ribbed wrist; For Anandi: bare arm with bangles
+  const forearmMat = (characterType === 'babanrao') ? sleeveMat : handSkinMat;
+  const foreLimb = createLimbSegment(pElbow, pWrist, 0.034, 0.042, forearmMat);
+  arm.add(foreLimb.mesh);
+
+  // If Anandi: Gold sleeve hem border at elbow
   if (addBangle) {
-    [0.17, 0.19, 0.21].forEach((zOff) => {
-      const bangleGeo = new THREE.TorusGeometry(0.044, 0.006, 8, 16);
+    const sleeveHemGeo = new THREE.TorusGeometry(0.046, 0.006, 8, 18);
+    const sleeveHem = new THREE.Mesh(sleeveHemGeo, goldTrimMaterial);
+    sleeveHem.position.copy(pElbow);
+    sleeveHem.quaternion.copy(foreLimb.mesh.quaternion);
+    arm.add(sleeveHem);
+  }
+
+  // Wrist Joint Sphere (Smooth transition to hand)
+  const wristGeo = new THREE.SphereGeometry(0.032, 12, 12);
+  const wrist = new THREE.Mesh(wristGeo, handSkinMat);
+  wrist.position.copy(pWrist);
+  arm.add(wrist);
+
+  // Gold Bangles on Anandi's wrists
+  if (addBangle) {
+    const forearmDir = foreLimb.dir;
+    [-0.015, -0.030, -0.045].forEach((dist) => {
+      const bangleGeo = new THREE.TorusGeometry(0.036, 0.0055, 8, 16);
       const bangle = new THREE.Mesh(bangleGeo, goldTrimMaterial);
-      bangle.position.set(sideSign * -0.025, -0.02, zOff);
-      bangle.rotation.y = sideSign * -0.16;
-      bangle.rotation.x = 1.48;
-      forearmGroup.add(bangle);
+      const banglePos = pWrist.clone().addScaledVector(forearmDir, dist);
+      bangle.position.copy(banglePos);
+      bangle.quaternion.copy(foreLimb.mesh.quaternion);
+      arm.add(bangle);
     });
   }
 
-  upperArmGroup.add(forearmGroup);
-  arm.add(upperArmGroup);
+  // Dinkar's ribbed knit wrist cuff
+  if (characterType === 'dinkar') {
+    const cuffGeo = new THREE.CylinderGeometry(0.038, 0.036, 0.035, 12);
+    const cuffMat = new THREE.MeshStandardMaterial({ color: 0x932626, roughness: 0.6 });
+    const cuff = new THREE.Mesh(cuffGeo, cuffMat);
+    const cuffPos = pWrist.clone().addScaledVector(foreLimb.dir, -0.02);
+    cuff.position.copy(cuffPos);
+    cuff.quaternion.copy(foreLimb.mesh.quaternion);
+    arm.add(cuff);
+  }
 
-  arm.userData = { upperArmGroup, forearmGroup, upper, fore, hand, isRight };
+  // Hand (Palm + Fingers + Thumb) resting flat on the table felt
+  const handGroup = new THREE.Group();
+  handGroup.position.copy(pWrist);
+
+  // Palm
+  const palmGeo = new THREE.BoxGeometry(0.068, 0.018, 0.065);
+  const palm = new THREE.Mesh(palmGeo, handSkinMat);
+  palm.position.set(sideSign * -0.008, -0.006, 0.035);
+  palm.rotation.y = sideSign * -0.15;
+  palm.castShadow = true;
+  palm.receiveShadow = true;
+  handGroup.add(palm);
+
+  // Fingers (Natural forward extension resting flat on baize)
+  const fingersGeo = new THREE.BoxGeometry(0.062, 0.014, 0.045);
+  const fingers = new THREE.Mesh(fingersGeo, handSkinMat);
+  fingers.position.set(sideSign * -0.012, -0.008, 0.085);
+  fingers.rotation.y = sideSign * -0.15;
+  fingers.castShadow = true;
+  fingers.receiveShadow = true;
+  handGroup.add(fingers);
+
+  // Thumb
+  const thumbGeo = new THREE.BoxGeometry(0.018, 0.014, 0.035);
+  const thumb = new THREE.Mesh(thumbGeo, handSkinMat);
+  thumb.position.set(sideSign * -0.042, -0.006, 0.032);
+  thumb.rotation.y = sideSign * 0.45;
+  handGroup.add(thumb);
+
+  arm.add(handGroup);
+
+  arm.userData = {
+    pShoulder,
+    pElbow,
+    pWrist,
+    handGroup,
+    isRight
+  };
   return arm;
 }
 
